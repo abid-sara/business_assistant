@@ -1,0 +1,73 @@
+{
+   "checksum": "18f9b202a8c42cb1da3c98038003a2b8",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13377038608988637",
+            "date_last_used": "0",
+            "guid": "386dbbac-7668-4ff4-b1e1-bb44b44ae5ff",
+            "id": "8",
+            "name": "Amazon",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://s3.amazonaws.com/amundsen/redirect/19q2/amazon.html?utm_source=win32&utm_medium=favorite",
+            "visit_count": 0
+         }, {
+            "date_added": "13377038608988561",
+            "date_last_used": "0",
+            "guid": "157bee4c-e28f-4fce-978a-e2e2e894bf5e",
+            "id": "7",
+            "name": "Booking.com",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://s3.amazonaws.com/amundsen/redirect/19q2/booking.html?utm_source=win32&utm_medium=favorite",
+            "visit_count": 0
+         }, {
+            "date_added": "13377038608988304",
+            "date_last_used": "0",
+            "guid": "b655dcba-b1c8-4c77-a2ef-6b558182f7a2",
+            "id": "6",
+            "name": "Facebook",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://s3.amazonaws.com/amundsen/redirect/20q2/facebook.html?utm_source=win32&utm_medium=favorite",
+            "visit_count": 0
+         } ],
+         "date_added": "13377038608812090",
+         "date_last_used": "0",
+         "date_modified": "13377038608988637",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Barre des favoris",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13377038608812093",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Autres favoris",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13377038608812096",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Favoris de l’appareil mobile",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "sync_metadata": "CkEKHgiIgQISCLOH52STAQAAKg4QABgBIAAoBTAAOABAABIAKhhRYkZtRnp1TTFtYi8zUmUxcVNBSEJRPT1IA6AGDBKOAQgBEokBChx5eEovNmZ2a2VjcjdrcDVFUXpCNHRXTHBkYkU9EiRiZTQ0YTM5Ny01YjBkLTUwZTktYjFlYi0wZTBiOWQzNWQwZDMYACAAKAAwzPPuhLQyOPr37oS0MkD69+6EtDJKHGFSQ1dMZ2hGOWI1SW5xS0lEdnVKL2p2UWtGYz1aAGUAAAAAwj4CYAASjgEIAhKJAQocWWNTVG9udkVTUHdxQ3M0TDJjclZodjY4TDk4PRIkZmQ0ZTM4MDMtZjc0MC01YTEwLWJlYjItYzRmYzJhMTVlN2U2GAAgACgAMM3z7oS0MjiV+O6EtDJAlfjuhLQyShxvUFZraHdCUmJWNjVLQ1dSMitJT05IV29PdTg9WgBlAAAAAMI+AmAAEo4BCAMSiQEKHG5qZ0R1ODhlQ3J2WHA4NnBEN2ZIR2NxRnA4OD0SJGNmYWVmNjE4LTM1MjgtNWMxNi05OGFmLWY2NWJhZjU0ODdlMxgAIAAoADDS8+6EtDI4zPjuhLQyQMz47oS0MkoceXpOQjAxY241NEE3Y1JVMHVUKy9QZ21UdFVvPVoAZQAAAADCPgJgADAAOAA=",
+   "version": 1
+}
