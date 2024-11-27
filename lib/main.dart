@@ -1,4 +1,7 @@
+import 'screens/create_account.dart';
 import 'package:flutter/material.dart';
+import 'screens/forgot_password.dart';
+import 'screens/sign_in.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +18,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Poppins',
       ),
-      // home: ,
+      routes: {
+        SignIn.pageRoute: (ctx) => const SignIn(),
+        CreateAccount.pageRoute: (ctx) => const CreateAccount(),
+        ForgotPassword.pageRoute: (ctx) => ForgotPassword(),
+      },
+      home: const SignIn(),
       debugShowCheckedModeBanner: false,
     );
   }
