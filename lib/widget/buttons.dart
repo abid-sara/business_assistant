@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
 
+//button that adds something
 class AddButton extends StatelessWidget {
-  const AddButton({super.key});
+  String thing;
+  AddButton({super.key, required this.thing});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
         style: const ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll<Color>(AppColors.darkGreen),
+          backgroundColor: WidgetStatePropertyAll<Color>(AppColors.lightGreen),
         ),
         onPressed: () {},
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.add),
+            const Icon(Icons.add),
             Text(
-              "Add order",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              "Add $thing",
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ));

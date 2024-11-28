@@ -12,11 +12,12 @@ class OrdersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(Icons.arrow_back_ios_new_rounded)),
+          // leading: GestureDetector(
+          //     onTap: () {
+          //       Navigator.pop(context);
+          //     },
+          //     child: const Icon(Icons.arrow_back_ios_new_rounded)),
+
           title: const Text("Orders center"),
           backgroundColor: Colors.white,
         ),
@@ -26,8 +27,7 @@ class OrdersPage extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image:
-                    AssetImage("assets/background.png"), // Path to your image
+                image: AssetImage("assets/images/background.png"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -64,7 +64,9 @@ class OrdersPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const AddButton(),
+                AddButton(
+                  thing: "order",
+                ),
 
                 //considering this, as our bottom bar
                 const SizedBox(
@@ -117,7 +119,7 @@ class _OrderlineState extends State<Orderline> {
         height: 80,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          color: AppColors.green,
+          color: AppColors.lightGreen,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
