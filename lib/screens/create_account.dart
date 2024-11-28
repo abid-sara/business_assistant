@@ -1,7 +1,7 @@
 import 'package:business_assistant/screens/sign_in.dart';
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
-import '../style/form.dart';
+import '../widget/form.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});

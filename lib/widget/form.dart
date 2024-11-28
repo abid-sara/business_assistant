@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'colors.dart';
+import '../style/colors.dart';
 
 var focused = OutlineInputBorder(
   borderRadius: BorderRadius.circular(10.0),

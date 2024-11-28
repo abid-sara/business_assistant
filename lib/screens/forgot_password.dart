@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../style/colors.dart';
-import '../style/form.dart';
+import '../widget/form.dart';
+import '../widget/back_arrow.dart';
 
 class ForgotPassword extends StatelessWidget {
   ForgotPassword({super.key});
@@ -13,27 +13,7 @@ class ForgotPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          leading: Container(
-            margin: const EdgeInsets.fromLTRB(16, 12, 0, 0),
-            decoration: const BoxDecoration(
-              color: AppColors.yellowGreen, 
-              shape: BoxShape.circle, 
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.arrow_back_ios_new_outlined, 
-                color: AppColors.darkGreen,
-              ),
-              onPressed: () {
-                Navigator.pop(context); // Go back to the previous page
-              },
-            ),
-          ),
-          backgroundColor: Colors.transparent,
-          // Transparent background
-          elevation: 0,
-        ),
+        appBar: const BackArrow(),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -89,7 +69,7 @@ class ForgotPassword extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(312, 48),
                               backgroundColor:
-                                  const Color(0xFF16423C), // Dark green
+                                  AppColors.darkGreen, // Dark green
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50.0),
                               ),
