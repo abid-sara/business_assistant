@@ -1,4 +1,5 @@
 import 'package:business_assistant/screens/create_account.dart';
+import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
 import '../widget/form.dart';
@@ -40,7 +41,7 @@ class _SignInState extends State<SignIn> {
                       const Text(
                         'Sign in to your account',
                         style: TextStyle(
-                          fontSize: 23,
+                          fontSize: 25,
                           fontWeight: FontWeight.bold,
                           color: AppColors.darkGreen,
                         ),
@@ -64,7 +65,7 @@ class _SignInState extends State<SignIn> {
                         const Text(
                           "Password",
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 19,
                             fontWeight: FontWeight.bold,
                             color: AppColors.darkGreen,
                           ),
@@ -78,6 +79,7 @@ class _SignInState extends State<SignIn> {
                             }
                             return null;
                           },
+                          style: const TextStyle(fontSize: 19),
                           obscureText: _isObscure,
                           decoration: InputDecoration(
                             hintText: 'Enter your password',
@@ -113,7 +115,7 @@ class _SignInState extends State<SignIn> {
                               'Forgot password?',
                               style: TextStyle(
                                   color: Color(0xFF16423C),
-                                  fontSize: 14,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w600),
                             ),
                           ),
@@ -124,14 +126,7 @@ class _SignInState extends State<SignIn> {
                         // Sign In Button
                         Center(
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(312, 48),
-                              backgroundColor:
-                                  const Color(0xFF16423C), // Dark green
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                            ),
+                            style: button,
                             onPressed: () {
                               //ççççççççççççççççççççççç change
                               if (formKey.currentState!.validate()) {
@@ -146,7 +141,7 @@ class _SignInState extends State<SignIn> {
                             child: const Text(
                               'Sign in',
                               style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
+                                  TextStyle(fontSize: 19, color: Colors.white),
                             ),
                           ),
                         ),
@@ -162,7 +157,7 @@ class _SignInState extends State<SignIn> {
                   children: [
                     const Text(
                       "Don't have an account?",
-                      style: TextStyle(fontSize: 15),
+                      style: TextStyle(fontSize: 16),
                     ),
                     TextButton(
                       onPressed: () {
@@ -172,9 +167,9 @@ class _SignInState extends State<SignIn> {
                       child: const Text(
                         'Create Account',
                         style: TextStyle(
-                          color: Color(0xFF16423C),
+                          color: AppColors.darkGreen,
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 16,
                         ),
                       ),
                     ),

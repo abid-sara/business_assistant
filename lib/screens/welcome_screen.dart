@@ -1,116 +1,78 @@
+import 'package:business_assistant/screens/sign_in.dart';
+import 'package:business_assistant/style/colors.dart';
+import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            child: CustomPaint(
-              size: Size(MediaQuery.of(context).size.width, 200),
-              painter: TopLeftShape(),
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                "assets/images/Welome_Page.jpg",
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          Positioned(
-            top: 150,
-            right: 0,
-            child: CustomPaint(
-              size: const Size(200, 200),
-              painter: TopRightShape(),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child: CustomPaint(
-              size: Size(MediaQuery.of(context).size.width, 150),
-              painter: BottomShapePainter(),
-            ),
-          ),
-          Positioned(
-            child: Image.asset(
-              'assets/images/welcome.jpg',
-              fit: BoxFit.contain,
-            ),
-          ),
-        ],
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 70),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 35.0),
+                  child: Text(
+                    "My Business\nAssistant",
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      color: AppColors.darkGreen, // Your custom color
+                      fontWeight: FontWeight.w900,
+                      fontSize: 40,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 9),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 35.0),
+                  child: Text(
+                    "Your All-in-One Digital App for Smarter Business Management",
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      color: AppColors.darkGreen,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 400),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(180, 0, 0, 0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, SignIn.pageRoute);
+                    },
+                    style: button,
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
-  }
-}
-
-class TopLeftShape extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0x00e4efdf)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width * 0.7, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-class TopRightShape extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0x00a9a9c7)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, 10);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height * 0.7);
-    path.lineTo(size.width * 0.3, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-class BottomShapePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF16423C)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(size.width * 0.5, size.height);
-    path.lineTo(0, size.height * 0.5);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }

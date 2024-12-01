@@ -76,7 +76,7 @@ flutter:
     - assets/images/star.png
     - assets/images/to-do-list-solid.png
     - assets/images/to-do-list.png
-    - assets/images/welcome.jpg
+    - assets/images/Welome_Page.jpg
     - assets/images/wishlist.png
     - assets/images/logo.png
 
@@ -95,6 +95,8 @@ flutter:
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 700
 
   #   - family: Trajan Pro
   #     fonts:

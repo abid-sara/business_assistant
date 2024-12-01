@@ -1,5 +1,7 @@
+import 'package:business_assistant/screens/check_email.dart';
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
+import '../widget/button.dart';
 import '../widget/form.dart';
 import '../widget/back_arrow.dart';
 
@@ -32,7 +34,7 @@ class ForgotPassword extends StatelessWidget {
                       const Text(
                         'Forgot password',
                         style: TextStyle(
-                          fontSize: 23,
+                          fontSize: 27,
                           fontWeight: FontWeight.bold,
                           color: AppColors.darkGreen,
                         ),
@@ -41,7 +43,7 @@ class ForgotPassword extends StatelessWidget {
                       const Text(
                         'Please enter your email to reset the password',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 17,
                           color: Colors.grey,
                         ),
                       ),
@@ -66,29 +68,16 @@ class ForgotPassword extends StatelessWidget {
                         // Sign In Button
                         Center(
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(312, 48),
-                              backgroundColor:
-                                  AppColors.darkGreen, // Dark green
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                            ),
+                            style: button,
                             onPressed: () {
-                              //ççççççççççççççççççççççç change
-                              if (formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  //do this
-                                  const SnackBar(
-                                    content: Text('Great!'),
-                                  ), // SnackBar
-                                );
-                              }
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => CheckEmail(
+                                      email: _emailController.text)));
                             },
                             child: const Text(
                               'Reset password',
                               style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
+                                  TextStyle(fontSize: 19, color: Colors.white),
                             ),
                           ),
                         ),
