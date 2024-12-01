@@ -32,7 +32,7 @@ Widget structure(String title, String hintText, TextEditingController control,
       Text(
         title,
         style: const TextStyle(
-            fontSize: 17,
+            fontSize: 19,
             fontWeight: FontWeight.bold,
             color: AppColors.darkGreen),
       ),
@@ -41,7 +41,7 @@ Widget structure(String title, String hintText, TextEditingController control,
         controller: control,
         validator: valid,
         style: const TextStyle(
-          fontSize: 16,
+          fontSize: 19,
           fontWeight: FontWeight.w500,
         ),
         decoration: textFieldDecoration(hintText),

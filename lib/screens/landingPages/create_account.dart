@@ -1,7 +1,8 @@
-import 'package:business_assistant/screens/sign_in.dart';
+import 'package:business_assistant/screens/landingPages/sign_in.dart';
+import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
-import '../style/colors.dart';
-import '../widget/form.dart';
+import '../../style/colors.dart';
+import '../../widget/form.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -79,7 +80,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       const Text(
                         "Password",
                         style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 19,
                             fontWeight: FontWeight.bold,
                             color: AppColors.darkGreen),
                       ),
@@ -94,7 +95,7 @@ class _CreateAccountState extends State<CreateAccount> {
                           return null;
                         },
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),
                         obscureText: _isObscure,
@@ -121,7 +122,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       const Text(
                         "Confirm password",
                         style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 19,
                             fontWeight: FontWeight.bold,
                             color: AppColors.darkGreen),
                       ),
@@ -140,7 +141,7 @@ class _CreateAccountState extends State<CreateAccount> {
                           return null;
                         },
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),
                         obscureText: _isObscure,
@@ -168,14 +169,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       // Sign In Button
                       Center(
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(312, 48),
-                            backgroundColor:
-                                const Color(0xFF16423C), // Dark green
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50.0),
-                            ),
-                          ),
+                          style: button,
                           onPressed: () {
                             // Sign in logic that will be changed after ______________
                             if (formKey.currentState!.validate()) {
@@ -189,7 +183,7 @@ class _CreateAccountState extends State<CreateAccount> {
                           },
                           child: const Text(
                             'Sign in',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
+                            style: TextStyle(fontSize: 19, color: Colors.white),
                           ),
                         ),
                       ),
@@ -204,7 +198,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   children: [
                     const Text(
                       "Already have an account?",
-                      style: TextStyle(fontSize: 15),
+                      style: TextStyle(fontSize: 16),
                     ),
                     TextButton(
                       onPressed: () {
@@ -215,7 +209,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         style: TextStyle(
                           color: Color(0xFF16423C),
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 16,
                         ),
                       ),
                     ),
