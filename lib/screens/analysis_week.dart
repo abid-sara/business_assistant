@@ -101,7 +101,7 @@ class AnalysisWeek extends StatelessWidget {
           ),
           child: const Padding(
             padding: EdgeInsets.all(8.0),  
-            child:CustomBarChart(),
+            // child:CustomBarChart(),
        
       ),
     ),

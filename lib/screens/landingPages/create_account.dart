@@ -1,57 +1,82 @@
+import 'package:business_assistant/screens/landingPages/sign_in.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import '../../style/colors.dart';
+import '../../widget/form.dart';
 
-import '../style/colors.dart';
-import '../widget/back_arrow.dart';
-import '../widget/form.dart';
+class CreateAccount extends StatefulWidget {
+  const CreateAccount({super.key});
 
-class ResetPassword extends StatefulWidget {
-  const ResetPassword({super.key});
-  static const String pageRoute = '/reset_password';
   @override
-  State<ResetPassword> createState() => _ResetPasswordState();
+  State<CreateAccount> createState() => _CreateAccountState();
+  static const String pageRoute = '/create_account';
 }
 
-TextEditingController _password = TextEditingController();
-TextEditingController _passwordCheck = TextEditingController();
-bool _isObscure = true;
+class _CreateAccountState extends State<CreateAccount> {
+  bool _isObscure = true;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordCheckerController =
+      TextEditingController();
+  final formKey = GlobalKey<FormState>();
 
-class _ResetPasswordState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-
     return SafeArea(
       child: Scaffold(
-        appBar: const BackArrow(),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(height: 12),
-                const Text(
-                  'Set a new password',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkGreen,
+                Center(
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        'assets/images/logo.png', // Add your logo here
+                        height: 110,
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Welcome Text
+                      const Text(
+                        'Create new account',
+                        style: TextStyle(
+                          fontSize: 23,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkGreen,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 19),
-                const Text(
-                  "Create a new password. Ensure it differs from previous ones for security",
-                  style: TextStyle(color: Colors.grey, fontSize: 17),
-                ),
-                const SizedBox(height: 52),
+
+                const SizedBox(height: 25),
                 Form(
                   key: formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Email Address Field
+                      structure(
+                        "Name",
+                        "Enter your name",
+                        _nameController,
+                        validateName,
+                      ),
+
+                      // Email Address Field
+                      structure(
+                        "Email",
+                        "Enter your email",
+                        _emailController,
+                        validateEmail,
+                      ),
+
                       const Text(
                         "Password",
                         style: TextStyle(
@@ -60,8 +85,9 @@ class _ResetPasswordState extends State<ResetPassword> {
                             color: AppColors.darkGreen),
                       ),
                       const SizedBox(height: 5),
+
                       TextFormField(
-                        controller: _password,
+                        controller: _passwordController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';
@@ -91,7 +117,8 @@ class _ResetPasswordState extends State<ResetPassword> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 25),
+
+                      const SizedBox(height: 18),
                       const Text(
                         "Confirm password",
                         style: TextStyle(
@@ -100,13 +127,15 @@ class _ResetPasswordState extends State<ResetPassword> {
                             color: AppColors.darkGreen),
                       ),
                       const SizedBox(height: 5),
+
                       TextFormField(
-                        controller: _passwordCheck,
+                        controller: _passwordCheckerController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password to confirm';
                           }
-                          if (_password.text != _passwordCheck.text) {
+                          if (_passwordController.text !=
+                              _passwordCheckerController.text) {
                             return "The password is not matching";
                           }
                           return null;
@@ -134,31 +163,57 @@ class _ResetPasswordState extends State<ResetPassword> {
                           ),
                         ),
                       ),
+
+                      const SizedBox(height: 20),
+
+                      // Sign In Button
+                      Center(
+                        child: ElevatedButton(
+                          style: button,
+                          onPressed: () {
+                            // Sign in logic that will be changed after ______________
+                            if (formKey.currentState!.validate()) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                //do this
+                                const SnackBar(
+                                  content: Text('Great!'),
+                                ), // SnackBar
+                              );
+                            }
+                          },
+                          child: const Text(
+                            'Sign in',
+                            style: TextStyle(fontSize: 19, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
-                const SizedBox(height: 33),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Code verified successfully!'),
-                          ),
-                        );
-                      }
-                    },
-                    style: button,
-                    child: const Text(
-                      "Update Password",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
+
+                // Create Account
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Already have an account?",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, SignIn.pageRoute);
+                      },
+                      child: const Text(
+                        'Back to Sign In',
+                        style: TextStyle(
+                          color: Color(0xFF16423C),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

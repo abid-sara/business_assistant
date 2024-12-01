@@ -1,9 +1,9 @@
-import 'package:business_assistant/screens/check_email.dart';
+import 'package:business_assistant/screens/landingPages/check_email.dart';
 import 'package:flutter/material.dart';
-import '../style/colors.dart';
-import '../widget/button.dart';
-import '../widget/form.dart';
-import '../widget/back_arrow.dart';
+import '../../style/colors.dart';
+import '../../widget/button.dart';
+import '../../widget/form.dart';
+import '../../widget/back_arrow.dart';
 
 class ForgotPassword extends StatelessWidget {
   ForgotPassword({super.key});

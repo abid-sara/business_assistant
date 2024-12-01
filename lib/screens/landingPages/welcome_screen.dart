@@ -1,4 +1,4 @@
-import 'package:business_assistant/screens/sign_in.dart';
+import 'package:business_assistant/screens/landingPages/sign_in.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';

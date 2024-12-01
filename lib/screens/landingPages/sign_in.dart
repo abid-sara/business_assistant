@@ -1,8 +1,8 @@
-import 'package:business_assistant/screens/create_account.dart';
+import 'package:business_assistant/screens/landingPages/create_account.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
-import '../style/colors.dart';
-import '../widget/form.dart';
+import '../../style/colors.dart';
+import '../../widget/form.dart';
 import 'forgot_password.dart';
 
 class SignIn extends StatefulWidget {

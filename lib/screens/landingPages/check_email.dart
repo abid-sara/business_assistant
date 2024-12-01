@@ -1,8 +1,8 @@
-import 'package:business_assistant/screens/reset_password.dart';
+import 'package:business_assistant/screens/landingPages/reset_password.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
-import '../style/colors.dart';
-import '../widget/back_arrow.dart';
+import '../../style/colors.dart';
+import '../../widget/back_arrow.dart';
 
 class CheckEmail extends StatefulWidget {
   late List<TextEditingController> controllers;

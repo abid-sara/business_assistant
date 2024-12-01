@@ -2,8 +2,8 @@ import 'package:business_assistant/widget/back_arrow.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 
-import '../style/colors.dart';
-import '../widget/form.dart';
+import '../../style/colors.dart';
+import '../../widget/form.dart';
 
 class Businessdetails extends StatefulWidget {
   const Businessdetails({super.key});
