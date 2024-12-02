@@ -1,12 +1,12 @@
-import 'package:business_assistant/widget/back_arrow.dart';
-import 'package:business_assistant/widget/button.dart';
+import '/widget/back_arrow.dart';
+import '/widget/button.dart';
 import 'package:flutter/material.dart';
-
 import '../../style/colors.dart';
 import '../../widget/form.dart';
 
 class Businessdetails extends StatefulWidget {
   const Businessdetails({super.key});
+  static const String pageRoute = '/businessDetails';
 
   @override
   State<Businessdetails> createState() => _BusinessdetailsState();
@@ -24,6 +24,7 @@ class _BusinessdetailsState extends State<Businessdetails> {
   ];
 
   final TextEditingController _nameController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +55,7 @@ class _BusinessdetailsState extends State<Businessdetails> {
                 ),
                 const SizedBox(height: 52),
                 Form(
+                  key: formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -100,14 +102,24 @@ class _BusinessdetailsState extends State<Businessdetails> {
                         validateName,
                       ),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  //do this
+                                  const SnackBar(
+                                    content: Text('Great!'),
+                                  ), // SnackBar
+                                );
+                              }
+                            },
                             style: button,
                             child: const Text(
                               "Save information",
                               style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
+                                  TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
                             ),
                           ),
                           ElevatedButton(
@@ -122,7 +134,7 @@ class _BusinessdetailsState extends State<Businessdetails> {
                             child: const Text(
                               "Skip for now",
                               style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
+                                  TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],

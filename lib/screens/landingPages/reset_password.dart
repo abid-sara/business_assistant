@@ -1,6 +1,5 @@
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
-
 import '../../style/colors.dart';
 import '../../widget/back_arrow.dart';
 import '../../widget/form.dart';
@@ -142,11 +141,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Code verified successfully!'),
-                          ),
-                        );
+                        // Navigator.pushNamed(context, Businessdetails.pageRoute);
                       }
                     },
                     style: button,
