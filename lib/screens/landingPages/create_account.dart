@@ -3,6 +3,7 @@ import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import '../../widget/form.dart';
+import 'businessDetails.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -166,19 +167,13 @@ class _CreateAccountState extends State<CreateAccount> {
 
                       const SizedBox(height: 20),
 
-                      // Sign In Button
                       Center(
                         child: ElevatedButton(
                           style: button,
                           onPressed: () {
-                            // Sign in logic that will be changed after ______________
                             if (formKey.currentState!.validate()) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                //do this
-                                const SnackBar(
-                                  content: Text('Great!'),
-                                ), // SnackBar
-                              );
+                              Navigator.pushNamed(
+                                  context, Businessdetails.pageRoute);
                             }
                           },
                           child: const Text(
