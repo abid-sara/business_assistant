@@ -51,6 +51,8 @@ class Analysis extends StatelessWidget {
                             icon: const Icon(Icons.tune)),
                       ],
                     ),
+
+
                     const Padding(padding: EdgeInsets.all(10)),
                     const Align(
                       alignment: Alignment.centerLeft,
@@ -60,6 +62,7 @@ class Analysis extends StatelessWidget {
                             fontSize: 25, fontWeight: FontWeight.bold),
                       ),
                     ),
+
                     const Padding(padding: EdgeInsets.all(10)),
                     Container(
                       width: screenWidth * 0.9,
@@ -70,7 +73,7 @@ class Analysis extends StatelessWidget {
                       ),
                       child: const Padding(
                         padding: EdgeInsets.all(8.0),
-                        child:CustomBarChart(),
+                        // child:CustomBarChart(),
                       ),
                     ),
                     const Padding(padding: EdgeInsets.all(8)),
@@ -113,6 +116,7 @@ class Analysis extends StatelessWidget {
                         )
                       ],
                     ),
+                    
                     const Padding(padding: EdgeInsets.all(10)),
                     Column(children: [
                       const Align(
@@ -157,48 +161,7 @@ class Analysis extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const Padding(padding: EdgeInsets.all(10)),
-                      BottomNavigationBar(
-                        type: BottomNavigationBarType.fixed,
-                        currentIndex: 0,
-                        onTap: (index) {},
-                        items: <BottomNavigationBarItem>[
-                          BottomNavigationBarItem(
-                            icon: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: Image.asset(
-                                  'assets/images/analysis_filled.png'),
-                            ),
-                            label: 'Analysis',
-                          ),
-                          BottomNavigationBarItem(
-                            icon: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child:
-                                  Image.asset('assets/images/monitoring.png'),
-                            ),
-                            label: 'inventory',
-                          ),
-                          BottomNavigationBarItem(
-                            icon: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: Image.asset('assets/images/star.png'),
-                            ),
-                            label: 'Goal',
-                          ),
-                          BottomNavigationBarItem(
-                            icon: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: Image.asset('assets/images/settings.png'),
-                            ),
-                            label: 'Settings',
-                          ),
-                        ],
-                      )
+                     
                     ])
                   ]),
                 ))));

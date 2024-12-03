@@ -124,52 +124,11 @@ class AnalysisWeek extends StatelessWidget {
           ),
           child: const Padding(
             padding: EdgeInsets.all(8.0),  
-            child:CustomBarChart(),
+            // child:CustomBarChart(),
        
       ),
     ),
-              const Padding(padding: EdgeInsets.all(10)) ,
-              BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-
-                currentIndex: 0, 
-                onTap: (index) {},
-                items: <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/analysis_filled.png'), 
-                    ),
-                    label: 'Analysis',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/monitoring.png'), 
-                    ),
-                    label: 'inventory',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/star.png'), 
-                    ),
-                    label: 'Goal',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/settings.png'), 
-                    ),
-                    label: 'Settings',
-                  ),
-                ],
-              )
-
+              
                         ])),
                         
                         ))

@@ -1,19 +1,69 @@
 import 'package:business_assistant/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/goal_card.dart';
+import 'package:business_assistant/screens/description.dart';
+import 'package:business_assistant/data/goaldata.dart';
 import 'package:business_assistant/widget/past_due_goal.dart';
-import 'package:business_assistant/widget/back_arrow.dart';
+import 'package:intl/intl.dart';
 
 class GoalList extends StatefulWidget {
-  const GoalList({super.key});
+  final List<Goal> goals;
+
+  const GoalList({super.key, required this.goals});
 
   @override
   State<GoalList> createState() => _GoalListState();
 }
 
 class _GoalListState extends State<GoalList> {
+      String _selectedDate = 'November 2024';//initiale date to be displayed at the top of the page
+    
+ //change the status according to the limit date
+  String _getStatus(Goal goal) {
+    if (goal.limit_date.isBefore(DateTime.now()) && goal.status == 'In progress') return 'Missed';
+    if (goal.status == 'Completed') return 'Completed';
+    return 'Missed';
+  }  
+
+  // Function to determine status background color based on the getstatus function
+  Color _getStatusColor(String status) {
+    if (status == 'Missed' ) return Colors.red;
+    return AppColors.lightGreen;
+  }
+  
+
+  // Function to determine status text color
+  Color _getStatusTextColor(String status) {
+    if (status == 'Missed' || status == 'In Progress') return AppColors.purpule;
+    return AppColors.lightGreen;
+  }
+
+
+
+List<PastDueGoalRow> _checkPastDueGoals() {
+  List<PastDueGoalRow> pastDueRows = [];
+  for (Goal goal in widget.goals) {
+    if ( goal.limit_date!.isBefore(DateTime.now())) {
+      pastDueRows.add(
+        PastDueGoalRow(
+          title: goal.title,
+          date: DateFormat('dd/MM/yyyy').format(goal.limit_date!),
+          icon: (goal.status == 'Completed')
+              ? Icons.sentiment_satisfied_rounded
+              : Icons.sentiment_dissatisfied_rounded,
+          iconColor: (goal.status == 'Completed')
+              ? AppColors.darkGreen
+              : Colors.red,
+        ),
+      );
+    }
+  }
+  return pastDueRows;
+}
+
   @override
   Widget build(BuildContext context) {
+    List<PastDueGoalRow> pastDueGoals = _checkPastDueGoals();
 
     return Scaffold(
       appBar: AppBar(
@@ -22,182 +72,127 @@ class _GoalListState extends State<GoalList> {
           'Goals list',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
         ),
-        leading: const Flexible(child: BackArrow()),
-
-        
       ),
-      extendBodyBehindAppBar: true, 
-      body: SingleChildScrollView(
-        child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/background.png'),  
-                fit: BoxFit.cover, 
-              ),
-            ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Navigation Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () {
-                      
-                    },
-                  ),
-                  const Text(
-                    'November 2024',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.calendar_today),
-                        onPressed: () {
-                          
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-        
-         const SizedBox(height: 20),
-
-
-              // Goal Cards
-              const GoalCard(
-                title: 'Goal 1',
-                date: '23 Jan - 24 Jan',
-                status: 'Missed',
-                backgroundColor: Color.fromARGB(255, 232, 156, 151),
-                statusColor: AppColors.lightGreen,
-              ),
-              const SizedBox(height: 10),
-              const GoalCard(
-                title: 'Goal 2',
-                date: '23 Jan - 24 Jan',
-                status: 'In Progress',
-                backgroundColor: AppColors.yellowGreen,
-                statusColor: AppColors.lightGreen,
-              ),
-              const SizedBox(height: 10),
-              const GoalCard(
-                title: 'Goal 3',
-                date: '23 Jan - 24 Jan',
-                status: 'Completed',
-                backgroundColor: AppColors.green,
-                statusColor: AppColors.lightGreen,
-              ),
-
-              const SizedBox(height: 20),
-
-              // Past Due Goals 
-              const Text(
-                'Past due goals',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              const PastDueGoalRow(
-                title: 'Revenue Growth',
-                date: '01 Jan - 02 Jan',
-                icon: Icons.sentiment_satisfied_alt_rounded,
-                iconColor: AppColors.darkGreen,
-              ),
-              const SizedBox(height: 10),
-              const PastDueGoalRow(
-                title: 'Customer Acquisition',
-                date: '01 Jan - 02 Jan',
-                icon: Icons.sentiment_dissatisfied_rounded,
-                iconColor: Colors.red,
-              ),
-              const SizedBox(height: 10),
-              const PastDueGoalRow(
-                title: 'Cost Reduction',
-                date: '01 Jan - 02 Jan',
-                icon: Icons.sentiment_dissatisfied_rounded,
-                iconColor: Colors.red,
-              ),
-              const SizedBox(height: 10),
-              const PastDueGoalRow(
-                title: 'Digital Transformation',
-                date: '01 Jan - 02 Jan',
-                icon: Icons.sentiment_satisfied_alt_rounded,
-                iconColor: AppColors.darkGreen,
-              ),
-              const Align(
-                alignment: Alignment.centerRight,
-                child: Icon(
-                  Icons.add_circle_rounded,
-                  color: AppColors.green,
-                  size: 40,
-                ),
-              ),
-
-              //Bottom bar
-               BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
-
-                    currentIndex: 0, 
-                    onTap: (index) {},
-                    items: <BottomNavigationBarItem>[
-                      BottomNavigationBarItem(
-                        icon: SizedBox(
-                          height: 20,  
-                          width: 20,   
-                          child: Image.asset('assets/images/analysis.png'), 
-                        ),
-                        label: 'Analysis',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: SizedBox(
-                          height: 20,  
-                          width: 20,   
-                          child: Image.asset('assets/images/monitoring.png'), 
-                        ),
-                        label: 'inventory',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: SizedBox(
-                          height: 20,  
-                          width: 20,   
-                          child: Image.asset('assets/images/star_filled.png'), 
-                        ),
-                        label: 'Goal',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: SizedBox(
-                          height: 20,  
-                          width: 20,   
-                          child: Image.asset('assets/images/settings.png'), 
-                        ),
-                        label: 'Settings',
-                      ),
-                    ],
-                  )
-
-
-            ],
-            
-            
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.png'),
+            fit: BoxFit.cover,
           ),
-          
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios),
+                  onPressed: () {
+                    
+                    setState(() {
+                      DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
+                      DateTime previousMonth = DateTime(currentDate.year, currentDate.month - 1);
+                      _selectedDate = DateFormat('MMMM yyyy').format(previousMonth);
+                    });
+                  },
+                ),
+                 Text(
+                  _selectedDate,
+                  style: const TextStyle(fontSize: 20),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      onPressed: () {
+                        setState(() {
+                      DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
+                      DateTime previousMonth = DateTime(currentDate.year, currentDate.month + 1);
+                      _selectedDate = DateFormat('MMMM yyyy').format(previousMonth);
+                    });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: () {
+                        showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        ).then((pickedDate) {
+                          if (pickedDate != null) {
+                          setState(() {
+                             final formattedDate = DateFormat('MMMM yyyy').format(pickedDate);
+                              _selectedDate = formattedDate; 
+                        });
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
             
+             Expanded(
+                  child: ListView(
+                    children: [
+                      ...widget.goals.map((goal) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: GoalCard(
+                            title: goal.title,
+                            date: '${goal.start_date} - ${goal.limit_date}',
+                            status: goal.status,
+                            backgroundColor: _getStatusColor(goal.status),
+                            statusColor: _getStatusTextColor(goal.status),
+                            
+                          ),
+                          
+                          
+                        );
+                      },
+                      ),
+                         
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Text(
+                          'Past due goals',
+                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      ...pastDueGoals.map((pastDueGoal) {
+                        return pastDueGoal;
+                      }),
+                    ],
+                  ),
+                ),
+
+            IconButton(
+              icon: const Icon(
+                Icons.add_circle,
+                color: AppColors.green,
+                size: 40,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Description(goals: widget.goals),
+                  ),
+                ).then((newGoal) {
+                  if (newGoal != null) {
+                    setState(() {
+                      widget.goals.add(newGoal);
+                    });
+                  }
+                });
+              },
+            ),
+          ],
+        ),
       ),
-      
-    ));
+    );
   }
 }

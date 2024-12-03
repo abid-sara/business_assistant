@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
 
-
-
 class CustomRow extends StatelessWidget {
   final Icon? icon; 
   final String title; 
@@ -53,9 +51,16 @@ class CustomRow extends StatelessWidget {
   }
 }
 
-class Transactions extends StatelessWidget {
-  const Transactions({super.key});
+class Transaction extends StatefulWidget {
+  const Transaction({super.key});
 
+  @override
+  State<Transaction> createState() => _TransactionState();
+}
+
+class _TransactionState extends State<Transaction> {
+  @override
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +77,7 @@ class Transactions extends StatelessWidget {
       ),
       body:  SingleChildScrollView(
          child: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/background.png'),  
                 fit: BoxFit.cover, 
@@ -104,7 +109,7 @@ class Transactions extends StatelessWidget {
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        Text(//HERE THE BALANCE IS TOTAL INCOME - TOTAL EXPENSES
                           'Your total balance ', 
                           style: TextStyle(
                             color: Colors.black, 
@@ -121,6 +126,7 @@ class Transactions extends StatelessWidget {
                             fontSize: 16, 
                           ),
                         ),
+
                       Padding(padding: EdgeInsets.all(10)),
                       Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -188,18 +194,18 @@ class Transactions extends StatelessWidget {
             ],
             ),
             const Padding(padding: EdgeInsets.all(10)),
-            Column(
+            const Column(
               children: [
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Recent transactions ',
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const Padding(padding: EdgeInsets.all(10)),
+                Padding(padding: EdgeInsets.all(10)),
 
-              const Column(
+              Column(
                 children: [
                   CustomRow(
                         title: 'Order ',
@@ -241,50 +247,15 @@ class Transactions extends StatelessWidget {
         ]),
       ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-
-                currentIndex: 0, 
-                onTap: (index) {},
-                items: <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/home.png'), 
-                    ),
-                    label: 'Dashboard',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/box.png'), 
-                    ),
-                    label: 'Orders',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/to-do-list.png'), 
-                    ),
-                    label: 'To do',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 20,  
-                      width: 20,   
-                      child: Image.asset('assets/images/settings.png'), 
-                    ),
-                    label: 'More',
-                  ),
-                ],
-              )
+      
                        
                         
                         
                         
                         );
           }
-              }
+}
+
+
+
+              
