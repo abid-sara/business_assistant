@@ -1,5 +1,9 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
+import 'package:business_assistant/data/transactiondata.dart';
+import 'package:intl/intl.dart';
 
 class CustomRow extends StatelessWidget {
   final Icon? icon; 
@@ -52,14 +56,73 @@ class CustomRow extends StatelessWidget {
 }
 
 class Transaction extends StatefulWidget {
-  const Transaction({super.key});
+  List<TransactionData> trasactionList;
+   
+  Transaction({super.key ,required this.trasactionList});
 
   @override
   State<Transaction> createState() => _TransactionState();
 }
 
 class _TransactionState extends State<Transaction> {
-  @override
+   bool isBalanceVisible = false;
+   double totalBalance = 0.0;
+
+   
+   @override
+      void initState() {
+        super.initState();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() {
+            totalBalance = _getTotalBalance();
+            
+          });
+        });
+      }
+
+
+
+   List<Widget> buildTransactionRows() {
+   
+  return widget.trasactionList.map((transaction) {
+    return CustomRow(
+      title: transaction.source,
+      subtitle: DateFormat('dd MMM yyyy at hh:mm a').format(transaction.date),
+      value: '${transaction.type == 'income' ? '+' : '-'} ${transaction.amount} DZD',
+      icon: Icon(
+        transaction.type == 'income' ? Icons.south_west : Icons.north_east,
+        size: 30,
+        color: transaction.type == 'income' ? AppColors.green : Colors.red,
+      ),
+    );
+  }).toList();
+}
+  
+  //we need to get the total balance to display it
+  //get the total income
+  double _getTotalIncome() {
+  double totalIncome = 0.0;
+  for (var transaction in widget.trasactionList) {
+    if (transaction.type == 'income') {
+      totalIncome += transaction.amount;
+    }
+  }
+  return totalIncome;
+}
+double _getTotalExpense(){
+  double totalExpense = 0.0;
+  for (var transaction in widget.trasactionList) {
+    if (transaction.type == 'expense') {
+      totalExpense += transaction.amount;
+    }
+  }
+  return totalExpense;
+}
+double _getTotalBalance(){
+  
+  return _getTotalIncome() - _getTotalExpense();
+}
+ 
   
   @override
   Widget build(BuildContext context) {
@@ -106,10 +169,10 @@ class _TransactionState extends State<Transaction> {
                   ],
                     ),
                     alignment: Alignment.center, 
-                    child: const Column(
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(//HERE THE BALANCE IS TOTAL INCOME - TOTAL EXPENSES
+                        Text(
                           'Your total balance ', 
                           style: TextStyle(
                             color: Colors.black, 
@@ -117,84 +180,51 @@ class _TransactionState extends State<Transaction> {
                             fontSize: 16, 
                           ),
                         ),
-                        Padding(padding: EdgeInsets.all(10)),
+                        
+
                         Text(
-                          ' 7,89999.0 DZD ', 
-                          style: TextStyle(
+                         isBalanceVisible ? '$totalBalance' + 'DZD' : 'Total Balance',
+                        style: TextStyle(
                             color: AppColors.green, 
                             fontWeight: FontWeight.bold, 
                             fontSize: 16, 
                           ),
                         ),
 
-                      Padding(padding: EdgeInsets.all(10)),
-                      Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center, 
-                    children: [
-                      Text(
-                        'Hide', 
-                        style: TextStyle(
-                          fontSize: 16, 
-                          
-                        ),
+                      
+                     Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            isBalanceVisible ? 'Hide' : 'Show',
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(
+                              isBalanceVisible ? Icons.visibility_off : Icons.visibility,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isBalanceVisible = !isBalanceVisible;
+                              });
+                            },
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 8), 
-                      Icon(
-                        Icons.visibility_off, 
-                        size: 20, 
-                        color: Colors.grey, 
-                      ),
-                    ],
-                  ),
                  ] ),
                   ),
                 ],
               ),
 
-              Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(onPressed: (){},
-                 style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.green, 
-                      foregroundColor: Colors.white, 
-                    ),
-                 child: const Row(
-                 mainAxisAlignment: MainAxisAlignment.center,
-                 crossAxisAlignment: CrossAxisAlignment.center,
-                 children:[
-                 Icon(
-                  Icons.north_east,
-                  color: Colors.white,
-                  size: 30,
-                 ),
-                Text('Expense '),
-                 ],
-               ),
-           ),
-           ElevatedButton(onPressed: (){},
-                style: ElevatedButton.styleFrom(
-                      backgroundColor:AppColors.purpule, 
-                      foregroundColor: Colors.white, 
-                    ),
-                child: const Row(
-                 mainAxisAlignment: MainAxisAlignment.center,
-                 crossAxisAlignment: CrossAxisAlignment.center,
-                 children:[
-                 Icon(
-                  Icons.south_west,
-                  color: Colors.white,
-                  size: 30,
-                 ),
-                Text('Revenue '),
-                 ],
-               ),
-           ),
-            ],
-            ),
-            const Padding(padding: EdgeInsets.all(10)),
-            const Column(
+              
+           
+            Column(
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
@@ -203,45 +233,50 @@ class _TransactionState extends State<Transaction> {
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(10)),
+                
+                  Column(
+                      children: buildTransactionRows(),
+                    ),
+ 
+             
 
-              Column(
-                children: [
-                  CustomRow(
-                        title: 'Order ',
-                        subtitle: '20 Jan 2024 at 10:00 PM',
-                        value: '+ 30000 DZD',
-                        icon: Icon(
-                          Icons.south_west,
-                          size: 30,
-                          color: AppColors.green,
-                        ),
-                      ),
+              // Column(
+              //   children: [
+              //     CustomRow(
+              //           title: 'Order ',
+              //           subtitle: '20 Jan 2024 at 10:00 PM',
+              //           value: '+ 30000 DZD',
+              //           icon: Icon(
+              //             Icons.south_west,
+              //             size: 30,
+              //             color: AppColors.green,
+              //           ),
+              //         ),
 
-                  SizedBox(height: 10), 
-                  CustomRow(
-                        title: 'Marketing ',
-                        subtitle: '20 Jan 2024 at 10:00 PM',
-                        value: '- 40000 DZD',
-                        icon: Icon(
-                          Icons.north_east,
-                          size: 30,
-                          color: AppColors.green,
-                        ),
-                      ),
-                  SizedBox(height: 10), 
-                 CustomRow(
-                        title: 'Shopping ',
-                        subtitle: '20 Jan 2024 at 10:00 PM',
-                        value: '- 20000 DZD',
-                        icon: Icon(
-                          Icons.north_east,
-                          size: 30,
-                         color: AppColors.green,
-                        ),
-                      ),
-                ],
-              ),
+              //     SizedBox(height: 10), 
+              //     CustomRow(
+              //           title: 'Marketing ',
+              //           subtitle: '20 Jan 2024 at 10:00 PM',
+              //           value: '- 40000 DZD',
+              //           icon: Icon(
+              //             Icons.north_east,
+              //             size: 30,
+              //             color: AppColors.green,
+              //           ),
+              //         ),
+              //     SizedBox(height: 10), 
+              //    CustomRow(
+              //           title: 'Shopping ',
+              //           subtitle: '20 Jan 2024 at 10:00 PM',
+              //           value: '- 20000 DZD',
+              //           icon: Icon(
+              //             Icons.north_east,
+              //             size: 30,
+              //            color: AppColors.green,
+              //           ),
+              //         ),
+              //   ],
+              // ),
             ],
           ),
         ]),

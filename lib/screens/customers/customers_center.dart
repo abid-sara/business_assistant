@@ -2,7 +2,6 @@ import 'package:business_assistant/style/containers.dart';
 import 'package:flutter/material.dart';
 
 import 'package:business_assistant/data/customers.dart'; // Import the customers.dart file
-import 'package:business_assistant/data/orders.dart';
 import 'package:business_assistant/style/colors.dart';
 
 class customersPage extends StatefulWidget {

@@ -1,35 +1,43 @@
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
-import '../widget/bar_chart.dart';
+import 'package:business_assistant/widget/bar_chart.dart';
 
-class SelectedButton extends StatelessWidget{
+class SelectedButton extends StatefulWidget {
   final String label;
   final VoidCallback onPressed;
-  final Icon? icon;
 
   const SelectedButton({
     super.key,
     required this.label,
     required this.onPressed,
-    this.icon ,
+   
   });
+
+  @override
+  State<SelectedButton> createState() => _SelectedButtonState();
+}
+
+class _SelectedButtonState extends State<SelectedButton> {
+  bool _isPressed = false;
+
+  void _handlePress() {
+    setState(() {
+      _isPressed = !_isPressed;
+    });
+    widget.onPressed();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.green, 
-                      foregroundColor: Colors.white, 
-                    ),
-                    
-      onPressed: onPressed,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null) icon!,
-          Text(label),
-        ],
-      )
+        //if the button is pressed we need to diffrentiate it
+        backgroundColor: _isPressed ? Colors.white : AppColors.green,
+        foregroundColor: _isPressed ? AppColors.green : Colors.white,
+        minimumSize: Size(80, 40), 
+      ),
+      onPressed: _handlePress,
+      child: Text(widget.label),
     );
   }
 }
@@ -79,7 +87,7 @@ class AnalysisWeek extends StatelessWidget {
                 label: 'Year',
                 onPressed: () {},
               ),
-             SelectedButton(label: ' ', onPressed: () {}, icon: const Icon(Icons.tune)),
+             
               ],
             ),
             const Padding(padding: EdgeInsets.all(10)) ,
@@ -101,7 +109,7 @@ class AnalysisWeek extends StatelessWidget {
           ),
           child: const Padding(
             padding: EdgeInsets.all(8.0),  
-            // child:CustomBarChart(),
+            child: CustomBarChart(isExpense: true),
        
       ),
     ),
@@ -124,7 +132,7 @@ class AnalysisWeek extends StatelessWidget {
           ),
           child: const Padding(
             padding: EdgeInsets.all(8.0),  
-            // child:CustomBarChart(),
+            child:CustomBarChart(isExpense: false,),
        
       ),
     ),

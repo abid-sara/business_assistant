@@ -5,6 +5,7 @@ import 'package:business_assistant/screens/description.dart';
 import 'package:business_assistant/data/goaldata.dart';
 import 'package:business_assistant/widget/past_due_goal.dart';
 import 'package:intl/intl.dart';
+import 'package:business_assistant/widget/back_arrow.dart';
 
 class GoalList extends StatefulWidget {
   final List<Goal> goals;
@@ -20,15 +21,16 @@ class _GoalListState extends State<GoalList> {
     
  //change the status according to the limit date
   String _getStatus(Goal goal) {
+    
     if (goal.limit_date.isBefore(DateTime.now()) && goal.status == 'In progress') return 'Missed';
     if (goal.status == 'Completed') return 'Completed';
-    return 'Missed';
+    return goal.status;
   }  
 
   // Function to determine status background color based on the getstatus function
   Color _getStatusColor(String status) {
-    if (status == 'Missed' ) return Colors.red;
-    return AppColors.lightGreen;
+    if (status == 'In progress' ) return AppColors.lightGreen;
+    return AppColors.green;
   }
   
 
@@ -37,17 +39,18 @@ class _GoalListState extends State<GoalList> {
     if (status == 'Missed' || status == 'In Progress') return AppColors.purpule;
     return AppColors.lightGreen;
   }
+  
 
 
 
 List<PastDueGoalRow> _checkPastDueGoals() {
   List<PastDueGoalRow> pastDueRows = [];
   for (Goal goal in widget.goals) {
-    if ( goal.limit_date!.isBefore(DateTime.now())) {
+    if (  goal.limit_date.isBefore(DateTime.now())) {
       pastDueRows.add(
         PastDueGoalRow(
           title: goal.title,
-          date: DateFormat('dd/MM/yyyy').format(goal.limit_date!),
+          date: DateFormat('dd/MM/yyyy').format(goal.limit_date),
           icon: (goal.status == 'Completed')
               ? Icons.sentiment_satisfied_rounded
               : Icons.sentiment_dissatisfied_rounded,
@@ -61,6 +64,8 @@ List<PastDueGoalRow> _checkPastDueGoals() {
   return pastDueRows;
 }
 
+
+
   @override
   Widget build(BuildContext context) {
     List<PastDueGoalRow> pastDueGoals = _checkPastDueGoals();
@@ -73,6 +78,7 @@ List<PastDueGoalRow> _checkPastDueGoals() {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
         ),
       ),
+      
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -121,12 +127,14 @@ List<PastDueGoalRow> _checkPastDueGoals() {
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         ).then((pickedDate) {
-                          if (pickedDate != null) {
+                         
                           setState(() {
-                             final formattedDate = DateFormat('MMMM yyyy').format(pickedDate);
-                              _selectedDate = formattedDate; 
+                             if (pickedDate != null) {
+                               final formattedDate = DateFormat('MMMM yyyy').format(pickedDate);
+                               _selectedDate = formattedDate; 
+                             }
                         });
-                          }
+                          
                         });
                       },
                     ),
@@ -140,15 +148,17 @@ List<PastDueGoalRow> _checkPastDueGoals() {
                     children: [
                       ...widget.goals.map((goal) {
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
+                         padding: const EdgeInsets.symmetric(vertical: 10),
                           child: GoalCard(
-                            title: goal.title,
-                            date: '${goal.start_date} - ${goal.limit_date}',
-                            status: goal.status,
-                            backgroundColor: _getStatusColor(goal.status),
-                            statusColor: _getStatusTextColor(goal.status),
-                            
-                          ),
+                              goal: goal,
+                              title: goal.title,
+                              date: '${DateFormat('dd/MM/yyyy').format(goal.startDateOnly)} - ${DateFormat('dd/MM/yyyy').format(goal.limitDateOnly)}',
+
+                              status: goal.status,
+                              backgroundColor: _getStatusColor(goal.status),
+                              statusColor: _getStatusTextColor(goal.status),
+                              
+                            ),
                           
                           
                         );

@@ -1,12 +1,35 @@
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
-import '../widget/bar_chart.dart';
 import 'analysis_week.dart';
 import 'transactions.dart';
+import 'package:business_assistant/data/transactiondata.dart';
+import 'package:intl/intl.dart';
+import 'package:business_assistant/widget/bar_chart.dart';
 
-class Analysis extends StatelessWidget {
-  const Analysis({super.key});
+class Analysis extends StatefulWidget {
+  List<TransactionData> Transactionlist;
+   Analysis({super.key, required this.Transactionlist});
 
+  @override
+  State<Analysis> createState() => _AnalysisState();
+}
+
+class _AnalysisState extends State<Analysis> {
+  //get the row object to be displayed in the recent transactions list
+   List<Widget> buildTransactionRows() {
+  return Transactionlist.map((transaction) {
+    return CustomRow(
+      title: transaction.source,
+      subtitle: DateFormat('dd MMM yyyy at hh:mm a').format(transaction.date),
+      value: '${transaction.type == 'income' ? '+' : '-'} ${transaction.amount} DZD',
+      icon: Icon(
+        transaction.type == 'income' ? Icons.south_west : Icons.north_east,
+        size: 30,
+        color: transaction.type == 'income' ? AppColors.green : Colors.red,
+      ),
+    );
+  }).toList();
+}
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -45,10 +68,7 @@ class Analysis extends StatelessWidget {
                           label: 'Year',
                           onPressed: () {},
                         ),
-                        SelectedButton(
-                            label: ' ',
-                            onPressed: () {},
-                            icon: const Icon(Icons.tune)),
+                       
                       ],
                     ),
 
@@ -71,51 +91,11 @@ class Analysis extends StatelessWidget {
                         borderRadius: BorderRadius.circular(0),
                         color: Colors.white,
                       ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        // child:CustomBarChart(),
+                      child: const Expanded(
+                        child:CustomBarChart(isExpense :true),
                       ),
                     ),
-                    const Padding(padding: EdgeInsets.all(8)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Align(
-                            alignment: Alignment.center,
-                            child: Text('Item '),
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 163, 71, 202),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Align(
-                            alignment: Alignment.center,
-                            child: Text('Ensurence '),
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Align(
-                            alignment: Alignment.center,
-                            child: Text('Ads '),
-                          ),
-                        )
-                      ],
-                    ),
+                    
                     
                     const Padding(padding: EdgeInsets.all(10)),
                     Column(children: [
@@ -129,37 +109,10 @@ class Analysis extends StatelessWidget {
                       ),
                       const Padding(padding: EdgeInsets.all(10)),
                       Column(
-                        children: [
-                          const CustomRow(
-                            title: 'Client',
-                            subtitle: 'Order',
-                            value: '5300 DZD',
-                          ),
-                          const SizedBox(height: 10),
-                          const CustomRow(
-                            title: 'Amazon',
-                            subtitle: 'Purchase',
-                            value: '77540 DZD',
-                          ),
-                          const SizedBox(height: 10),
-                          const CustomRow(
-                            title: 'Client',
-                            subtitle: 'order',
-                            value: '19000 DZD',
-                          ),
-                          SizedBox(
-                            width: 120,
-                            height: 40,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.darkGreen,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Export pdf'),
-                            ),
-                          ),
-                        ],
+                      
+                      children: buildTransactionRows(),
+                  
+ 
                       ),
                      
                     ])

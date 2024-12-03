@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../style/colors.dart';
 import '../data/goaldata.dart';
 import 'package:intl/intl.dart';
+import 'package:business_assistant/data/goaldata.dart';
 
 
 class DataField extends StatelessWidget {
@@ -38,7 +39,10 @@ class DataField extends StatelessWidget {
                     children: [
                       Expanded(
                         child:
-                  TextField(
+                        Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0), 
+                        
+                  child:TextField(
                     controller: controller,
                     maxLines: isDescription ? 5 : 1, 
                     decoration: InputDecoration(
@@ -54,7 +58,7 @@ class DataField extends StatelessWidget {
                       hintStyle: const TextStyle(color: Colors.grey),
                       contentPadding: const EdgeInsets.symmetric(vertical :12),
                     ),
-                  )
+                  ))
     ),
                   if(isDate)
                   IconButton(
@@ -110,7 +114,7 @@ class _DescriptionState extends State<Description> with TickerProviderStateMixin
           }
 }
 
-@override
+
 
 @override
 void initState() {
@@ -231,13 +235,13 @@ bool _validateForm() {
               ),
             ),
       child :Padding(
-        padding: const EdgeInsets.all(16),
+         padding: EdgeInsets.symmetric(vertical: 5),
         child:Center(
         child: Column(
           children: [
            Expanded(
              child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 5),
                 decoration: BoxDecoration(color:AppColors.green,
                 borderRadius:BorderRadius.circular(12),),
                 width :screenWidth * 0.8,
@@ -259,8 +263,7 @@ bool _validateForm() {
                     ],
                     ),
 
-                  const Padding(padding: EdgeInsets.all(16)),
-                 
+
                   
                      DataField(
                       text: 'Description',
@@ -270,7 +273,6 @@ bool _validateForm() {
                       ),
 
                       
-                     const Padding(padding: EdgeInsets.all(16)),
                      Row(
                           children: [
                             Expanded(
@@ -296,8 +298,6 @@ bool _validateForm() {
                                 ),
 
                             ),
-                            
-                            const SizedBox(width: 16), 
                             
                             Expanded(
                               child: Column(
@@ -331,7 +331,7 @@ bool _validateForm() {
               ),
            ),
             
-            const Padding(padding: EdgeInsets.all(16)),
+             
                   ElevatedButton(
           onPressed: () {
              if (_validateForm()) {
