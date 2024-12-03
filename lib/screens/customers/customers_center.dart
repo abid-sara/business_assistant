@@ -154,11 +154,6 @@ class _customersPageState extends State<customersPage> {
     List<Customer> filteredCustomers = _filterCustomers(_searchQuery);
     return Scaffold(
       appBar: AppBar(
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Icon(Icons.arrow_back_ios_new_rounded)),
         title: const Text("Customers center"),
         backgroundColor: Colors.white,
       ),
@@ -169,8 +164,8 @@ class _customersPageState extends State<customersPage> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image:
-                    AssetImage("assets/background.png"), // Path to your image
+                image: AssetImage(
+                    "assets/images/background.png"), // Path to your image
                 fit: BoxFit.cover,
               ),
             ),

@@ -336,8 +336,8 @@ class _OrdersPageState extends State<OrdersPage>
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image:
-                    AssetImage("assets/background.png"), // Path to your image
+                image: AssetImage(
+                    "assets/images/background.png"), // Path to your image
                 fit: BoxFit.cover,
               ),
             ),
@@ -354,7 +354,7 @@ class _OrdersPageState extends State<OrdersPage>
                       prefixIcon: const Icon(Icons.search),
                       fillColor: AppColors.purpule,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
+                        borderRadius: BorderRadius.circular(40.0),
                       ),
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,

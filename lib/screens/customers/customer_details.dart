@@ -336,7 +336,7 @@ class _customerDetailsState extends State<customerDetails> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/background.png"),
+                image: AssetImage("assets/images/background.png"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -352,12 +352,12 @@ class _customerDetailsState extends State<customerDetails> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Divider(
-                    color: AppColors.darkGreen,
-                    thickness: 1,
-                    indent: 10,
-                    endIndent: 10,
-                  ),
+                  // const Divider(
+                  //   color: AppColors.darkGreen,
+                  //   thickness: 1,
+                  //   indent: 10,
+                  //   endIndent: 10,
+                  // ),
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.purpule,

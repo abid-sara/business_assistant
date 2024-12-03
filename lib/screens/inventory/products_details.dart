@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/text.dart';
 import 'package:business_assistant/style/colors.dart';
-import 'package:business_assistant/data/orders.dart';
 import 'package:business_assistant/data/products.dart'; // Import the product data
 
 class ItemDetails extends StatefulWidget {
@@ -284,7 +283,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: AppColors.darkGreen,
+                    color: AppColors.lightGreen,
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -332,7 +331,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: AppColors.darkGreen,
+                    color: AppColors.lightGreen,
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -371,7 +370,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: AppColors.darkGreen,
+                    color: AppColors.lightGreen,
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -410,7 +409,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: AppColors.darkGreen,
+                    color: AppColors.lightGreen,
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(

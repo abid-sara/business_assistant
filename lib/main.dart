@@ -1,6 +1,10 @@
+import 'package:business_assistant/screens/customers/customers_center.dart';
+import 'package:business_assistant/screens/inventory/products_center.dart';
+
 import 'constants/routes.dart';
 import 'package:flutter/material.dart';
 import 'screens/landingPages/welcome_screen.dart';
+import 'screens/orders/orders_center.dart';
 
 void main() {
   runApp(const MyApp());

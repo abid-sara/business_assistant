@@ -3,7 +3,6 @@ import 'package:business_assistant/style/text.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/data/products.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'dart:io';
 
 class Inventory extends StatefulWidget {
@@ -210,7 +209,7 @@ class _InventoryState extends State<Inventory>
                   id: products.length + 1,
                   name: _nameController.text,
                   quantity: double.parse(_quantityController.text),
-                  image: "assets/background.png",
+                  image: "assets/images/background.png",
                   unitPrice: double.parse(_unitPriceController.text),
                   description: _additionalInfoController.text,
                   remainingQuantity: double.parse(_quantityController
@@ -301,8 +300,8 @@ class _InventoryState extends State<Inventory>
             Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image:
-                      AssetImage("assets/background.png"), // Path to your image
+                  image: AssetImage(
+                      "assets/images/background.png"), // Path to your image
                   fit: BoxFit.cover,
                 ),
               ),

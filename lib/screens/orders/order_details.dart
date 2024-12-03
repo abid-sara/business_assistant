@@ -30,8 +30,8 @@ class orderDetails extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image:
-                    AssetImage("assets/background.png"), // Path to your image
+                image: AssetImage(
+                    "assets/images/background.png"), // Path to your image
                 fit: BoxFit.cover,
               ),
             ),
