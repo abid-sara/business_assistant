@@ -1,4 +1,3 @@
-import 'package:business_assistant/screens/landingPages/reset_password.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import '../../style/colors.dart';
@@ -6,7 +5,6 @@ import '../../widget/back_arrow.dart';
 
 class CheckEmail extends StatefulWidget {
   late List<TextEditingController> controllers;
-  static const String pageRoute = '/check_email';
   String email;
 
   CheckEmail({super.key, required this.email}) {
@@ -24,7 +22,7 @@ class _CheckEmailState extends State<CheckEmail> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: const BackArrow(),
+        appBar: BackArrow(title: ""),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -134,7 +132,7 @@ class _CheckEmailState extends State<CheckEmail> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        Navigator.pushNamed(context, ResetPassword.pageRoute);
+                        Navigator.pushNamed(context, '/ResetPassword');
                       }
                     },
                     style: button,

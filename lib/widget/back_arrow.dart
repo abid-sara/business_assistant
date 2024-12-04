@@ -3,12 +3,15 @@ import '../style/colors.dart';
 
 class BackArrow extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onPressed;
+  String title;
 
-  const BackArrow({super.key, this.onPressed});
+  BackArrow({super.key, this.onPressed, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      title: Text(title),
+      enterTitle: true,
       backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,

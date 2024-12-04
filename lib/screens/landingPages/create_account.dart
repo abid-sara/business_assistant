@@ -1,16 +1,14 @@
-import 'package:business_assistant/screens/landingPages/sign_in.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import '../../widget/form.dart';
-import 'businessDetails.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
 
   @override
   State<CreateAccount> createState() => _CreateAccountState();
-  static const String pageRoute = '/create_account';
+  static const String pageRoute = '/CreateAccount';
 }
 
 class _CreateAccountState extends State<CreateAccount> {
@@ -37,7 +35,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   child: Column(
                     children: [
                       Image.asset(
-                        'assets/images/logo.png', // Add your logo here
+                        'assets/images/logo.png',
                         height: 110,
                       ),
 
@@ -172,8 +170,7 @@ class _CreateAccountState extends State<CreateAccount> {
                           style: button,
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
-                              Navigator.pushNamed(
-                                  context, Businessdetails.pageRoute);
+                              Navigator.pushNamed(context, '/Businessdetails');
                             }
                           },
                           child: const Text(
@@ -197,7 +194,7 @@ class _CreateAccountState extends State<CreateAccount> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, SignIn.pageRoute);
+                        Navigator.pushNamed(context, '/signIn');
                       },
                       child: const Text(
                         'Back to Sign In',

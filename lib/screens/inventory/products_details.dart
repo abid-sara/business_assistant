@@ -224,10 +224,12 @@ class _ItemDetailsState extends State<ItemDetails> {
                             ),
                           ],
                         ),
-                        SizedBox(
-                            width: 100,
-                            height: 50,
-                            child: Text(product.description)),
+                        Center(
+                          child: SizedBox(
+                              width: 100,
+                              height: 50,
+                              child: Text(product.description)),
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

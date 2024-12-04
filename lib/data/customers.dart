@@ -1,3 +1,5 @@
+import 'package:business_assistant/data/products.dart';
+
 import 'orders.dart';
 
 class Customer {
@@ -43,5 +45,45 @@ List<Customer> customers = [
       address: 'Egypt',
       phone_num: "987654321",
       email: 'hello@there.com',
-      orders: []), //no orders for now for this customer
+      orders: []),
+  //add another customer
+  Customer(
+      customerID: 3,
+      name: 'Ali',
+      address: 'Tunisia',
+      phone_num: "123456789",
+      email: 'email@gmail.com',
+      orders: []),
+
+  Customer(
+      customerID: 4,
+      name: 'Sara',
+      address: 'Morocco',
+      phone_num: "123456789",
+      email: 'anything@gmail.com',
+      orders: []),
+  // he cannot have an order once created!
+  Customer(
+      customerID: 5,
+      name: 'John',
+      address: 'USA',
+      phone_num: "555123456",
+      email: 'john@example.com',
+      orders: []),
+  //add another customer
+  Customer(
+      customerID: 6,
+      name: 'Jane',
+      address: 'Canada',
+      phone_num: "555987654",
+      email: 'jane@example.com',
+      orders: []),
+  //add another customer
+  Customer(
+      customerID: 7,
+      name: 'Ahmed',
+      address: 'Saudi Arabia',
+      phone_num: "555678901",
+      email: 'ahmed@example.com',
+      orders: []),
 ];

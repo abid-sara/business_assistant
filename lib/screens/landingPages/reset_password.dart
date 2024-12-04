@@ -6,7 +6,7 @@ import '../../widget/form.dart';
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({super.key});
-  static const String pageRoute = '/reset_password';
+  static const String pageRoute = '/ResetPassword';
   @override
   State<ResetPassword> createState() => _ResetPasswordState();
 }
@@ -22,7 +22,9 @@ class _ResetPasswordState extends State<ResetPassword> {
 
     return SafeArea(
       child: Scaffold(
-        appBar: const BackArrow(),
+        appBar: BackArrow(
+          title: "",
+        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -141,7 +143,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        // Navigator.pushNamed(context, Businessdetails.pageRoute);
+                        Navigator.pushNamed(context, '/dashboard');
                       }
                     },
                     style: button,

@@ -1,4 +1,3 @@
-import 'package:business_assistant/screens/landingPages/sign_in.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(180, 0, 0, 0),
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, SignIn.pageRoute);
+                      Navigator.pushNamed(context, '/signIn');
                     },
                     style: button,
                     child: const Text(

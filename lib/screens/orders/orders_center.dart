@@ -1,5 +1,5 @@
 import 'package:business_assistant/style/colors.dart';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/orderLine.dart';
 import 'package:business_assistant/data/orders.dart';
@@ -21,6 +21,9 @@ class _OrdersPageState extends State<OrdersPage>
   String _searchQuery = '';
   Customer? selectedCustomer;
   List<Order> filteredOrders = [];
+  DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+  String DateError = "";
+  String priceError = ""; //it must be only numbers and no char
 
   @override
   void initState() {
@@ -110,10 +113,9 @@ class _OrdersPageState extends State<OrdersPage>
 
     return randomString(codeLength);
   }
+//defining the date Times that will be compared
 
   void _showAddOrderDialog() {
-    final TextEditingController orderCodeController = TextEditingController();
-    final TextEditingController totalPriceController = TextEditingController();
     final TextEditingController deliveryPriceController =
         TextEditingController();
     final TextEditingController deliveryDateController =
@@ -122,7 +124,8 @@ class _OrdersPageState extends State<OrdersPage>
         TextEditingController();
     final TextEditingController orderDateController = TextEditingController();
     List<Map<String, dynamic>> selectedProducts = [];
-
+    late DateTime deliveryDate;
+    late DateTime orderDate;
     void addProductField(StateSetter setState) {
       setState(() {
         selectedProducts.add({'product': null, 'quantity': 1});
@@ -211,9 +214,19 @@ class _OrdersPageState extends State<OrdersPage>
                         },
                       ),
                       GestureDetector(
-                        onTap: () => _selectDate(context, orderDateController),
+                        onTap: () {
+                          _selectDate(context, orderDateController);
+                        },
                         child: AbsorbPointer(
                           child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                if (orderDateController.text.isNotEmpty) {
+                                  orderDate = dateFormat
+                                      .parse(orderDateController.text);
+                                }
+                              });
+                            },
                             controller: orderDateController,
                             decoration:
                                 const InputDecoration(labelText: 'Order date'),
@@ -225,6 +238,20 @@ class _OrdersPageState extends State<OrdersPage>
                         decoration:
                             const InputDecoration(labelText: 'Delivery Price'),
                         keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            if (RegExp(r'^[0-9]*$').hasMatch(value)) {
+                              priceError = '';
+                            } else {
+                              priceError = 'Please enter a valid number';
+                            }
+                          });
+                        },
+                      ),
+                      //display the error in case something is wrong
+                      Text(
+                        priceError,
+                        style: const TextStyle(color: Colors.red),
                       ),
                       TextField(
                         controller: deliveryAddressController,
@@ -232,15 +259,42 @@ class _OrdersPageState extends State<OrdersPage>
                             labelText: 'Delivery Address'),
                       ),
                       GestureDetector(
-                        onTap: () =>
-                            _selectDate(context, deliveryDateController),
+                        onTap: () {
+                          _selectDate(context, deliveryDateController);
+                        },
                         child: AbsorbPointer(
                           child: TextField(
+                            onChanged: (value) {
+                              print("helloo we are hereee!");
+                              setState(() {
+                                if (deliveryDateController.text.isNotEmpty) {
+                                  deliveryDate = dateFormat
+                                      .parse(deliveryDateController.text);
+                                }
+                              });
+                              if (deliveryDate.isBefore(orderDate)) {
+                                setState(() {
+                                  DateError =
+                                      "Delivery date must be after the order date";
+                                  print("There is an error !");
+                                });
+                              } else if (deliveryDate.isAfter(orderDate)) {
+                                setState(() {
+                                  DateError = "";
+                                  print("Delivery date is before order date");
+                                });
+                              }
+                            },
                             controller: deliveryDateController,
                             decoration: const InputDecoration(
                                 labelText: 'Estimated Delivery Date'),
                           ),
                         ),
+                      ),
+                      //display the error in case something is wrong
+                      Text(
+                        DateError,
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ],
                   ),
@@ -266,6 +320,35 @@ class _OrdersPageState extends State<OrdersPage>
                       return;
                     }
 
+                    setState(() {
+                      if (orderDateController.text.isNotEmpty) {
+                        orderDate = dateFormat.parse(orderDateController.text);
+                      }
+                    });
+                    print("helloo we are hereee!");
+                    setState(() {
+                      if (deliveryDateController.text.isNotEmpty) {
+                        deliveryDate =
+                            dateFormat.parse(deliveryDateController.text);
+                      }
+                    });
+                    if (deliveryDate.isBefore(orderDate)) {
+                      setState(() {
+                        DateError =
+                            "Delivery date must be after the order date";
+                        print("There is an error !");
+                      });
+                    } else if (deliveryDate.isAfter(orderDate)) {
+                      setState(() {
+                        DateError = "";
+                        print("Delivery date is before order date");
+                      });
+                    }
+
+//check if there is an error in the date, in that case we return without adding the order
+                    if (DateError.isNotEmpty) {
+                      return;
+                    }
                     final newOrder = Order(
                       totalPrice: 70, //temp !!
                       orderCode:
@@ -286,6 +369,14 @@ class _OrdersPageState extends State<OrdersPage>
                       ordersCenter.add(newOrder);
                       selectedCustomer?.addOrder(newOrder);
                       _updateFilteredOrders(); // Update filtered orders
+                      //We have to update the quantity of the order
+
+                      for (var productData in selectedProducts) {
+                        productData['product'].quantity -=
+                            productData['quantity'];
+                        print(
+                            "We are reducing the quantity for the used ones ");
+                      }
                     });
 
                     Navigator.of(context).pop();
@@ -312,12 +403,12 @@ class _OrdersPageState extends State<OrdersPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
+        // leading: GestureDetector(
+        //   onTap: () {
+        //     Navigator.pop(context);
+        //   },
+        //   child: const Icon(Icons.arrow_back_ios_new_rounded),
+        // ),
         title: const Text("Orders center"),
         backgroundColor: Colors.white,
         bottom: TabBar(
@@ -390,19 +481,27 @@ class _OrdersPageState extends State<OrdersPage>
                     ],
                   ),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkGreen,
-                  ),
-                  onPressed: _showAddOrderDialog,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add),
-                      SizedBox(width: 8),
-                      Text('Add Order',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
+                SizedBox(
+                  width: 170,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.darkGreen,
+                    ),
+                    onPressed: _showAddOrderDialog,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8),
+                        Text('Add Order',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                      ],
+                    ),
                   ),
                 ),
                 //considering this, as our bottom bar
@@ -434,7 +533,5 @@ class _OrdersPageState extends State<OrdersPage>
   }
 }
 
-
-
-//it is adding the order immediately to the list of orders 
-//and it is also moving the delivred ones to their respective page 
+//it is adding the order immediately to the list of orders
+//and it is also moving the delivred ones to their respective page

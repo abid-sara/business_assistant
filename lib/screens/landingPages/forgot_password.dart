@@ -9,13 +9,13 @@ class ForgotPassword extends StatelessWidget {
   ForgotPassword({super.key});
   final TextEditingController _emailController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  static const String pageRoute = '/forgot_password';
+  static const String pageRoute = '/ForgotPassword';
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: const BackArrow(),
+        appBar:  BackArrow(title: "",),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),

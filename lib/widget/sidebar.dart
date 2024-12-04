@@ -1,181 +1,156 @@
-import 'package:flutter/material.dart';
-import 'package:business_assistant/main.dart';
-import 'package:business_assistant/style/colors.dart';
+import 'package:business_assistant/screens/landingPages/sign_in.dart';
 
-class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+import '/constants/imagePaths.dart';
+import 'package:flutter/material.dart';
+import 'package:business_assistant/style/colors.dart';
+import 'package:business_assistant/constants/routes.dart';
+
+class Sidebar extends StatefulWidget {
+  const Sidebar({super.key});
+
+  @override
+  State<Sidebar> createState() => _SidebarState();
+}
+
+class _SidebarState extends State<Sidebar> {
+  String selectedMenuItem = 'Dashboard';
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          Row(
-            children: [
-             Align(
-            alignment: Alignment.centerLeft,
-            child: SizedBox(
-              width: 70,
-              height: 70,   
-              child: const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: AppColors.darkGreen,
-                  shape: BoxShape.circle, 
-                ),
-                child: SizedBox.shrink(), 
-              ),
-                
-              ),
-            ),
-             const Align(
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    final double itemSpacing = screenHeight * 0.02;
+
+    return SafeArea(
+      child: Drawer(
+        width: screenWidth * 0.6,
+        child: ListView(
+          padding: const EdgeInsets.all(12),
+          children: <Widget>[
+            Row(
+              children: [
+                Align(
                   alignment: Alignment.centerLeft,
-                child: Text(
-                  'Sara ABID',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
+                  child: SizedBox(
+                    width: screenWidth * 0.18,
+                    height: screenWidth * 0.18,
+                    child: const DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: AppColors.darkGreen,
+                        shape: BoxShape.circle,
+                      ),
+                      child: SizedBox.shrink(),
+                    ),
                   ),
                 ),
+                const SizedBox(width: 10),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Sara ABID',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
                 ),
+                const Spacer(),
                 const Align(
                   alignment: Alignment.centerRight,
                   child: Icon(Icons.keyboard_arrow_right),
-
                 )
-               
-            ]
-          ),
-          Container(
-            height: 1,
-            color: Colors.grey,
-            
-          ),
-        
-         
-          ListTile(
-            leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/home.png' , fit : BoxFit.cover) ),
-            title: const Text('Dashboard',style: TextStyle(fontSize: 20)),
-            onTap: () {
-
-              
-            },
-          
-
+              ],
             ),
-             
-          const Padding(padding: EdgeInsets.all(16)),
-         
-          ListTile(
-            leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/box.png' , fit : BoxFit.cover) ),
-            title: const Text('Orders',style: TextStyle(fontSize: 20)),
-            onTap: () {
-              
-              
-            },
-          ),
-
-          const Padding(padding: EdgeInsets.all(16)),
-
-          ListTile(
-            leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/to-do-list.png' , fit : BoxFit.cover) ),
-            title: const Text('To do',style: TextStyle(fontSize: 20)),
-            onTap: () {
-              
-            },
-          ),
-
-          const Padding(padding: EdgeInsets.all(16)),
-
-          ListTile(
-            leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/Customers.png' , fit : BoxFit.cover) ),
-            title: const Text('Customers',style: TextStyle(fontSize: 20)),
-            onTap: () {
-              
-            },
-          ),
-
-          const Padding(padding: EdgeInsets.all(16)),
-
-          ListTile(
-            leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/analysis.png' , fit : BoxFit.cover) ),
-            title: const Text('Analysis',style: TextStyle(fontSize: 20),),
-            onTap: () {
-              
-             
-            },
-          ),
-
-          const Padding(padding: EdgeInsets.all(16)),
-
-          ListTile(
-           leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/monitoring.png' , fit : BoxFit.cover) ),
-            title: const Text('Inventory',style: TextStyle(fontSize: 20)),
-            onTap: () {
-              
-             
-            },
-          ),
-
-          const Padding(padding: EdgeInsets.all(16)),
-
-          ListTile(
-            leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/wishlist.png' , fit : BoxFit.cover) ),
-            title: const Text('Goals',style: TextStyle(fontSize: 20)),
-            onTap: () {
-              
-              
-            },
-          ),
-
-          const Padding(padding: EdgeInsets.all(20)),
-
-          ListTile(
-            leading:  SizedBox(
-               width: 24,
-              height: 23,
-            child: Image.asset('assets/images/settings.png' , fit : BoxFit.cover) ),
-            title: const Text('Settings',style: TextStyle(fontSize: 20)),
-            onTap: () {
-              
-              
-            },
-          ),
-          const Padding(padding: EdgeInsets.all(16)),
-
-          ListTile(
-            leading: 
-            const Icon(Icons.exit_to_app , size: 24, color: Colors.red),
-            title: const Text('Logout account',style: TextStyle(fontSize: 20)),
-            onTap: () {
-              
-              
-            },
-          ),
-          
-        ],
+            Container(
+              height: 1,
+              color: Colors.grey,
+            ),
+            buildMenuItem(
+              title: 'Dashboard',
+              image: selectedMenuItem == 'Dashboard'
+                  ? home_filled
+                  : home_not_filled,
+              route: '/dashboard',
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'Orders',
+              image: selectedMenuItem == 'Orders'
+                  ? orders_filled
+                  : orders_not_filled,
+              route: '/orders',
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'To do',
+              image:
+                  selectedMenuItem == 'To do' ? todo_filled : todo_not_filled,
+              route: '/dashboard',
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'Customers',
+              image: selectedMenuItem == 'Customers'
+                  ? customers_filled
+                  : customers_not_filled,
+              route: '/customers',
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'Analysis',
+              image: selectedMenuItem == 'Analysis'
+                  ? analysis_filled
+                  : analysis_not_filled,
+              route: '/dashboard',
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'Inventory',
+              image: selectedMenuItem == 'Inventory'
+                  ? inventory_filled
+                  : inventory_not_filled,
+              route: '/inventory',
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'Goals',
+              image:
+                  selectedMenuItem == 'Goals' ? goals_filled : goals_not_filled,
+              route: '/dashboard',
+            ),
+            SizedBox(height: itemSpacing),
+            ListTile(
+              leading:
+                  const Icon(Icons.exit_to_app, size: 25, color: Colors.red),
+              title:
+                  const Text('Logout account', style: TextStyle(fontSize: 20)),
+              onTap: () {
+                Navigator.pushReplacementNamed(context, '/signIn');
+              },
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget buildMenuItem(
+      {required String title, required String image, required String route}) {
+    return ListTile(
+      leading: SizedBox(
+        width: 25,
+        height: 25,
+        child: Image.asset(image, fit: BoxFit.cover),
+      ),
+      title: Text(title, style: const TextStyle(fontSize: 20)),
+      onTap: () {
+        setState(() {
+          selectedMenuItem = title;
+          Navigator.pop(context);
+          Navigator.pushNamed(context, route);
+        });
+      },
     );
   }
 }

@@ -60,15 +60,15 @@ List<Order> ordersCenter = [
   Order(
     orderCode: "YUOP09",
     products: {
-      products[0]: 2, // the product itself and the quantity
-      products[1]: 1,
+      products[0]: 3, // the product itself and the quantity
+      products[1]: 4,
     },
     customer: customers[0],
-    totalPrice: 40.0,
-    deliveryPrice: 5.0,
-    deliveryDate: '23/04/2024',
+    totalPrice: products[0].unitPrice * 3 + 4 * products[1].unitPrice,
+    deliveryPrice: 500.0,
+    deliveryDate: '23-04-2024',
     deliveryAddress: customers[0].address,
-    orderDate: "23/04/2024",
+    orderDate: "23-04-2024",
   ),
   Order(
     orderCode: "JKLOY78",
@@ -77,11 +77,11 @@ List<Order> ordersCenter = [
       products[3]: 1,
     },
     customer: customers[1],
-    totalPrice: 70.0,
-    deliveryPrice: 7.0,
-    deliveryDate: '24/04/2024',
+    totalPrice: products[2].unitPrice * 3 + products[3].unitPrice,
+    deliveryPrice: 700.0,
+    deliveryDate: '24-04-2024',
     deliveryAddress: customers[1].address,
-    orderDate: "23/04/2024",
+    orderDate: "23-04-2024",
   ),
   Order(
     orderCode: "GHDK98",
@@ -89,10 +89,10 @@ List<Order> ordersCenter = [
       products[4]: 1,
     },
     customer: customers[0],
-    totalPrice: 110.0,
-    deliveryPrice: 10.0,
-    deliveryDate: '25/04/2024',
+    totalPrice: products[4].unitPrice,
+    deliveryPrice: 500.0,
+    deliveryDate: '25-04-2024',
     deliveryAddress: customers[0].address,
-    orderDate: "23/04/2024",
+    orderDate: "23-04-2024",
   ),
 ];

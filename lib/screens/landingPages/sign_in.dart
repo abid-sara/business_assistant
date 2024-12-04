@@ -1,16 +1,14 @@
-import 'package:business_assistant/screens/landingPages/create_account.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import '../../widget/form.dart';
-import 'forgot_password.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
 
   @override
   State<SignIn> createState() => _SignInState();
-  static const String pageRoute = '/sign_in';
+  static const String pageRoute = '/signIn';
 }
 
 class _SignInState extends State<SignIn> {
@@ -108,8 +106,7 @@ class _SignInState extends State<SignIn> {
                           child: TextButton(
                             onPressed: () {
                               // Forgot password logic
-                              Navigator.pushNamed(
-                                  context, ForgotPassword.pageRoute);
+                              Navigator.pushNamed(context, '/ForgotPassword');
                             },
                             child: const Text(
                               'Forgot password?',
@@ -128,14 +125,8 @@ class _SignInState extends State<SignIn> {
                           child: ElevatedButton(
                             style: button,
                             onPressed: () {
-                              //ççççççççççççççççççççççç change
                               if (formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  //do this
-                                  const SnackBar(
-                                    content: Text('Great!'),
-                                  ), // SnackBar
-                                );
+                                Navigator.pushNamed(context, '/dashboard');
                               }
                             },
                             child: const Text(
@@ -162,7 +153,7 @@ class _SignInState extends State<SignIn> {
                     TextButton(
                       onPressed: () {
                         // Navigate to create account
-                        Navigator.pushNamed(context, CreateAccount.pageRoute);
+                        Navigator.pushNamed(context, '/CreateAccount');
                       },
                       child: const Text(
                         'Create Account',

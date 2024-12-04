@@ -6,7 +6,7 @@ import '../../widget/form.dart';
 
 class Businessdetails extends StatefulWidget {
   const Businessdetails({super.key});
-  static const String pageRoute = '/businessDetails';
+  static const String pageRoute = '/Businessdetails';
 
   @override
   State<Businessdetails> createState() => _BusinessdetailsState();
@@ -30,7 +30,7 @@ class _BusinessdetailsState extends State<Businessdetails> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: const BackArrow(),
+        appBar: BackArrow(title: ""),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -107,23 +107,22 @@ class _BusinessdetailsState extends State<Businessdetails> {
                           ElevatedButton(
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  //do this
-                                  const SnackBar(
-                                    content: Text('Great!'),
-                                  ), // SnackBar
-                                );
+                                Navigator.pushNamed(context, '/dashboard');
                               }
                             },
                             style: button,
                             child: const Text(
                               "Save information",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/dashboard');
+                            },
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(100, 48),
                               backgroundColor: Colors.grey,
@@ -133,8 +132,10 @@ class _BusinessdetailsState extends State<Businessdetails> {
                             ),
                             child: const Text(
                               "Skip for now",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
