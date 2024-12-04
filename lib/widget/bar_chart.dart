@@ -1,9 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../style/colors.dart';
+import 'package:business_assistant/data/transactiondata.dart';
 
 class CustomBarChart extends StatefulWidget {
-  const CustomBarChart({super.key});
+  final bool isExpense;
+
+  const CustomBarChart({super.key, required this.isExpense});
 
   @override
   State<CustomBarChart> createState() => _CustomBarChartState();
@@ -12,41 +15,32 @@ class CustomBarChart extends StatefulWidget {
 class _CustomBarChartState extends State<CustomBarChart> {
   @override
   Widget build(BuildContext context) {
+    // Filter the transactions to be able to draw the bar chart of expense/income
+    List<TransactionData> filteredTransactions = filterTransactions(widget.isExpense);
+
+    Map<int, double> amountsByDay = aggregateAmountsByDay(filteredTransactions);
+    List<BarChartGroupData> barChartData = prepareBarChartData(amountsByDay);
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
       child: BarChart(
         BarChartData(
-          minY: 0,
-          maxY: 1000,
+          // Min and maximum value
+          minY: 20000,
+          maxY: 100000,
           borderData: FlBorderData(show: false),
-          gridData: FlGridData(
+          gridData: const FlGridData(
             drawVerticalLine: true,
-            drawHorizontalLine: true,
-            getDrawingHorizontalLine: (value) {
-              return const FlLine(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashArray: [2, 2],
-              );
-            },
-            getDrawingVerticalLine: (value) {
-              return const FlLine(
-                color: Colors.grey,
-                strokeWidth: 1,
-                dashArray: [2, 2],
-              );
-            },
+            verticalInterval: 500,
           ),
           titlesData: FlTitlesData(
-            topTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 40,
-                interval: 200,
+                reservedSize: 60,
+                interval: 20000,
                 getTitlesWidget: (value, meta) {
                   return Text(value.toString());
                 },
@@ -78,44 +72,43 @@ class _CustomBarChartState extends State<CustomBarChart> {
               ),
             ),
           ),
-          groupsSpace: 10,
-          barGroups: [
-            BarChartGroupData(x: 1, barRods: [
-              BarChartRodData(toY: 400, width: 40, color: Colors.grey),
-            ]),
-            BarChartGroupData(x: 2, barRods: [
-              BarChartRodData(toY: 900, width: 40, color: Colors.grey),
-            ]),
-            BarChartGroupData(
-              x: 3,
-              barRods: [
-                BarChartRodData(
-                  toY: 600,
-                  width: 40,
-                  rodStackItems: [
-                    BarChartRodStackItem(0, 200, Colors.grey),
-                    BarChartRodStackItem(200, 400, AppColors.green),
-                    BarChartRodStackItem(
-                        400, 600, const Color.fromARGB(255, 163, 71, 202)),
-                  ],
-                ),
-              ],
-            ),
-            BarChartGroupData(x: 4, barRods: [
-              BarChartRodData(toY: 240, width: 30, color: Colors.grey),
-            ]),
-            BarChartGroupData(x: 5, barRods: [
-              BarChartRodData(toY: 670, width: 30, color: Colors.grey),
-            ]),
-            BarChartGroupData(x: 6, barRods: [
-              BarChartRodData(toY: 880, width: 30, color: Colors.grey),
-            ]),
-            BarChartGroupData(x: 7, barRods: [
-              BarChartRodData(toY: 786, width: 30, color: Colors.grey),
-            ]),
-          ],
+          groupsSpace: 10, 
+          barGroups: barChartData,
         ),
       ),
     );
+  }
+
+  // Filter transactions based on whether they are income or expense
+  List<TransactionData> filterTransactions(bool isExpense) {
+    return Transactionlist.where((transaction) => transaction.type == (isExpense ? 'expense' : 'income')).toList();
+  }
+
+  /// Assigns the values to the days in the bar chart widget.
+  Map<int, double> aggregateAmountsByDay(List<TransactionData> transactions) {
+    Map<int, double> amountsByDay = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0, 6: 0.0, 7: 0.0};
+    for (var transaction in transactions) {
+      int dayOfWeek = transaction.date.weekday;
+      amountsByDay[dayOfWeek] = (amountsByDay[dayOfWeek] ?? 0.0) + transaction.amount;
+    }
+    return amountsByDay;
+  }
+
+  // Assign the values to the bar chart widget
+  List<BarChartGroupData> prepareBarChartData(Map<int, double> amountsByDay) {
+    return amountsByDay.entries.map((entry) {
+      int day = entry.key;
+      double amount = entry.value;
+      return BarChartGroupData(
+        x: day,
+        barRods: [
+          BarChartRodData(
+            toY: amount,
+            width: 20, 
+            color: AppColors.darkGreen,
+          ),
+        ],
+      );
+    }).toList();
   }
 }

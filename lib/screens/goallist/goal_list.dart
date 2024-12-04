@@ -1,16 +1,15 @@
 import 'package:business_assistant/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/goal_card.dart';
-import 'package:business_assistant/screens/description.dart';
 import 'package:business_assistant/data/goaldata.dart';
 import 'package:business_assistant/widget/past_due_goal.dart';
 import 'package:intl/intl.dart';
-import 'package:business_assistant/widget/back_arrow.dart';
+
 
 class GoalList extends StatefulWidget {
-  final List<Goal> goals;
+  
 
-  const GoalList({super.key, required this.goals});
+  const GoalList({super.key});
 
   @override
   State<GoalList> createState() => _GoalListState();
@@ -18,7 +17,19 @@ class GoalList extends StatefulWidget {
 
 class _GoalListState extends State<GoalList> {
       String _selectedDate = 'November 2024';//initiale date to be displayed at the top of the page
-    
+      
+      List<Goal> goals =[];
+
+@override
+  void initState(){
+  super.initState();
+  _initializeGoals();
+}
+
+void _initializeGoals() {
+    goals = List.from(goallist);
+  }
+  
  //change the status according to the limit date
   String _getStatus(Goal goal) {
     
@@ -45,7 +56,7 @@ class _GoalListState extends State<GoalList> {
 
 List<PastDueGoalRow> _checkPastDueGoals() {
   List<PastDueGoalRow> pastDueRows = [];
-  for (Goal goal in widget.goals) {
+  for (Goal goal in goals) {
     if (  goal.limit_date.isBefore(DateTime.now())) {
       pastDueRows.add(
         PastDueGoalRow(
@@ -146,9 +157,9 @@ List<PastDueGoalRow> _checkPastDueGoals() {
              Expanded(
                   child: ListView(
                     children: [
-                      ...widget.goals.map((goal) {
+                      ...goals.map((goal) {
                         return Padding(
-                         padding: const EdgeInsets.symmetric(vertical: 10),
+                         padding: const EdgeInsets.symmetric(vertical: 15),
                           child: GoalCard(
                               goal: goal,
                               title: goal.title,
@@ -186,15 +197,13 @@ List<PastDueGoalRow> _checkPastDueGoals() {
                 size: 40,
               ),
               onPressed: () {
-                Navigator.push(
+                Navigator.pushNamed(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => Description(goals: widget.goals),
-                  ),
+                  '/description',
                 ).then((newGoal) {
                   if (newGoal != null) {
                     setState(() {
-                      widget.goals.add(newGoal);
+                      goals.add(newGoal as Goal);
                     });
                   }
                 });

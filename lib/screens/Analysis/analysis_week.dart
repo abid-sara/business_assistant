@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import '../style/colors.dart';
+import '../../style/colors.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
 
 class SelectedButton extends StatefulWidget {
   final String label;
-  final VoidCallback onPressed;
+  final String routeName;
 
   const SelectedButton({
     super.key,
     required this.label,
-    required this.onPressed,
-   
+    required this.routeName,
   });
 
   @override
@@ -24,7 +23,7 @@ class _SelectedButtonState extends State<SelectedButton> {
     setState(() {
       _isPressed = !_isPressed;
     });
-    widget.onPressed();
+     Navigator.pushNamed(context, widget.routeName);
   }
 
   @override
@@ -34,7 +33,7 @@ class _SelectedButtonState extends State<SelectedButton> {
         //if the button is pressed we need to diffrentiate it
         backgroundColor: _isPressed ? Colors.white : AppColors.green,
         foregroundColor: _isPressed ? AppColors.green : Colors.white,
-        minimumSize: Size(80, 40), 
+        minimumSize: const Size(80, 40), 
       ),
       onPressed: _handlePress,
       child: Text(widget.label),
@@ -68,28 +67,34 @@ class AnalysisWeek extends StatelessWidget {
         child:Center(
         child: Column(
           children: [ 
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-              SelectedButton(
-                label: '24h',
-                onPressed: () {},
-              ),
-              SelectedButton(
-                label: 'Week',
-                onPressed: () {},
-              ),
-              SelectedButton(
-                label: 'Month',
-                onPressed: () {},
-              ),
-              SelectedButton(
-                label: 'Year',
-                onPressed: () {},
-              ),
-             
-              ],
+                  children: [
+                        SelectedButton(
+                          label: '24h',
+                          routeName: '/transaction', 
+                          
+                        ),
+                        
+                        SelectedButton(
+                          label: 'Week',
+                          routeName:  '/analysis', 
+                              
+                        ),
+                        SelectedButton(
+                          label: 'Month',
+                          routeName: '/analysisweek', 
+                              
+                        ),
+                        SelectedButton(
+                          label: 'Year',
+                        routeName: '/analysisweek', 
+                              
+                        ),
+                      
+                        ],
             ),
+
             const Padding(padding: EdgeInsets.all(10)) ,
             const Align(
               alignment: Alignment.centerLeft,

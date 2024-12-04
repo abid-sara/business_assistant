@@ -1,5 +1,3 @@
-
-
 class Goal {
   
   final String title ;
@@ -25,6 +23,9 @@ class Goal {
       throw ArgumentError('Invalid status: $newStatus');
     }
   }
+  //to get obly the date and not the time also
+   DateTime get startDateOnly => DateTime(start_date.year, start_date.month, start_date.day);
+  DateTime get limitDateOnly => DateTime(limit_date.year, limit_date.month, limit_date.day);
   
 }
 List <Goal> goallist = [
@@ -51,14 +52,15 @@ List <Goal> goallist = [
     title: 'Goal 9',
     start_date: DateTime(2024, 4, 23),
     limit_date : DateTime(2024, 4, 23),
-    status: 'Missed',
+    status: 'In progress',
  
-  description : 'description',),
+  description : 'description'),
+
   Goal(
     title: 'Goal 10',
     start_date: DateTime(2024, 4, 23),
     limit_date : DateTime(2024, 4, 23),
-    status: 'Missed',
+    status: 'Completed',
  
   description : 'description',),
   Goal(

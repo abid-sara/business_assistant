@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../style/colors.dart';
-import '../data/goaldata.dart';
+import '../../style/colors.dart';
+import '../../data/goaldata.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/data/goaldata.dart';
 
@@ -80,8 +80,9 @@ class DataField extends StatelessWidget {
   }
 }
 class Description extends StatefulWidget {
-  final List<Goal> goals;
-  const Description({super.key , required this.goals});
+  
+  final Goal? goal;
+  const Description({super.key ,this.goal});
   @override
   _DescriptionState createState() => _DescriptionState();
   
@@ -93,6 +94,8 @@ class _DescriptionState extends State<Description> with TickerProviderStateMixin
   final TextEditingController _titleController = TextEditingController();
    final TextEditingController _status = TextEditingController();
    final TextEditingController _descriptionController = TextEditingController();
+
+    List<Goal> goals =[];
 
    //for error handling
    late String? _titleError;
@@ -124,18 +127,38 @@ void initState() {
   _startDateError = null;
     _limitDateError = null;
    
+   if (widget.goal != null) {
+      _titleController.text = widget.goal!.title;
+      _startDateController.text = DateFormat('dd/MM/yyyy').format(widget.goal!.start_date);
+      _limitDateController.text = DateFormat('dd/MM/yyyy').format(widget.goal!.limit_date);
+      _descriptionController.text = widget.goal!.description;
+      _status.text = widget.goal!.status;
+    }
   
 }
 
    @override
 void dispose() {
-  _tabController.dispose();
-  _titleController.dispose();
-  _startDateController.dispose();
-  _limitDateController.dispose();
-  _descriptionController.dispose();
-  super.dispose();
-}
+    _titleController.dispose();
+    _startDateController.dispose();
+    _limitDateController.dispose();
+    _descriptionController.dispose();
+    _status.dispose();
+    super.dispose();
+  }
+
+  Goal updateGoal() {
+    DateTime startDate = DateFormat('dd/MM/yyyy').parse(_startDateController.text);
+    DateTime limitDate = DateFormat('dd/MM/yyyy').parse(_limitDateController.text);
+
+    return Goal(
+      title: _titleController.text,
+      status: _status.text.isNotEmpty ? _status.text : 'In Progress',
+      start_date: startDate,
+      limit_date: limitDate,
+      description: _descriptionController.text,
+    );
+  }
 
    Goal addGoal() {
   
@@ -182,14 +205,14 @@ bool _validateForm() {
   //start date should be either today or in the future today's date
   if(DateFormat('dd/MM/yyyy').parse(_startDateController.text).isBefore(DateTime.now())) {
     setState(() {
-      _startDateError = 'The start date should be  in the future';
+      _startDateError = 'Date passed';
     });// if it is in the future then the user will receive it as reminder(notification)
     return false;
   }
   // the limit date should be in the future
   if(DateFormat('dd/MM/yyyy').parse(_limitDateController.text).isBefore(DateTime.now())) {
     setState(() {
-      _limitDateError = 'The limit date should be in the future';
+      _limitDateError = 'Date passed';
     });
     return false;
   }
@@ -198,7 +221,7 @@ bool _validateForm() {
   //the start date should be before the limit date
   if (DateFormat('dd/MM/yyyy').parse(_startDateController.text).isAfter(DateFormat('dd/MM/yyyy').parse(_limitDateController.text))) {
     setState(() {
-      _startDateError = 'The start date should be before the limit date';
+      _limitDateError = 'start date after limit date';
     });
     return false;
   }
@@ -235,13 +258,15 @@ bool _validateForm() {
               ),
             ),
       child :Padding(
-         padding: EdgeInsets.symmetric(vertical: 5),
+         padding: const EdgeInsets.symmetric(vertical: 10),
         child:Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
            Expanded(
              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
+             
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 decoration: BoxDecoration(color:AppColors.green,
                 borderRadius:BorderRadius.circular(12),),
                 width :screenWidth * 0.8,
@@ -287,10 +312,20 @@ bool _validateForm() {
                                       isDate: true,
                                     ),
                                     if (_startDateError != null)
-                                      Text(
-                                        _startDateError!,
-                                        style: const TextStyle(color: Colors.red),
-                                      ),
+                                    
+                                     Padding(
+                                              padding: const EdgeInsets.only(top: 8.0),
+                                              child: Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: Text(
+                                                      _startDateError!,
+                                                      style: const TextStyle(color: Colors.red),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                       ],
                                     ),
                                    

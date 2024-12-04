@@ -3,7 +3,6 @@ import '../style/text.dart';
 import '../style/colors.dart';
 import 'package:business_assistant/data/customers.dart';
 import 'package:business_assistant/data/orders.dart';
-import '../screens/orders/orders_center.dart';
 
 // ignore: must_be_immutable
 class Orderline extends StatefulWidget {

@@ -15,7 +15,7 @@ class AppDrawer extends StatelessWidget {
             children: [
              Align(
             alignment: Alignment.centerLeft,
-            child: Container(
+            child: SizedBox(
               width: 70,
               height: 70,   
               child: const DrawerHeader(
@@ -28,7 +28,7 @@ class AppDrawer extends StatelessWidget {
                 
               ),
             ),
-             Align(
+             const Align(
                   alignment: Alignment.centerLeft,
                 child: Text(
                   'Sara ABID',
@@ -38,7 +38,7 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ),
                 ),
-                Align(
+                const Align(
                   alignment: Alignment.centerRight,
                   child: Icon(Icons.keyboard_arrow_right),
 
@@ -67,7 +67,7 @@ class AppDrawer extends StatelessWidget {
 
             ),
              
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
          
           ListTile(
             leading:  SizedBox(
@@ -81,7 +81,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
 
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
 
           ListTile(
             leading:  SizedBox(
@@ -94,7 +94,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
 
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
 
           ListTile(
             leading:  SizedBox(
@@ -107,7 +107,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
 
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
 
           ListTile(
             leading:  SizedBox(
@@ -121,7 +121,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
 
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
 
           ListTile(
            leading:  SizedBox(
@@ -135,7 +135,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
 
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
 
           ListTile(
             leading:  SizedBox(
@@ -149,7 +149,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
 
-          Padding(padding: EdgeInsets.all(20)),
+          const Padding(padding: EdgeInsets.all(20)),
 
           ListTile(
             leading:  SizedBox(
@@ -162,11 +162,11 @@ class AppDrawer extends StatelessWidget {
               
             },
           ),
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
 
           ListTile(
             leading: 
-            Icon(Icons.exit_to_app , size: 24, color: Colors.red),
+            const Icon(Icons.exit_to_app , size: 24, color: Colors.red),
             title: const Text('Logout account',style: TextStyle(fontSize: 20)),
             onTap: () {
               

@@ -1,28 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:business_assistant/data/goaldata.dart';
+import 'package:business_assistant/screens/goallist/description.dart';
 
-class GoalCard extends StatelessWidget {
+class GoalCard extends StatefulWidget {
+  final Goal goal;
   final String? title; 
   final String? date; 
   final String? status; 
   final Color? backgroundColor; 
   final Color? statusColor; 
+  final Function(String)? onStatusChange;
 
   const GoalCard({
     super.key,
+    required this.goal,
     this.title,
     this.date,
     this.status,
     this.backgroundColor,
     this.statusColor,
+    this.onStatusChange,
   });
+
+  @override
+  State<GoalCard> createState() => _GoalCardState();
+}
+
+class _GoalCardState extends State<GoalCard> {
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: backgroundColor,
+        color: widget.backgroundColor,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,10 +43,19 @@ class GoalCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                title ?? 'Untitled Goal',
+                widget.title ?? 'Untitled Goal',
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const Icon(Icons.edit, color: Colors.black),
+              
+              IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.black),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/description', 
+                    );
+                  },
+                 ),
             ],
           ),
           const SizedBox(height: 10),
@@ -42,18 +63,37 @@ class GoalCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                date ?? '11/10/2024 - 12/10/2024',
+                widget.date ?? '11/10/2024 - 12/10/2024',
                 style: const TextStyle(fontSize: 16),
               ),
               Container(
-                padding: const EdgeInsets.all(8),
+                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: statusColor,
+                  color: widget.statusColor,
                 ),
+                child: PopupMenuButton<String>(
                 child: Text(
-                  status ?? 'Missed',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          widget.status ?? 'In progress',
+          style: const TextStyle(fontSize: 16, color: Colors.black),
+        ),
+        onSelected: (String newStatus) {
+                    setState(() {
+                      widget.goal.setStatus(newStatus);
+                    });
+                    if (widget.onStatusChange != null) {
+                      widget.onStatusChange!(newStatus); 
+                    }
+                  },
+
+        itemBuilder: (BuildContext context) {
+          return ['Completed', 'In progress'].map((String choice) {
+            return PopupMenuItem<String>(
+              value: choice,
+              child: Text(choice),
+            );
+          }).toList();
+        },
                 ),
               ),
             ],
