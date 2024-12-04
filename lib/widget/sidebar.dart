@@ -1,9 +1,7 @@
-import 'package:business_assistant/screens/landingPages/sign_in.dart';
 
 import '/constants/imagePaths.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/colors.dart';
-import 'package:business_assistant/constants/routes.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -102,7 +100,7 @@ class _SidebarState extends State<Sidebar> {
               image: selectedMenuItem == 'Analysis'
                   ? analysis_filled
                   : analysis_not_filled,
-              route: '/dashboard',
+              route: '/analysis',
             ),
             SizedBox(height: itemSpacing),
             buildMenuItem(
@@ -117,7 +115,7 @@ class _SidebarState extends State<Sidebar> {
               title: 'Goals',
               image:
                   selectedMenuItem == 'Goals' ? goals_filled : goals_not_filled,
-              route: '/dashboard',
+              route: '/goalList',
             ),
             SizedBox(height: itemSpacing),
             ListTile(

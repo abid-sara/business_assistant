@@ -29,7 +29,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
           minY: 20000,
           maxY: 100000,
           borderData: FlBorderData(show: false),
-          gridData: FlGridData(
+          gridData: const FlGridData(
             drawVerticalLine: true,
             verticalInterval: 500,
           ),
