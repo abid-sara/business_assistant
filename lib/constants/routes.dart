@@ -23,6 +23,7 @@ import '../screens/Analysis/analysis.dart';
 import '../screens/Analysis/analysis_week.dart';
 import '../screens/goallist/goal_list.dart';
 import '../screens/goallist/description.dart';
+
 var routes = {
   '/signIn': (ctx) => const SignIn(),
   '/CreateAccount': (ctx) => const CreateAccount(),
@@ -33,7 +34,7 @@ var routes = {
   '/orders': (context) => const OrdersPage(),
   '/customers': (context) => const customersPage(),
   '/customerDetails': (context) => const customerDetails(),
-  '/inventory': (context) => const Inventory(),
+  // '/inventory': (context) => const Inventory(),
   '/itemDetails': (context) => const ItemDetails(),
   '/dashboard': (context) => const Dashboard(),
   // '/settings' : (context) => const Settings(),
@@ -46,7 +47,7 @@ var routes = {
   // '/Tasks' : (cntext) => const Tasks(),
   '/goalList': (context) => const GoalList(),
    '/description': (context) => const Description(),
-   '/analysis': (context) =>  Analysis(),
+   '/analysis': (context) =>  const Analysis(),
    '/analysisweek': (context) => const AnalysisWeek(),
-     '/transaction': (context) =>  Transaction(),
+     '/transaction': (context) =>  const Transaction(),
 };

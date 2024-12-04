@@ -1,3 +1,4 @@
+import 'package:business_assistant/widget/back_arrow.dart';
 import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
@@ -47,18 +48,12 @@ class AnalysisWeek extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-       appBar: AppBar(
-       
-        centerTitle:true,
-        title:  const Text(
-          'Analytics',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-         
-        ),
-      ),
+       appBar: BackArrow(
+        onPressed: () {
+          Navigator.pushNamed(context, '/analysis');
+        },
+        title: 'Analytics',
+       ),
         
       
       body: SingleChildScrollView( 

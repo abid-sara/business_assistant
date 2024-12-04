@@ -1,6 +1,3 @@
-import 'package:business_assistant/screens/customers/customers_center.dart';
-import 'package:business_assistant/screens/inventory/products_center.dart';
-import 'package:business_assistant/screens/dashboard.dart';
 
 import 'constants/routes.dart';
 import 'package:flutter/material.dart';

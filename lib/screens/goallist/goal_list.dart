@@ -4,6 +4,7 @@ import 'package:business_assistant/widget/goal_card.dart';
 import 'package:business_assistant/data/goaldata.dart';
 import 'package:business_assistant/widget/past_due_goal.dart';
 import 'package:intl/intl.dart';
+import 'package:business_assistant/widget/sidebar.dart';
 
 
 class GoalList extends StatefulWidget {
@@ -82,6 +83,7 @@ List<PastDueGoalRow> _checkPastDueGoals() {
     List<PastDueGoalRow> pastDueGoals = _checkPastDueGoals();
 
     return Scaffold(
+      drawer: const Sidebar(),
       appBar: AppBar(
         centerTitle: true,
         title: const Text(

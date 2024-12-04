@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import '../../data/goaldata.dart';
 import 'package:intl/intl.dart';
-import 'package:business_assistant/data/goaldata.dart';
-
+import 'package:business_assistant/widget/back_arrow.dart';
 
 class DataField extends StatelessWidget {
   final String text;
@@ -237,17 +236,12 @@ bool _validateForm() {
     double screenHeight = MediaQuery.of(context).size.height;
     
       return Scaffold(
-       appBar: AppBar(
-        
-        centerTitle:true,
-        title:  const Text(
-          'Goal description',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-      ),
+       appBar: BackArrow(
+        onPressed: () {
+          Navigator.pushNamed(context, '/goallist');
+        },
+        title: 'Goal Description',
+       ),
       
       body: 
       Container(

@@ -5,7 +5,7 @@ import 'transactions.dart';
 import 'package:business_assistant/data/transactiondata.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
-
+import 'package:business_assistant/widget/sidebar.dart';
 class Analysis extends StatefulWidget {
   
    const Analysis({super.key});
@@ -46,12 +46,12 @@ void _initializeTransaction() {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      drawer: const Sidebar(),
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
           'Analytics',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
