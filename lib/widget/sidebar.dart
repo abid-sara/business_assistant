@@ -1,4 +1,3 @@
-
 import '/constants/imagePaths.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/colors.dart';

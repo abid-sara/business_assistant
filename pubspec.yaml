@@ -36,11 +36,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   fl_chart: ^0.69.2
   intl: ^0.20.1
+  image_input: ^0.0.5
+  permission_handler: ^10.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  image_picker: ^0.8.4+4 
+  image_picker: ^1.0.2 
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

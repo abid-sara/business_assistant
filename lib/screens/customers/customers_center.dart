@@ -1,7 +1,8 @@
 import 'package:business_assistant/style/containers.dart';
+import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
-
 import 'package:business_assistant/data/customers.dart'; // Import the customers.dart file
+import 'package:business_assistant/data/orders.dart';
 import 'package:business_assistant/style/colors.dart';
 
 class customersPage extends StatefulWidget {
@@ -28,6 +29,10 @@ class _customersPageState extends State<customersPage> {
   //we need to add the filter for the customers
   String _searchQuery = '';
   String _selectedSortOption = 'Orders count';
+  String phoneError = '';
+  String emailError = '';
+  String addressError = '';
+  String nameError = '';
 
   void _sortCustomers() {
     setState(() {
@@ -65,21 +70,67 @@ class _customersPageState extends State<customersPage> {
               TextField(
                 decoration: const InputDecoration(labelText: 'Customer Name'),
                 controller: _customerNameController,
+                onChanged: (value) {
+                  setState(() {
+                    if (value.isEmpty) {
+                      nameError = 'Name of customer must be filled';
+                    } else {
+                      nameError = '';
+                    }
+                  });
+                },
+              ),
+              Text(
+                nameError,
+                style: const TextStyle(color: Colors.red),
               ),
               TextField(
                 controller: _customerPhoneController,
                 decoration:
                     const InputDecoration(labelText: 'Customer phone number'),
                 keyboardType: TextInputType.phone,
+                onChanged: (value) {
+                  setState(() {
+                    if (value.isEmpty) {
+                      phoneError = 'Please enter a phone number';
+                    } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                      phoneError = 'Please enter a valid number';
+                    } else {
+                      phoneError = '';
+                    }
+                  });
+                },
+              ),
+              Text(
+                phoneError,
+                style: const TextStyle(color: Colors.red),
               ),
               TextField(
                 controller: _customerEmailController,
                 decoration: const InputDecoration(labelText: 'Customer Email'),
+                onChanged: (value) {
+                  setState(() {
+                    if (value.isEmpty) {
+                      emailError = 'Please enter an email';
+                    } else if (!RegExp(
+                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                        .hasMatch(value)) {
+                      emailError = 'Please enter a valid email';
+                    } else {
+                      emailError = '';
+                    }
+                  });
+                },
+              ),
+              Text(
+                emailError,
+                style: const TextStyle(color: Colors.red),
               ),
               TextField(
                 controller: _customerAddressController,
                 decoration:
                     const InputDecoration(labelText: 'Customer Address'),
+                //it can be empty address
               ),
               TextField(
                 controller: _customerNoteController,
@@ -97,6 +148,31 @@ class _customersPageState extends State<customersPage> {
             ),
             TextButton(
               onPressed: () {
+                setState(() {
+                  if (_customerNameController.text.isEmpty) {
+                    nameError = 'Name of customer must be filled';
+                  }
+                  if (_customerPhoneController.text.isEmpty) {
+                    phoneError = 'Please enter a phone number';
+                  } else if (!RegExp(r'^[0-9]*$')
+                      .hasMatch(_customerPhoneController.text)) {
+                    phoneError = 'Please enter a valid number';
+                  }
+                  if (_customerEmailController.text.isEmpty) {
+                    emailError = 'Please enter an email';
+                  } else if (!RegExp(
+                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                      .hasMatch(_customerEmailController.text)) {
+                    emailError = 'Please enter a valid email';
+                  }
+                });
+
+                if (nameError.isNotEmpty ||
+                    phoneError.isNotEmpty ||
+                    emailError.isNotEmpty) {
+                  return;
+                }
+
                 // Adding an item it means that we will append a new customer in the list of customers
                 // if none of them is empty then add the customer
                 if (_customerNameController.text.isEmpty ||
@@ -147,11 +223,11 @@ class _customersPageState extends State<customersPage> {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     List<Customer> filteredCustomers = _filterCustomers(_searchQuery);
     return Scaffold(
+      drawer: const Sidebar(),
       appBar: AppBar(
         title: const Text("Customers center"),
         backgroundColor: Colors.white,
@@ -171,43 +247,61 @@ class _customersPageState extends State<customersPage> {
           ),
           Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: 'Search for an order, customer order...',
-                    prefixIcon: const Icon(Icons.search),
-                    fillColor: AppColors.purpule,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    filled: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 20.0),
-                  ),
-                  onChanged: (query) {
-                    setState(() {
-                      _searchQuery = query;
-                    });
-                  },
-                ),
-              ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: SortByDropdown(
-                      onChanged: (String newValue) {
-                        setState(() {
-                          _selectedSortOption = newValue;
-                          _sortCustomers();
-                        });
-                      },
+                    child: SizedBox(
+                      width: 200,
+                      height: 50,
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          labelText: 'Customer...',
+                          prefixIcon: const Icon(Icons.search),
+                          fillColor: AppColors.purpule,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide:
+                                BorderSide.none, // Remove the border side
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide:
+                                BorderSide.none, // Remove the border side
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide:
+                                BorderSide.none, // Remove the border side
+                          ),
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 20.0),
+                        ),
+                        onChanged: (query) {
+                          setState(() {
+                            _searchQuery = query;
+                          });
+                        },
+                      ),
                     ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SortByDropdown(
+                          onChanged: (String newValue) {
+                            setState(() {
+                              _selectedSortOption = newValue;
+                              _sortCustomers();
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -233,15 +327,30 @@ class _customersPageState extends State<customersPage> {
                   }).toList(),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  _showAddCustomerDialog();
-                },
-                child: const Row(
-                  children: [
-                    Icon(Icons.add),
-                    Text('Add customer'),
-                  ],
+              SizedBox(
+                width: 170,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkGreen,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                  ),
+                  onPressed: () {
+                    _showAddCustomerDialog();
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      Text(
+                        'Add customer',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -284,7 +393,7 @@ class CustomerLine extends StatelessWidget {
         margin: const EdgeInsets.all(3),
         height: 50,
         decoration: BoxDecoration(
-          color: AppColors.lightGreen,
+          color: AppColors.darkGreen,
           borderRadius: roundedRadius,
         ),
         child: Padding(
@@ -292,7 +401,9 @@ class CustomerLine extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(customerName, style: const TextStyle(color: Colors.white)),
+              Text(customerName,
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
               Text(ordersCount.toString(),
                   style: const TextStyle(color: Colors.white)),
             ],
@@ -302,6 +413,7 @@ class CustomerLine extends StatelessWidget {
     );
   }
 }
+
 
 class SortByDropdown extends StatefulWidget {
   final ValueChanged<String> onChanged;

@@ -5,6 +5,7 @@ import 'package:business_assistant/data/customers.dart'; // Import the customers
 import 'package:business_assistant/data/orders.dart'; // Import the orders.dart file
 import 'package:business_assistant/data/products.dart'; // Import the products.dart file
 import 'dart:math';
+import 'package:intl/intl.dart';
 
 class customerDetails extends StatefulWidget {
   const customerDetails({super.key});
@@ -19,6 +20,9 @@ class _customerDetailsState extends State<customerDetails> {
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
   late TextEditingController _noteController;
+  DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+  String DateError = "";
+  String priceError = ""; //it must be only numbers and no char
 
   @override
   void initState() {
@@ -59,6 +63,8 @@ class _customerDetailsState extends State<customerDetails> {
     final TextEditingController orderDateController = TextEditingController();
     List<Map<String, dynamic>> selectedProducts = [];
     Customer selectedCustomer = currentCustomer;
+    late DateTime deliveryDate;
+    late DateTime orderDate;
 
     void addProductField(StateSetter setState) {
       setState(() {
@@ -177,6 +183,19 @@ class _customerDetailsState extends State<customerDetails> {
                         decoration:
                             const InputDecoration(labelText: 'Delivery Price'),
                         keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            if (RegExp(r'^[0-9]*$').hasMatch(value)) {
+                              priceError = '';
+                            } else {
+                              priceError = 'Please enter a valid number';
+                            }
+                          });
+                        },
+                      ),
+                      Text(
+                        priceError,
+                        style: const TextStyle(color: Colors.red),
                       ),
                       TextField(
                         controller: deliveryAddressController,
@@ -193,6 +212,10 @@ class _customerDetailsState extends State<customerDetails> {
                                 labelText: 'Estimated Delivery Date'),
                           ),
                         ),
+                      ),
+                      Text(
+                        DateError,
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ],
                   ),
@@ -217,6 +240,35 @@ class _customerDetailsState extends State<customerDetails> {
                       return;
                     }
 
+                    setState(() {
+                      if (orderDateController.text.isNotEmpty) {
+                        orderDate = dateFormat.parse(orderDateController.text);
+                      }
+                    });
+                    print("helloo we are hereee!");
+                    setState(() {
+                      if (deliveryDateController.text.isNotEmpty) {
+                        deliveryDate =
+                            dateFormat.parse(deliveryDateController.text);
+                      }
+                    });
+                    if (deliveryDate.isBefore(orderDate)) {
+                      setState(() {
+                        DateError =
+                            "Delivery date must be after the order date";
+                        print("There is an error !");
+                      });
+                    } else if (deliveryDate.isAfter(orderDate)) {
+                      setState(() {
+                        DateError = "";
+                        print("Delivery date is before order date");
+                      });
+                    }
+
+//check if there is an error in the date, in that case we return without adding the order
+                    if (DateError.isNotEmpty) {
+                      return;
+                    }
                     final newOrder = Order(
                       totalPrice: 70, //temp !!
                       orderCode:
@@ -494,3 +546,7 @@ class _customerDetailsState extends State<customerDetails> {
     );
   }
 }
+
+
+
+//THE FORM IS validated for adding a customer 

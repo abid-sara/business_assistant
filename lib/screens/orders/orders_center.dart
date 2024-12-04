@@ -1,4 +1,5 @@
 import 'package:business_assistant/style/colors.dart';
+import 'package:business_assistant/widget/sidebar.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/orderLine.dart';
@@ -402,6 +403,7 @@ class _OrdersPageState extends State<OrdersPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const Sidebar(),
       appBar: AppBar(
         // leading: GestureDetector(
         //   onTap: () {
@@ -409,6 +411,7 @@ class _OrdersPageState extends State<OrdersPage>
         //   },
         //   child: const Icon(Icons.arrow_back_ios_new_rounded),
         // ),
+
         title: const Text("Orders center"),
         backgroundColor: Colors.white,
         bottom: TabBar(
@@ -441,14 +444,21 @@ class _OrdersPageState extends State<OrdersPage>
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      labelText: 'Search for an order, customer order...',
+                      labelText: 'Search for an order...',
                       prefixIcon: const Icon(Icons.search),
                       fillColor: AppColors.purpule,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40.0),
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: BorderSide.none, // Remove the border side
                       ),
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: BorderSide.none, // Remove the border side
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: BorderSide.none, // Remove the border side
+                      ),
                       filled: true,
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 10.0, horizontal: 20.0),
