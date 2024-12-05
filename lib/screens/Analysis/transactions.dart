@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import 'package:business_assistant/data/transactiondata.dart';
 import 'package:intl/intl.dart';
-import 'package:business_assistant/widget/back_arrow.dart';
+import 'package:business_assistant/widget/sidebar.dart';
+
 
 class CustomRow extends StatelessWidget {
   final Icon? icon; 
@@ -124,12 +125,16 @@ class _TransactionState extends State<Transaction> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: BackArrow(
-        onPressed: () {
-          Navigator.pushNamed(context, '/analysis');
-        },
-        title: 'Transactions',
-       ),
+      drawer: const Sidebar(),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          'Analytics',
+          style: TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      ),
         
       body: SingleChildScrollView(
         child: Container(

@@ -11,10 +11,10 @@ class AddTaskPage extends StatefulWidget {
   const AddTaskPage({Key? key, required this.onAddTask}) : super(key: key);
 
   @override
-  State<AddTaskPage> createState() => _AddTaskPageState();
+  State<AddTaskPage> createState() => addTaskPageState();
 }
 
-class _AddTaskPageState extends State<AddTaskPage> {
+class addTaskPageState extends State<AddTaskPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
@@ -47,39 +47,34 @@ class _AddTaskPageState extends State<AddTaskPage> {
     }
   }
 
-  void _addTask() {
-    if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Title cannot be empty!')),
-      );
-      return;
-    }
-
-    // Ensure start time is before end time
-    if (_startTime.hour > _endTime.hour ||
-        (_startTime.hour == _endTime.hour && _startTime.minute >= _endTime.minute)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Start time must be before end time!')),
-      );
-      return;
-    }
-
-    final task = Task(
-      title: _titleController.text,
-      date: DateTime(
-        _selectedDate.year,
-        _selectedDate.month,
-        _selectedDate.day,
-      ),
-      status: "In progress",
-      description: _descriptionController.text,
-      reminder: _reminder,
-      repeatFrequency: _repeatFrequency,
+ void addTask() {
+  if (_titleController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Title cannot be empty!')),
     );
-
-    widget.onAddTask(task); // Send the task back to parent widget
-    Navigator.pop(context); // Navigate back
+    return;
   }
+
+  final newtask = Task(
+    title: _titleController.text,
+    date: DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+    ),
+    status: "In progress",
+    description: _descriptionController.text,
+    reminder: _reminder,
+    repeatFrequency: _repeatFrequency,
+  );
+
+  print('Task Created: ${newtask.title}, ${newtask.description}');
+  widget.onAddTask(newtask); // Pass task back to parent
+  print('onAddTask Invoked');
+  Navigator.pop(context);
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +254,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
-                  onPressed: _addTask,
+                  onPressed: addTask,
                   style: button,
                   child: const Text('Done', style: TextStyle(color: Colors.white, fontSize: 20),) ,
                 ),

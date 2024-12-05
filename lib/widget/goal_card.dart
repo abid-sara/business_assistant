@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:business_assistant/data/goaldata.dart';
-import 'package:business_assistant/screens/goallist/description.dart';
 
 class GoalCard extends StatefulWidget {
   final Goal goal;

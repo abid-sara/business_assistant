@@ -1,6 +1,6 @@
 class Task {
   final String title;
-  final DateTime date;
+  late final DateTime date;
   String status;  
   final String description;
   final String? reminder;

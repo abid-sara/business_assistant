@@ -1,4 +1,5 @@
 import 'package:business_assistant/data/Task.dart';
+import 'package:business_assistant/screens/To_do.dart/update.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'add_task.dart';
 import 'package:business_assistant/widget/button.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/customindicator.dart';
 import 'package:business_assistant/style/colors.dart';
+import 'update.dart';
 
 class Tasks extends StatefulWidget {
   const Tasks({super.key});
@@ -41,7 +43,7 @@ final Map<String, WidgetBuilder> routes = {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
   }
-  void _addTask(Task task) {
+  void addTask(Task task) {
   setState(() {
     _tasks.add(task);  // Adds the new task to the list
   });
@@ -160,19 +162,6 @@ final Map<String, WidgetBuilder> routes = {
                     color: Colors.black,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // reschedule logic here
-                  },
-                  child: const Text(
-                    "Reschedule",
-                    style: TextStyle(
-                      color: AppColors.green,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
                 ),
               ],
@@ -362,6 +351,24 @@ Widget _buildTaskList({String? filterStatus}) {
                                 ),
                               ],
                             ),
+                            TextButton(
+                                    onPressed: (){Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RescheduleTaskPage(
+                                      task: _tasks[index],  // Pass the specific task to edit
+                                      onUpdateTask: (updatedTask) {
+                                        // Handle updated task
+                                        setState(() {
+                                          // Update the task list with the updated task
+                                          _tasks[index] = updatedTask;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                );
+                     }, child: Text('Reschedule' , style: TextStyle( color: AppColors.green, fontSize: 15),), 
+                                  ),
                           ],
                         ),
                       ),
@@ -376,17 +383,24 @@ Widget _buildTaskList({String? filterStatus}) {
         bottom: 16,
         right: 16,
        child: ElevatedButton(
-              onPressed: () async {
-                // Navigate to AddTaskPage and wait for the result
-                final newTask = await Navigator.pushNamed(context, '/addtask');
+             onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddTaskPage(
+                            onAddTask: (newTask) {
+                              setState(() {
+                                _tasks.add(newTask);
+                                print(_tasks); // Add the task to the list
+                              });
+                            },
+                          ),
+                        ),
+                      );
 
-                // Ensure the result is of type Task
-                if (newTask is Task) {
-                  _addTask(newTask); // Call your _addTask method with the new task
-                } else {
-                  debugPrint("No task was added or returned value is not a Task.");
-                }
-              },
+
+
+                  },
               style: button,
               child: Text("Add Task",
               style: TextStyle( color: Colors.white , fontSize: 20),)

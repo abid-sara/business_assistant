@@ -16,6 +16,28 @@ class Analysis extends StatefulWidget {
 
 class _AnalysisState extends State<Analysis> {
    List<TransactionData> transactions=[];
+   
+
+  int selectedIndex = -1;
+
+        @override
+        void didChangeDependencies() {
+          super.didChangeDependencies();
+          final int? index = ModalRoute.of(context)!.settings.arguments as int?;
+          if (index != null && selectedIndex != index) {
+            setState(() {
+              selectedIndex = index; // Ensure selectedIndex is updated from arguments
+            });
+          }
+        }
+
+        void handleButtonPress(int index, String routeName) {
+          setState(() {
+            selectedIndex = index; // Update selectedIndex locally when a button is pressed
+          });
+          Navigator.pushNamed(context, routeName, arguments: index); // Pass selectedIndex when navigating
+        }
+
 
    @override
   void initState() {
@@ -62,28 +84,34 @@ void _initializeTransaction() {
           child: Center(
             child: Column(
               children: [
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                        
-                        
+                   children: [
                         SelectedButton(
                           label: 'Week',
-                          routeName:  '/analysis', 
-                              
+                          index: 1,
+                          selectedIndex: selectedIndex,
+                          onPressed: () {
+                            handleButtonPress(1, '/analysis');
+                          },
                         ),
                         SelectedButton(
                           label: 'Month',
-                          routeName: '/analysisweek', 
-                              
+                          index: 2,
+                          selectedIndex: selectedIndex,
+                          onPressed: () {
+                            handleButtonPress(2, '/analysisweek');
+                          },
                         ),
                         SelectedButton(
                           label: 'Year',
-                        routeName: '/analysisweek', 
-                              
+                          index: 3,
+                          selectedIndex: selectedIndex,
+                          onPressed: () {
+                            handleButtonPress(3, '/analysisweek');
+                          },
                         ),
-                      
-                        ],
+                      ],
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
                 const Align(

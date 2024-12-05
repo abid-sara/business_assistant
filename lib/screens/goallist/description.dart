@@ -37,7 +37,7 @@ class DataField extends StatelessWidget {
             child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
-                  style: TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 20),
                   controller: controller,
                   maxLines: isDescription ? 5 : 1,
                   decoration: InputDecoration(
@@ -230,138 +230,119 @@ class _DescriptionState extends State<Description>
   }
 
   @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    return Scaffold(
-        appBar: BackArrow(
-          onPressed: () {
-            Navigator.pushNamed(context, '/goallist');
-          },
-          title: 'Goal Description',
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: BackArrow(
+      onPressed: () {
+        Navigator.pushNamed(context, '/goallist');
+      },
+      title: 'Goal Description',
+    ),
+    body: Container(
+      height: MediaQuery.of(context).size.height,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/background.png'),
+          fit: BoxFit.cover,
         ),
-        body: Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/background.png'),
-                fit: BoxFit.cover,
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+              decoration: BoxDecoration(
+                color: AppColors.green,
+                borderRadius: BorderRadius.circular(12),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        decoration: BoxDecoration(
-                          color: AppColors.green,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        width: screenWidth * 0.8,
-                        height: screenHeight * 0.5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title Field
+                  DataField(
+                    text: 'Title',
+                    description: 'Enter the title',
+                    controller: _titleController,
+                  ),
+                  if (_titleError != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        _titleError!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  // Description Field
+                  DataField(
+                    text: 'Description',
+                    description: 'Enter the description',
+                    isDescription: true,
+                    controller: _descriptionController,
+                  ),
+                  // Start Date and Limit Date Fields
+                  Row(
+                    children: [
+                      Flexible(
                         child: Column(
                           children: [
-                            Column(
-                              children: [
-                                DataField(
-                                  text: 'Title',
-                                  description: 'Enter the title',
-                                  controller: _titleController,
-                                ),
-                                if (_titleError != null)
-                                  Text(
-                                    _titleError!,
-                                    style: const TextStyle(color: Colors.red),
-                                  ),
-                              ],
-                            ),
                             DataField(
-                              text: 'Description',
-                              description: 'Enter the description',
-                              isDescription: true,
-                              controller: _descriptionController,
+                              text: 'Start date',
+                              description: 'DD/MM/YYYY',
+                              controller: _startDateController,
+                              isDate: true,
                             ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Column(
-                                        children: [
-                                          DataField(
-                                            text: 'Start date',
-                                            description: 'DD/MM/YYYY',
-                                            controller: _startDateController,
-                                            isDate: true,
-                                          ),
-                                          if (_startDateError != null)
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Row(
-                                                children: [
-                                                  Flexible(
-                                                    child: Text(
-                                                      _startDateError!,
-                                                      style: const TextStyle(
-                                                          color: Colors.red),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Column(
-                                        children: [
-                                          DataField(
-                                            text: 'Limit date',
-                                            description: 'DD/MM/YYYY',
-                                            controller: _limitDateController,
-                                            isDate: true,
-                                          ),
-                                          if (_limitDateError != null)
-                                            Text(
-                                              _limitDateError!,
-                                              style: const TextStyle(
-                                                  color: Colors.red),
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                            if (_startDateError != null)
+                              Text(
+                                _startDateError!,
+                                style: const TextStyle(color: Colors.red),
+                              ),
                           ],
                         ),
                       ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_validateForm()) {
-                          Goal newGoal = addGoal();
-                          Navigator.pop(context, newGoal);
-                        }
-                      },
-                      style: button,
-                      child: const Text(
-                        'Add Goal',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      const SizedBox(width: 8.0),
+                      Flexible(
+                        child: Column(
+                          children: [
+                            DataField(
+                              text: 'Limit date',
+                              description: 'DD/MM/YYYY',
+                              controller: _limitDateController,
+                              isDate: true,
+                            ),
+                            if (_limitDateError != null)
+                              Text(
+                                _limitDateError!,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
-            )));
-  }
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                if (_validateForm()) {
+                  Goal newGoal = addGoal();
+                  Navigator.pop(context, newGoal);
+                }
+              },
+              style: button,
+              child: const Text(
+                'Add Goal',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
+    }

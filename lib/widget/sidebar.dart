@@ -133,7 +133,7 @@ class _SidebarState extends State<Sidebar> {
             buildMenuItem(
               title: 'Transactions',
               image:
-                  selectedMenuItem == 'Transactions' ? goals_filled : goals_not_filled,
+                  selectedMenuItem == 'Transactions' ? transaction_filled : transaction_not_filled,
               route: '/transaction',
               parameter: const Transaction(),
             ),

@@ -102,13 +102,13 @@ class _SettingsState extends State<Settings> {
                                   GestureDetector(
                                     onTap: _pickImage,
                                     child: CircleAvatar(
-                                      radius: 50,
-                                      backgroundImage: _profileImage != null
-                                          ? FileImage(_profileImage!)
-                                          : const NetworkImage(
-                                                  'https://via.placeholder.com/150')
-                                              as ImageProvider,
-                                    ),
+                                        radius: 50, // Set the radius for the avatar
+                                        backgroundImage: _profileImage != null
+                                            ? FileImage(_profileImage!) 
+                                            : const AssetImage('assets/images/default_profile.png') 
+                                                as ImageProvider,
+                                      ),
+
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
