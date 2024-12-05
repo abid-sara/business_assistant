@@ -62,6 +62,7 @@ class _customersPageState extends State<customersPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+
         return AlertDialog(
           title: const Text('Add Customer'),
           content: Column(
@@ -225,6 +226,8 @@ class _customersPageState extends State<customersPage> {
   }
   @override
   Widget build(BuildContext context) {
+    
+    
     List<Customer> filteredCustomers = _filterCustomers(_searchQuery);
     return Scaffold(
       drawer: const Sidebar(),
@@ -247,70 +250,74 @@ class _customersPageState extends State<customersPage> {
           ),
           Column(
             children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      width: 200,
-                      height: 50,
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          labelText: 'Customer...',
-                          prefixIcon: const Icon(Icons.search),
-                          fillColor: AppColors.purpule,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                            borderSide:
-                                BorderSide.none, // Remove the border side
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            labelText: 'Customer...',
+                            prefixIcon: const Icon(Icons.search),
+                            fillColor: AppColors.purpule,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              borderSide:
+                                  BorderSide.none, // Remove the border side
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              borderSide:
+                                  BorderSide.none, // Remove the border side
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              borderSide:
+                                  BorderSide.none, // Remove the border side
+                            ),
+                            filled: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 20.0),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                            borderSide:
-                                BorderSide.none, // Remove the border side
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                            borderSide:
-                                BorderSide.none, // Remove the border side
-                          ),
-                          filled: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 20.0),
-                        ),
-                        onChanged: (query) {
-                          setState(() {
-                            _searchQuery = query;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SortByDropdown(
-                          onChanged: (String newValue) {
+                          onChanged: (query) {
                             setState(() {
-                              _selectedSortOption = newValue;
-                              _sortCustomers();
+                              _searchQuery = query;
                             });
                           },
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SortByDropdown(
+                            onChanged: (String newValue) {
+                              setState(() {
+                                _selectedSortOption = newValue;
+                                _sortCustomers();
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const Padding(
                 padding: EdgeInsets.only(left: 10, right: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Customer            ",
+                    Text("Customer",
                         style: TextStyle(color: Colors.grey)),
                     Text("Orders", style: TextStyle(color: Colors.grey)),
                   ],

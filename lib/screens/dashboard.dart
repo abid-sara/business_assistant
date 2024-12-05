@@ -2,6 +2,8 @@ import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
 
+import 'customers/customers_center.dart';
+
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
 
@@ -126,7 +128,9 @@ class _DashboardState extends State<Dashboard> {
                                         fontSize: 18),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.pushNamed(context, '/Tasks');
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color.fromARGB(
                                           255, 228, 239, 223),
@@ -278,25 +282,30 @@ class _DashboardState extends State<Dashboard> {
                     //Transactions
                     SizedBox(
                       width: screenWidth,
-                      child: const Card(
-                        color: Color.fromARGB(255, 252, 249, 208),
-                        child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Recent Transactions",
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/transaction');
+                        },
+                        child: const Card(
+                          color: Color.fromARGB(255, 252, 249, 208),
+                          child: Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Recent Transactions",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold)),
+                                SizedBox(height: 4),
+                                Text(
+                                  "# transactions",
                                   style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 4),
-                              Text(
-                                "# transactions",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 118, 117, 117),
-                                    fontSize: 18),
-                              ),
-                            ],
+                                      color: Color.fromARGB(255, 118, 117, 117),
+                                      fontSize: 18),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -313,19 +322,24 @@ class _DashboardState extends State<Dashboard> {
                     //add a task
                     SizedBox(
                       width: screenWidth,
-                      child: const Card(
-                        color: AppColors.purpule,
-                        child: Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Add a task",
-                                style: TextStyle(fontSize: 19),
-                              ),
-                              Icon(Icons.add)
-                            ],
+                      child: GestureDetector(
+                        onTap: () {
+                            Navigator.pushNamed(context, '/addtask');
+                        },
+                        child:const  Card(
+                          color: AppColors.purpule,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Add a task",
+                                  style: TextStyle(fontSize: 19),
+                                ),
+                                const Icon(Icons.add)
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -347,7 +361,9 @@ class _DashboardState extends State<Dashboard> {
                                 style: TextStyle(fontSize: 19),
                               ),
                               GestureDetector(
-                                  child: const Icon(Icons.add), onTap: () {}),
+                                  child: const Icon(Icons.add), onTap: () {
+                                    Navigator.pushNamed(context, '/customers');
+                                  }),
                               //it must show the add customer dialog
                             ],
                           ),
@@ -359,19 +375,24 @@ class _DashboardState extends State<Dashboard> {
                     const SizedBox(height: 12),
                     SizedBox(
                       width: screenWidth,
-                      child: const Card(
-                        color: AppColors.purpule,
-                        child: Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Add an order",
-                                style: TextStyle(fontSize: 19),
-                              ),
-                              Icon(Icons.add)
-                            ],
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/orders');
+                        },
+                        child: const Card(
+                          color: AppColors.purpule,
+                          child: Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Add an order",
+                                  style: TextStyle(fontSize: 19),
+                                ),
+                                Icon(Icons.add)
+                              ],
+                            ),
                           ),
                         ),
                       ),

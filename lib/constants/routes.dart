@@ -1,16 +1,17 @@
+import 'package:business_assistant/screens/To_do.dart/add_task.dart';
+import 'package:business_assistant/screens/To_do.dart/all_tasks.dart';
 import 'package:business_assistant/screens/customers/customer_details.dart';
 import 'package:business_assistant/screens/dashboard.dart';
 import 'package:business_assistant/screens/inventory/products_center.dart';
 import 'package:business_assistant/screens/inventory/products_details.dart';
 import 'package:business_assistant/screens/orders/order_details.dart';
-// import 'package:bussiness_assist/all_task.dart';
-// import 'package:bussiness_assist/editprofile.dart';
-// import 'package:bussiness_assist/help&support.dart';
-// import 'package:bussiness_assist/passwordedit.dart';
-// import 'package:bussiness_assist/rateus.dart';
-// import 'package:bussiness_assist/reportproblem.dart';
-// import 'package:bussiness_assist/setting.dart';
-// import 'package:bussiness_assist/subscription.dart';
+import 'package:business_assistant/screens/Settings/changepassword.dart';
+import 'package:business_assistant/screens/Settings/feedback.dart';
+import 'package:business_assistant/screens/Settings/editprofile.dart';
+import 'package:business_assistant/screens/Settings/help&support.dart';
+import 'package:business_assistant/screens/Settings/reportproblem.dart';
+import 'package:business_assistant/screens/Settings/subscription.dart';
+import 'package:business_assistant/screens/Settings/setting.dart';
 import '/screens/landingPages/forgot_password.dart';
 import '/screens/landingPages/sign_in.dart';
 import '../screens/customers/customers_center.dart';
@@ -32,19 +33,20 @@ var routes = {
   '/Businessdetails': (ctx) => const Businessdetails(),
   '/details': (context) => const orderDetails(),
   '/orders': (context) => const OrdersPage(),
-  '/customers': (context) => const customersPage(),
+  '/customers': (context) =>  const customersPage(),
   '/customerDetails': (context) => const customerDetails(),
   '/inventory': (context) => const Inventory(),
   '/itemDetails': (context) => const ItemDetails(),
   '/dashboard': (context) => const Dashboard(),
-  // '/settings' : (context) => const Settings(),
-  // '/editprofil' : (context) => const EditProfile(),
-  // '/changepassword' : (context) => const ChangePassword(),
-  // '/subscription' : (context) => const SubscriptionPage(),
-  // '/reportproblem' : (context) => const ReportProblemPage(),
-  // '/help&support' : (context) => const HelpSupportPage(),
-  // '/feedback' : (context) => const Feedback(),
-  // '/Tasks' : (cntext) => const Tasks(),
+   '/settings' : (context) => const Settings(),
+   '/editprofil' : (context) => const EditProfile(initialName: 'Sara', initialSurname: 'Abid',),
+   '/changepassword' : (context) => const ChangePassword(),
+   '/subscription' : (context) => const SubscriptionPage(),
+   '/reportproblem' : (context) => const ReportProblemPage(),
+   '/help&support' : (context) => const HelpSupportPage(),
+   '/feedback' : (context) => const Feedback(),
+   '/Tasks' : (cntext) => const Tasks(),
+   '/addtask' : (context) => AddTaskPage(onAddTask: (task) {},),
   '/goalList': (context) => const GoalList(),
   '/description': (context) => const Description(),
   '/analysis': (context) => const Analysis(),

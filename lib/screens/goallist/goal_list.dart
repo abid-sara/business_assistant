@@ -82,136 +82,141 @@ List<PastDueGoalRow> _checkPastDueGoals() {
   Widget build(BuildContext context) {
     List<PastDueGoalRow> pastDueGoals = _checkPastDueGoals();
 
-    return Scaffold(
-      drawer: const Sidebar(),
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Goals list',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
-        ),
-      ),
-      
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
+    return SafeArea(
+      child: Scaffold(
+        drawer: const Sidebar(),
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text(
+            'Goals list',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
           ),
         ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        
+        body: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/background.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Column(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () {
-                    
-                    setState(() {
-                      DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
-                      DateTime previousMonth = DateTime(currentDate.year, currentDate.month - 1);
-                      _selectedDate = DateFormat('MMMM yyyy').format(previousMonth);
-                    });
-                  },
-                ),
-                 Text(
-                  _selectedDate,
-                  style: const TextStyle(fontSize: 20),
-                ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios),
+                      icon: const Icon(Icons.arrow_back_ios),
                       onPressed: () {
+                        
                         setState(() {
-                      DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
-                      DateTime previousMonth = DateTime(currentDate.year, currentDate.month + 1);
-                      _selectedDate = DateFormat('MMMM yyyy').format(previousMonth);
-                    });
+                          DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
+                          DateTime previousMonth = DateTime(currentDate.year, currentDate.month - 1);
+                          _selectedDate = DateFormat('MMMM yyyy').format(previousMonth);
+                        });
                       },
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: () {
-                        showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        ).then((pickedDate) {
-                         
-                          setState(() {
-                             if (pickedDate != null) {
-                               final formattedDate = DateFormat('MMMM yyyy').format(pickedDate);
-                               _selectedDate = formattedDate; 
-                             }
+                     Text(
+                      _selectedDate,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios),
+                          onPressed: () {
+                            setState(() {
+                          DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
+                          DateTime previousMonth = DateTime(currentDate.year, currentDate.month + 1);
+                          _selectedDate = DateFormat('MMMM yyyy').format(previousMonth);
                         });
-                          
-                        });
-                      },
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () {
+                            showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            ).then((pickedDate) {
+                             
+                              setState(() {
+                                 if (pickedDate != null) {
+                                   final formattedDate = DateFormat('MMMM yyyy').format(pickedDate);
+                                   _selectedDate = formattedDate; 
+                                 }
+                            });
+                              
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
+                
+                 Expanded(
+                      child: ListView(
+                        children: [
+                          ...goals.map((goal) {
+                            return Padding(
+                             padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: GoalCard(
+                                  goal: goal,
+                                  title: goal.title,
+                                  date: '${DateFormat('dd/MM/yyyy').format(goal.startDateOnly)} - ${DateFormat('dd/MM/yyyy').format(goal.limitDateOnly)}',
+                
+                                  status: goal.status,
+                                  backgroundColor: _getStatusColor(goal.status),
+                                  statusColor: _getStatusTextColor(goal.status),
+                                  
+                                ),
+                              
+                              
+                            );
+                          },
+                          ),
+                             
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: Text(
+                              'Past due goals',
+                              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          ...pastDueGoals.map((pastDueGoal) {
+                            return pastDueGoal;
+                          }),
+                        ],
+                      ),
+                    ),
+                
+                IconButton(
+                  icon: const Icon(
+                    Icons.add_circle,
+                    color: AppColors.green,
+                    size: 40,
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/description',
+                    ).then((newGoal) {
+                      if (newGoal != null) {
+                        setState(() {
+                          goals.add(newGoal as Goal);
+                        });
+                      }
+                    });
+                  },
+                ),
               ],
             ),
-            
-             Expanded(
-                  child: ListView(
-                    children: [
-                      ...goals.map((goal) {
-                        return Padding(
-                         padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: GoalCard(
-                              goal: goal,
-                              title: goal.title,
-                              date: '${DateFormat('dd/MM/yyyy').format(goal.startDateOnly)} - ${DateFormat('dd/MM/yyyy').format(goal.limitDateOnly)}',
-
-                              status: goal.status,
-                              backgroundColor: _getStatusColor(goal.status),
-                              statusColor: _getStatusTextColor(goal.status),
-                              
-                            ),
-                          
-                          
-                        );
-                      },
-                      ),
-                         
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          'Past due goals',
-                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      ...pastDueGoals.map((pastDueGoal) {
-                        return pastDueGoal;
-                      }),
-                    ],
-                  ),
-                ),
-
-            IconButton(
-              icon: const Icon(
-                Icons.add_circle,
-                color: AppColors.green,
-                size: 40,
-              ),
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  '/description',
-                ).then((newGoal) {
-                  if (newGoal != null) {
-                    setState(() {
-                      goals.add(newGoal as Goal);
-                    });
-                  }
-                });
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );

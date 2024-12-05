@@ -1,4 +1,5 @@
 import 'package:business_assistant/style/colors.dart';
+import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/orderLine.dart';
 import 'package:business_assistant/data/customers.dart'; // Import the customers.dart file
@@ -293,6 +294,7 @@ class _customerDetailsState extends State<customerDetails> {
 
                     Navigator.of(context).pop();
                   },
+                  
                   child: const Text('Add Order'),
                 ),
               ],
@@ -536,7 +538,8 @@ class _customerDetailsState extends State<customerDetails> {
                         //adding an order
                         _showAddOrderDialog(customer);
                       },
-                      child: const Text("Add order"))
+                      style: button,
+                      child: const Text("Add order" , style: TextStyle(color: Colors.white , fontSize: 20), ))
                 ],
               ),
             ),

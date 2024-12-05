@@ -1,3 +1,4 @@
+import 'package:business_assistant/data/customers.dart';
 import 'package:business_assistant/screens/customers/customers_center.dart';
 import 'package:business_assistant/screens/dashboard.dart';
 
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Poppins',
       ),
       routes: routes,
-      home: const WelcomeScreen(),
+      home: WelcomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -15,3 +15,5 @@ const String inventory_not_filled = "assets/images/monitoring.png";
 const String inventory_filled = "assets/images/monitoring_filled.png";
 const String goals_not_filled = "assets/images/wishlist.png";
 const String goals_filled = "assets/images/heart_filled.png";
+const String settings_filled = 'assets/images/settings_filled.png';
+const String settings_not_filled = 'assets/images/settings.png';

@@ -31,7 +31,7 @@ class _GoalCardState extends State<GoalCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-       padding: const EdgeInsets.symmetric(vertical: 10),
+       padding: const EdgeInsets.all( 11),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: widget.backgroundColor,

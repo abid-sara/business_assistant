@@ -65,11 +65,7 @@ void _initializeTransaction() {
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                        SelectedButton(
-                          label: '24h',
-                          routeName: '/transaction', 
-                          
-                        ),
+                        
                         
                         SelectedButton(
                           label: 'Week',
@@ -113,7 +109,7 @@ void _initializeTransaction() {
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        '10 May Fri',
+                        'May 2024',
                         style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                       ),
                     ),

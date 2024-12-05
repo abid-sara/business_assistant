@@ -1,3 +1,14 @@
+import 'package:business_assistant/data/Task.dart';
+import 'package:business_assistant/screens/Analysis/analysis.dart';
+import 'package:business_assistant/screens/Analysis/transactions.dart';
+import 'package:business_assistant/screens/Settings/setting.dart';
+import 'package:business_assistant/screens/To_do.dart/all_tasks.dart';
+import 'package:business_assistant/screens/customers/customers_center.dart';
+import 'package:business_assistant/screens/dashboard.dart';
+import 'package:business_assistant/screens/goallist/goal_list.dart';
+import 'package:business_assistant/screens/inventory/products_center.dart';
+import 'package:business_assistant/screens/orders/orders_center.dart';
+
 import '/constants/imagePaths.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/colors.dart';
@@ -52,11 +63,11 @@ class _SidebarState extends State<Sidebar> {
                     ),
                   ),
                 ),
-                const Spacer(),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(Icons.keyboard_arrow_right),
-                )
+                // const Spacer(),
+                // const Align(
+                //   alignment: Alignment.centerRight,
+                //   child: Icon(Icons.keyboard_arrow_right),
+                // )
               ],
             ),
             Container(
@@ -69,7 +80,10 @@ class _SidebarState extends State<Sidebar> {
                   ? home_filled
                   : home_not_filled,
               route: '/dashboard',
+              parameter: const Dashboard(), // Replace with the actual widget
             ),
+
+           
             SizedBox(height: itemSpacing),
             buildMenuItem(
               title: 'Orders',
@@ -77,13 +91,15 @@ class _SidebarState extends State<Sidebar> {
                   ? orders_filled
                   : orders_not_filled,
               route: '/orders',
+              parameter: const OrdersPage(),
             ),
             SizedBox(height: itemSpacing),
             buildMenuItem(
               title: 'To do',
               image:
                   selectedMenuItem == 'To do' ? todo_filled : todo_not_filled,
-              route: '/dashboard',
+              route: '/Tasks',
+              parameter: const Tasks(),
             ),
             SizedBox(height: itemSpacing),
             buildMenuItem(
@@ -92,6 +108,8 @@ class _SidebarState extends State<Sidebar> {
                   ? customers_filled
                   : customers_not_filled,
               route: '/customers',
+              parameter: const customersPage(),
+              
             ),
             SizedBox(height: itemSpacing),
             buildMenuItem(
@@ -100,6 +118,7 @@ class _SidebarState extends State<Sidebar> {
                   ? analysis_filled
                   : analysis_not_filled,
               route: '/analysis',
+              parameter: const Analysis(),
             ),
             SizedBox(height: itemSpacing),
             buildMenuItem(
@@ -108,6 +127,15 @@ class _SidebarState extends State<Sidebar> {
                   ? inventory_filled
                   : inventory_not_filled,
               route: '/inventory',
+              parameter: const Inventory(),
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'Transactions',
+              image:
+                  selectedMenuItem == 'Transactions' ? goals_filled : goals_not_filled,
+              route: '/transaction',
+              parameter: const Transaction(),
             ),
             SizedBox(height: itemSpacing),
             buildMenuItem(
@@ -115,6 +143,17 @@ class _SidebarState extends State<Sidebar> {
               image:
                   selectedMenuItem == 'Goals' ? goals_filled : goals_not_filled,
               route: '/goalList',
+              parameter: const GoalList(),
+            ),
+            SizedBox(height: itemSpacing),
+            buildMenuItem(
+              title: 'Settings',
+              image: selectedMenuItem == 'Settings'
+                  ? settings_filled
+                  : settings_not_filled,
+              route: '/settings',
+              parameter: const Settings(),
+              
             ),
             SizedBox(height: itemSpacing),
             ListTile(
@@ -133,7 +172,7 @@ class _SidebarState extends State<Sidebar> {
   }
 
   Widget buildMenuItem(
-      {required String title, required String image, required String route}) {
+      {required String title, required String image, required String route, required parameter}) {
     return ListTile(
       leading: SizedBox(
         width: 25,
@@ -141,11 +180,17 @@ class _SidebarState extends State<Sidebar> {
         child: Image.asset(image, fit: BoxFit.cover),
       ),
       title: Text(title, style: const TextStyle(fontSize: 20)),
+      
       onTap: () {
+        Navigator.pop(context);
+        Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => parameter,
+        ),
+      );
         setState(() {
-          selectedMenuItem = title;
-          Navigator.pop(context);
-          Navigator.pushNamed(context, route);
+        selectedMenuItem = title;
+          
         });
       },
     );
