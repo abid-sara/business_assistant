@@ -93,7 +93,7 @@ class _EditProfileState extends State<EditProfile> {
   Future<void> _pickProfilePicture() async {
     final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(
-      source: ImageSource.gallery, // or ImageSource.camera for camera
+      source: ImageSource.gallery, 
     );
 
     if (pickedFile != null) {
@@ -118,76 +118,78 @@ class _EditProfileState extends State<EditProfile> {
               ),
             ),
           ),
-          Column(
-            children: [
-              BackArrow(title: 'Edit profile'),
-          // Content
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0), // Padding directly around the form
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            GestureDetector(
-                              onTap: _pickProfilePicture,
-                              child: CircleAvatar(
-                                radius: 60,
-                                backgroundImage: _profilePicture != null
-                                    ? FileImage(_profilePicture!)
-                                    : const AssetImage('assets/images/flower.png')
-                                        as ImageProvider,
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                BackArrow(title: 'Edit profile'),
+            // Content
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0), // Padding directly around the form
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: _pickProfilePicture,
+                                child: CircleAvatar(
+                                  radius: 60,
+                                  backgroundImage: _profilePicture != null
+                                      ? FileImage(_profilePicture!)
+                                      : const AssetImage('assets/images/flower.png')
+                                          as ImageProvider,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 16),
-                            buildTextField(
-                              label: 'Name',
-                              controller: _nameController,
-                              validator: _validateName,
-                            ),
-                            buildTextField(
-                              label: 'Surname',
-                              controller: _surnameController,
-                              validator: _validateSurname,
-                            ),
-                            buildTextField(
-                              label: 'Mobile',
-                              controller: _mobileController,
-                              hint: '+213',
-                              keyboardType: TextInputType.phone,
-                              validator: _validateMobile,
-                            ),
-                            buildTextField(
-                              label: 'E-mail',
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: _validateEmail,
-                            ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: _saveProfile,
-                              style: button, // Apply the button style here
-                              child: const Text(
-                              'Save',
-                              style: TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              buildTextField(
+                                label: 'Name',
+                                controller: _nameController,
+                                validator: _validateName,
+                              ),
+                              buildTextField(
+                                label: 'Surname',
+                                controller: _surnameController,
+                                validator: _validateSurname,
+                              ),
+                              buildTextField(
+                                label: 'Mobile',
+                                controller: _mobileController,
+                                hint: '+213',
+                                keyboardType: TextInputType.phone,
+                                validator: _validateMobile,
+                              ),
+                              buildTextField(
+                                label: 'E-mail',
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: _validateEmail,
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: _saveProfile,
+                                style: button, 
+                                child: const Text(
+                                'Save',
+                                style: TextStyle(color: Colors.white, fontSize: 20),
+                              ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
+                    ],
+                  ),
           ),
-        ],
-      ),
       ]
       )
     );

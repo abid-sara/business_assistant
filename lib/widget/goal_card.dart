@@ -41,42 +41,48 @@ class _GoalCardState extends State<GoalCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                widget.title ?? 'Untitled Goal',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Flexible(
+                child: Text(
+                  widget.title ?? 'Untitled Goal',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis, // Ensures text truncates if too long
+                ),
               ),
-              
               IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.black),
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/description', 
-                    );
-                  },
-                 ),
+                icon: const Icon(Icons.edit, color: Colors.black),
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/description', 
+                  );
+                },
+              ),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                widget.date ?? '11/10/2024 - 12/10/2024',
-                style: const TextStyle(fontSize: 16),
+              Flexible(
+                child: Text(
+                  widget.date ?? '11/10/2024 - 12/10/2024',
+                  style: const TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis, // Ensures date text truncates if too long
+                ),
               ),
               Container(
-                 padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: widget.statusColor,
                 ),
                 child: PopupMenuButton<String>(
-                child: Text(
-          widget.status ?? 'In progress',
-          style: const TextStyle(fontSize: 16, color: Colors.black),
-        ),
-        onSelected: (String newStatus) {
+                  child: Text(
+                    widget.status ?? 'In progress',
+                    style: const TextStyle(fontSize: 16, color: Colors.black),
+                    overflow: TextOverflow.ellipsis, // Prevents overflow in status text
+                  ),
+                  onSelected: (String newStatus) {
                     setState(() {
                       widget.goal.setStatus(newStatus);
                     });
@@ -84,15 +90,14 @@ class _GoalCardState extends State<GoalCard> {
                       widget.onStatusChange!(newStatus); 
                     }
                   },
-
-        itemBuilder: (BuildContext context) {
-          return ['Completed', 'In progress'].map((String choice) {
-            return PopupMenuItem<String>(
-              value: choice,
-              child: Text(choice),
-            );
-          }).toList();
-        },
+                  itemBuilder: (BuildContext context) {
+                    return ['Completed', 'In progress'].map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+                      );
+                    }).toList();
+                  },
                 ),
               ),
             ],

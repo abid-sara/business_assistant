@@ -34,7 +34,7 @@ final Map<String, WidgetBuilder> routes = {
   '/': (context) => Tasks(),
   '/addtask': (context) => AddTaskPage(
     onAddTask: (task) {
-      // Here, we will eventually handle the task addition logic
+      //  task addition logic
     },
   ),
 };
@@ -45,7 +45,7 @@ final Map<String, WidgetBuilder> routes = {
   }
   void addTask(Task task) {
   setState(() {
-    _tasks.add(task);  // Adds the new task to the list
+    _tasks.add(task);  
   });
   print("Task added: ${task.title}"); // Debugging
 }
@@ -75,7 +75,7 @@ final Map<String, WidgetBuilder> routes = {
             TextButton(
               onPressed: () {
                 setState(() {
-                  task.status = "Completed"; // Mark the task as completed
+                  task.status = "Completed"; 
                 });
                 Navigator.of(context).pop();
               },
@@ -105,7 +105,6 @@ final Map<String, WidgetBuilder> routes = {
       ),
       body: Column(
         children: [
-          // Row displaying date and calendar icon
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -150,7 +149,7 @@ final Map<String, WidgetBuilder> routes = {
 
           const SizedBox(height: 16),
 
-          // Row for "Today . Wednesday" and "Reschedule"
+          // Row for "Today . Wednesday" 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -194,7 +193,7 @@ final Map<String, WidgetBuilder> routes = {
                           labelColor: Colors.white,
                           unselectedLabelColor: Colors.grey,
                           labelStyle: const TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
                           tabs: const [
@@ -212,10 +211,10 @@ final Map<String, WidgetBuilder> routes = {
   child: TabBarView(
     controller: _tabController,
     children: [
-      _buildTaskList(), // All tasks (no filter)
-      _buildTaskList(filterStatus: "In progress"), // In progress tasks
-      _buildTaskList(filterStatus: "Completed"), // Completed tasks
-      _buildTaskList(filterStatus: "Missed"), // Missed tasks
+      _buildTaskList(),
+      _buildTaskList(filterStatus: "In progress"), 
+      _buildTaskList(filterStatus: "Completed"), 
+      _buildTaskList(filterStatus: "Missed"), 
     ],
   ),
 )

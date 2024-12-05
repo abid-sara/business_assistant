@@ -27,7 +27,6 @@ class _FeedbackState extends State<Feedback> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -36,11 +35,9 @@ class _FeedbackState extends State<Feedback> {
               ),
             ),
           ),
-          // Content with Transparent AppBar
           Column(
             children: [
              BackArrow(title: 'Rate us',),
-              // Main Content
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -141,13 +138,13 @@ class _FeedbackState extends State<Feedback> {
                         Center(
                           child: ElevatedButton(
                                 onPressed: () {
-                                  // Handle submission
+                                  
                                   print("Rating: $selectedRating");
                                   print("Liked: $selectedLikedOption");
                                   print("Improved: $selectedImprovementOption");
                                   print("Feedback:${feedbackController.text}");
                                 },
-                                style: button, // Use the predefined button style
+                                style: button,
                                 child: const Text(
                                 'Submit',
                                 style: TextStyle(color: Colors.white, fontSize: 20),

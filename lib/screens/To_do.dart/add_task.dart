@@ -26,7 +26,7 @@ class addTaskPageState extends State<AddTaskPage> {
   @override
   void initState() {
     super.initState();
-    // Debugging line to check if onAddTask is passed correctly
+    
     print(widget.onAddTask);
   }
 
@@ -47,7 +47,7 @@ class addTaskPageState extends State<AddTaskPage> {
     }
   }
 
- void addTask() {
+  void addTask() {
   if (_titleController.text.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Title cannot be empty!')),
@@ -68,18 +68,17 @@ class addTaskPageState extends State<AddTaskPage> {
     repeatFrequency: _repeatFrequency,
   );
 
-  print('Task Created: ${newtask.title}, ${newtask.description}');
-  widget.onAddTask(newtask); // Pass task back to parent
-  print('onAddTask Invoked');
+  print('Task Created: ${newtask.title}, ${newtask.description}'); 
+  widget.onAddTask(newtask);
+  print('onAddTask Invoked'); 
   Navigator.pop(context);
 }
-
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:  BackArrow(title: 'Add task'),
+      appBar: BackArrow(title: 'Add task'),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
@@ -87,9 +86,9 @@ class addTaskPageState extends State<AddTaskPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             
-              // Calendar Section
               SafeArea(
+                
+                
                 child: TableCalendar(
                   focusedDay: _selectedDate,
                   firstDay: DateTime(2000),
@@ -123,121 +122,129 @@ class addTaskPageState extends State<AddTaskPage> {
               ),
               const SizedBox(height: 16),
               // Grid Section
-              GridView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 2,
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.2,
+                child: GridView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 2,
+                  ),
+                  children: [
+                    // Start Time
+                    GestureDetector(
+                      onTap: () => _selectTime(context, true),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.yellowGreen,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Start Time",
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+
+                            Flexible(
+                              child: Text(
+                                _startTime.format(context),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // End Time
+                    GestureDetector(
+                      onTap: () => _selectTime(context, false),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.yellowGreen,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "End Time",
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Flexible(
+                              child: Text(
+                                _endTime.format(context),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Repeat Task
+                    DropdownButtonFormField<String>(
+                      value: _repeatFrequency,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(16),
+                        filled: true,
+                        fillColor: AppColors.yellowGreen,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        labelText: "Repeat Task",
+                      ),
+                      items: ["None", "Daily", "Weekly", "Monthly"]
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _repeatFrequency = value ?? "None";
+                        });
+                      },
+                    ),
+                    // Reminder
+                    DropdownButtonFormField<String>(
+                      value: _reminder,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(16),
+                        filled: true,
+                        fillColor: AppColors.yellowGreen,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        labelText: "Reminder",
+                      ),
+                      items: ["15 Minutes", "30 Minutes", "1 Hour", "None"]
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _reminder = value;
+                        });
+                      },
+                    ),
+                  ],
                 ),
-                children: [
-                  // Start Time
-                  GestureDetector(
-                    onTap: () => _selectTime(context, true),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: AppColors.yellowGreen,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Start Time",
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _startTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // End Time
-                  GestureDetector(
-                    onTap: () => _selectTime(context, false),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: AppColors.yellowGreen,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "End Time",
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _endTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Repeat Task
-                  DropdownButtonFormField<String>(
-                    value: _repeatFrequency,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.all(16),
-                      filled: true,
-                      fillColor: AppColors.yellowGreen,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      labelText: "Repeat Task",
-                    ),
-                    items: ["None", "Daily", "Weekly", "Monthly"]
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _repeatFrequency = value ?? "None";
-                      });
-                    },
-                  ),
-                  // Reminder
-                  DropdownButtonFormField<String>(
-                    value: _reminder,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.all(16),
-                      filled: true,
-                      fillColor: AppColors.yellowGreen,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      labelText: "Reminder",
-                    ),
-                    items: ["15 Minutes", "30 Minutes", "1 Hour", "None"]
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _reminder = value;
-                      });
-                    },
-                  ),
-                ],
               ),
               const SizedBox(height: 16),
               // Description Input

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // For file picker functionality
+import 'package:image_picker/image_picker.dart'; 
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/back_arrow.dart';
 import 'package:business_assistant/widget/button.dart';
@@ -12,11 +12,11 @@ class ReportProblemPage extends StatefulWidget {
 }
 
 class _ReportProblemPageState extends State<ReportProblemPage> {
-  bool isCheckboxChecked = false; // Track checkbox state
-  String? selectedCategory; // Track selected category
-  XFile? screenshot; // Track the selected screenshot
+  bool isCheckboxChecked = false;
+  String? selectedCategory; 
+  XFile? screenshot; 
 
-  final ImagePicker _picker = ImagePicker(); // Image picker instance
+  final ImagePicker _picker = ImagePicker(); 
 
   Future<void> _pickScreenshot() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -32,20 +32,17 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/background.png'), // Replace with your image path
-                fit: BoxFit.cover, // Ensure the image covers the entire page
+                image: AssetImage('assets/images/background.png'), 
+                fit: BoxFit.cover,
               ),
             ),
           ),
-          // Content with Transparent AppBar
           Column(
             children: [
              BackArrow(title: 'Report a problem',),
-              // Main Content
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -82,11 +79,13 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
                               "Attach screenshot:",
                               style: TextStyle(fontSize: 16),
                             ),
-                             ElevatedButton(
-                                onPressed: _pickScreenshot,
-                                style: button, // Apply the button style here
-                                child: const Text("Choose File"),
-                              ),
+                             Flexible(
+                               child: ElevatedButton(
+                                  onPressed: _pickScreenshot,
+                                  style: button, // Apply the button style here
+                                  child: const Text("Choose File", style: TextStyle(color: Colors.white, fontSize: 15),),
+                                ),
+                             ),
 
                           ],
                         ),
@@ -110,14 +109,15 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
                             color: AppColors.darkGreen,
                           ),
                         ),
-                        Row(
-                          children: [
-                            _buildChoiceChip("Report a bug"),
-                            const SizedBox(width: 8),
-                            _buildChoiceChip("Feature request"),
-                            const SizedBox(width: 8),
-                            _buildChoiceChip("Other"),
-                          ],
+                        Wrap(
+                            spacing: 8, // Space between chips
+                            runSpacing: 8, // Space between lines of chips
+                            children: [
+                              _buildChoiceChip("Report a bug"),
+                              _buildChoiceChip("Feature request"),
+                              _buildChoiceChip("Other"),
+                            ],
+                        
                         ),
                         const SizedBox(height: 16),
                         Row(

@@ -19,7 +19,7 @@ class _SettingsState extends State<Settings> {
   final TextEditingController _businessNameController =
       TextEditingController(text: 'Cosmetics business owner');
 
-  bool _isNotificationsEnabled = false; // State to control notification toggle
+  bool _isNotificationsEnabled = false; 
 
   void _handleNotificationToggle(bool value) {
     setState(() {
@@ -210,13 +210,13 @@ class _SettingsState extends State<Settings> {
                               title: 'Notifications',
                               icon: Icons.notifications,
                               isNotificationOption:
-                                  true, // Show switch for notifications
+                                  true,
                               isNotificationEnabled:
-                                  _isNotificationsEnabled, // Bind state
+                                  _isNotificationsEnabled, 
                               onNotificationToggle:
-                                  _handleNotificationToggle, // Handle toggle change
+                                  _handleNotificationToggle,
                               onTap: () {
-                                // Handle tap for Notifications if needed
+                                //tap for Notifications if needed
                               },
                             ),
                           ]),
@@ -282,7 +282,6 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  // Helper method to create a settings section
   Widget _buildSettingsSection(List<SettingsOption> options) {
     return Container(
       padding: const EdgeInsets.all(16.0),

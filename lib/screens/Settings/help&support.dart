@@ -44,134 +44,136 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/background.png'), // Replace with your image path
+                image: AssetImage('assets/images/background.png'), 
                 fit: BoxFit.cover,
               ),
             ),
           ),
           // Content
-          Column(
-            children: [
-              BackArrow(title: 'Help & Support',),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center( // Center the logo
-                child: Image.asset(
-                  'assets/images/logo.png', // Replace with your logo path
-                  height: 165, // Adjust height as necessary
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                BackArrow(title: 'Help & Support',),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center( 
+                  child: Image.asset(
+                    'assets/images/logo.png', 
+                    height: 165, 
+                  ),
                 ),
-              ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.search),
-                        hintText: "Search for help topics",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 16),
+                      TextField(
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search),
+                          hintText: "Search for help topics",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          fillColor: Colors.white,
+                          filled: true,
                         ),
-                        fillColor: Colors.white,
-                        filled: true,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "Help topics",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkGreen,
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Help topics",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkGreen,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    filteredTopics.isEmpty
-                        ? const Center(
-                            child: Text(
-                              "No results found.",
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: filteredTopics.length,
-                            itemBuilder: (context, index) {
-                              final topic = filteredTopics[index];
-                              return Column(
-                                children: [
-                                  ListTile(
-                                    title: Text(topic["title"]),
-                                    trailing: Icon(
-                                      topic["isExpanded"]
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
+                      const SizedBox(height: 8),
+                      filteredTopics.isEmpty
+                          ? const Center(
+                              child: Text(
+                                "No results found.",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: filteredTopics.length,
+                              itemBuilder: (context, index) {
+                                final topic = filteredTopics[index];
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      title: Text(topic["title"]),
+                                      trailing: Icon(
+                                        topic["isExpanded"]
+                                            ? Icons.expand_less
+                                            : Icons.expand_more,
+                                      ),
+                                      onTap: () {
+                                        setState(() {
+                                          topic["isExpanded"] =
+                                              !topic["isExpanded"];
+                                        });
+                                      },
                                     ),
-                                    onTap: () {
-                                      setState(() {
-                                        topic["isExpanded"] =
-                                            !topic["isExpanded"];
-                                      });
-                                    },
-                                  ),
-                                  if (topic["isExpanded"])
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0),
-                                      child: Text(
-                                        topic["description"],
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black54,
+                                    if (topic["isExpanded"])
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0),
+                                        child: Text(
+                                          topic["description"],
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black54,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                ],
-                              );
-                            },
-                          ),
-                    const Divider(),
-                    const Text(
-                      "Contact us",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkGreen,
+                                  ],
+                                );
+                              },
+                            ),
+                      const Divider(),
+                      const Text(
+                        "Contact us",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkGreen,
+                        ),
                       ),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.email),
-                      title: const Text("Email us"),
-                      onTap: () {
-                        // Implement contact functionality
-                      },
-                    ),
-                    const Divider(),
-                    const Text(
-                      "Learn more",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkGreen,
+                      ListTile(
+                        leading: const Icon(Icons.email),
+                        title: const Text("Email us"),
+                        onTap: () {
+                          // contact functionality
+                        },
                       ),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.play_circle_fill),
-                      title: const Text("User Documentation"),
-                      onTap: () {
-                        // Implement user documentation functionality
-                      },
-                    ),
-                  ],
+                      const Divider(),
+                      const Text(
+                        "Learn more",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkGreen,
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.play_circle_fill),
+                        title: const Text("User Documentation"),
+                        onTap: () {
+                          //user documentation functionality
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
