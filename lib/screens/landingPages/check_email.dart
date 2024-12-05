@@ -20,6 +20,9 @@ class _CheckEmailState extends State<CheckEmail> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return SafeArea(
       child: Scaffold(
         appBar: BackArrow(title: ""),
@@ -69,7 +72,7 @@ class _CheckEmailState extends State<CheckEmail> {
                 
                   textAlign: TextAlign.left,
                 ),
-                const SizedBox(height: 52),
+                 SizedBox(height: screenHeight*0.01),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Form(
@@ -81,50 +84,52 @@ class _CheckEmailState extends State<CheckEmail> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 2.0),
-                            child: SizedBox(
-                              width: 70,
-                              child: TextFormField(
-                                controller: widget.controllers[i],
-                                validator: (value) {
-                                  if (widget.controllers[i].text.isEmpty) {
-                                    return "Please fill";
-                                  } else {
-                                    return null;
-                                  }
-                                },
-                                keyboardType: TextInputType.number,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 24),
-                                decoration: InputDecoration(
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 20),
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: widget.controllers[i].text.isEmpty
-                                          ? Colors.grey
-                                          : AppColors.darkGreen,
+                            child: Expanded(
+                              child: SizedBox(
+                                width: screenWidth*0.16,
+                                child: TextFormField(
+                                  controller: widget.controllers[i],
+                                  validator: (value) {
+                                    if (widget.controllers[i].text.isEmpty) {
+                                      return "Please fill";
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 24),
+                                  decoration: InputDecoration(
+                                    contentPadding:
+                                        const EdgeInsets.symmetric(vertical: 20),
+                                    isDense: true,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(
+                                        color: widget.controllers[i].text.isEmpty
+                                            ? Colors.grey
+                                            : AppColors.darkGreen,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.darkGreen,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(
+                                        color: widget.controllers[i].text.isEmpty
+                                            ? Colors.grey
+                                            : AppColors.darkGreen,
+                                      ),
                                     ),
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.darkGreen,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: widget.controllers[i].text.isEmpty
-                                          ? Colors.grey
-                                          : AppColors.darkGreen,
-                                    ),
-                                  ),
+                                  onChanged: (value) {
+                                    setState(() {});
+                                  },
                                 ),
-                                onChanged: (value) {
-                                  setState(() {});
-                                },
                               ),
                             ),
                           ),

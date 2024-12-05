@@ -62,7 +62,6 @@ class _customersPageState extends State<customersPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-
         return AlertDialog(
           title: const Text('Add Customer'),
           content: Column(
@@ -224,10 +223,9 @@ class _customersPageState extends State<customersPage> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
-    
-    
     List<Customer> filteredCustomers = _filterCustomers(_searchQuery);
     return Scaffold(
       drawer: const Sidebar(),
@@ -317,8 +315,7 @@ class _customersPageState extends State<customersPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Customer",
-                        style: TextStyle(color: Colors.grey)),
+                    Text("Customer", style: TextStyle(color: Colors.grey)),
                     Text("Orders", style: TextStyle(color: Colors.grey)),
                   ],
                 ),
@@ -420,7 +417,6 @@ class CustomerLine extends StatelessWidget {
     );
   }
 }
-
 
 class SortByDropdown extends StatefulWidget {
   final ValueChanged<String> onChanged;

@@ -9,6 +9,9 @@ class BackArrow extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return AppBar(
       title: Text(title),
       centerTitle: true,
@@ -17,23 +20,26 @@ class BackArrow extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       flexibleSpace: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 23, top: 23),
-            child: Container(
-              padding: const EdgeInsets.all(2), // Padding within the circle
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.yellowGreen, // Background color
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.keyboard_arrow_left,
-                  size: 30,
-                  color: AppColors.darkGreen, // Icon color
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  left: screenWidth * 0.04, top: screenHeight * 0.03),
+              child: Container(
+                padding: const EdgeInsets.all(2), // Padding within the circle
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.yellowGreen, // Background color
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                child: IconButton(
+                  icon: Icon(
+                    Icons.keyboard_arrow_left,
+                    size: screenWidth * 0.1,
+                    color: AppColors.darkGreen, // Icon color
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
               ),
             ),
           ),

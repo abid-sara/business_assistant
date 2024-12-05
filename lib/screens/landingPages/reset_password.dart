@@ -11,14 +11,16 @@ class ResetPassword extends StatefulWidget {
   State<ResetPassword> createState() => _ResetPasswordState();
 }
 
-TextEditingController _password = TextEditingController();
-TextEditingController _passwordCheck = TextEditingController();
-bool _isObscure = true;
-
 class _ResetPasswordState extends State<ResetPassword> {
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _passwordCheck = TextEditingController();
+  bool _isObscure = true;
+  final formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
 
     return SafeArea(
       child: Scaffold(
@@ -32,7 +34,7 @@ class _ResetPasswordState extends State<ResetPassword> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(height: 12),
+                SizedBox(height: screenHeight * 0.01),
                 const Text(
                   'Set a new password',
                   textAlign: TextAlign.left,
@@ -42,12 +44,12 @@ class _ResetPasswordState extends State<ResetPassword> {
                     color: AppColors.darkGreen,
                   ),
                 ),
-                const SizedBox(height: 19),
+                SizedBox(height: screenHeight * 0.01),
                 const Text(
                   "Create a new password. Ensure it differs from previous ones for security",
                   style: TextStyle(color: Colors.grey, fontSize: 17),
                 ),
-                const SizedBox(height: 52),
+                SizedBox(height: screenHeight * 0.03),
                 Form(
                   key: formKey,
                   child: Column(
@@ -60,7 +62,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                             fontWeight: FontWeight.bold,
                             color: AppColors.darkGreen),
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: screenHeight * 0.01),
                       TextFormField(
                         controller: _password,
                         validator: (value) {
@@ -92,7 +94,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 25),
+                      SizedBox(height: screenHeight * 0.02),
                       const Text(
                         "Confirm password",
                         style: TextStyle(
@@ -100,7 +102,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                             fontWeight: FontWeight.bold,
                             color: AppColors.darkGreen),
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: screenHeight * 0.01),
                       TextFormField(
                         controller: _passwordCheck,
                         validator: (value) {
@@ -138,7 +140,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 33),
+                SizedBox(height: screenHeight * 0.04),
                 Center(
                   child: ElevatedButton(
                     onPressed: () {

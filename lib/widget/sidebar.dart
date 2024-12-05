@@ -1,3 +1,4 @@
+import 'package:business_assistant/controllers/DrawerController.dart';
 import 'package:business_assistant/data/Task.dart';
 import 'package:business_assistant/screens/Analysis/analysis.dart';
 import 'package:business_assistant/screens/Analysis/transactions.dart';
@@ -8,6 +9,7 @@ import 'package:business_assistant/screens/dashboard.dart';
 import 'package:business_assistant/screens/goallist/goal_list.dart';
 import 'package:business_assistant/screens/inventory/products_center.dart';
 import 'package:business_assistant/screens/orders/orders_center.dart';
+import 'package:get/get.dart';
 
 import '/constants/imagePaths.dart';
 import 'package:flutter/material.dart';
@@ -20,15 +22,20 @@ class Sidebar extends StatefulWidget {
   State<Sidebar> createState() => _SidebarState();
 }
 
+String selectedMenuItem = 'Dashboard';
+
+late double screenWidth;
+late double screenHeight;
+
 class _SidebarState extends State<Sidebar> {
-  String selectedMenuItem = 'Dashboard';
+  final controller = Get.put(DrawerControl());
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
 
-    final double itemSpacing = screenHeight * 0.02;
+    final double itemSpacing = screenHeight * 0.01;
 
     return SafeArea(
       child: Drawer(
@@ -53,114 +60,101 @@ class _SidebarState extends State<Sidebar> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Sara ABID',
                     style: TextStyle(
                       color: Colors.black,
-                      fontSize: 20,
+                      fontSize: screenWidth * 0.056,
                     ),
                   ),
                 ),
-                // const Spacer(),
-                // const Align(
-                //   alignment: Alignment.centerRight,
-                //   child: Icon(Icons.keyboard_arrow_right),
-                // )
               ],
             ),
             Container(
               height: 1,
               color: Colors.grey,
             ),
-            buildMenuItem(
-              title: 'Dashboard',
-              image: selectedMenuItem == 'Dashboard'
-                  ? home_filled
-                  : home_not_filled,
-              route: '/dashboard',
-              parameter: const Dashboard(), // Replace with the actual widget
-            ),
-
-           
-            SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'Orders',
-              image: selectedMenuItem == 'Orders'
-                  ? orders_filled
-                  : orders_not_filled,
-              route: '/orders',
-              parameter: const OrdersPage(),
+            Obx(
+              () => buildMenuItem(
+                title: 'Dashboard',
+                image: controller.selectedMenuItem.value == 'Dashboard'
+                    ? home_filled
+                    : home_not_filled,
+                route: '/dashboard',
+              ),
             ),
             SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'To do',
-              image:
-                  selectedMenuItem == 'To do' ? todo_filled : todo_not_filled,
-              route: '/Tasks',
-              parameter: const Tasks(),
-            ),
+            Obx(() => buildMenuItem(
+                  title: 'Orders',
+                  image: controller.selectedMenuItem.value == 'Orders'
+                      ? orders_filled
+                      : orders_not_filled,
+                  route: '/orders',
+                )),
             SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'Customers',
-              image: selectedMenuItem == 'Customers'
-                  ? customers_filled
-                  : customers_not_filled,
-              route: '/customers',
-              parameter: const customersPage(),
-              
-            ),
+            Obx(() => buildMenuItem(
+                  title: 'To do',
+                  image: controller.selectedMenuItem.value == 'To do'
+                      ? todo_filled
+                      : todo_not_filled,
+                  route: '/Tasks',
+                )),
             SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'Analysis',
-              image: selectedMenuItem == 'Analysis'
-                  ? analysis_filled
-                  : analysis_not_filled,
-              route: '/analysis',
-              parameter: const Analysis(),
-            ),
+            Obx(() => buildMenuItem(
+                  title: 'Customers',
+                  image: controller.selectedMenuItem.value == 'Customers'
+                      ? customers_filled
+                      : customers_not_filled,
+                  route: '/customers',
+                )),
             SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'Inventory',
-              image: selectedMenuItem == 'Inventory'
-                  ? inventory_filled
-                  : inventory_not_filled,
-              route: '/inventory',
-              parameter: const Inventory(),
-            ),
+            Obx(() => buildMenuItem(
+                  title: 'Analysis',
+                  image: controller.selectedMenuItem.value == 'Analysis'
+                      ? analysis_filled
+                      : analysis_not_filled,
+                  route: '/analysis',
+                )),
             SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'Transactions',
-              image:
-                  selectedMenuItem == 'Transactions' ? transaction_filled : transaction_not_filled,
-              route: '/transaction',
-              parameter: const Transaction(),
-            ),
+            Obx(() => buildMenuItem(
+                  title: 'Inventory',
+                  image: controller.selectedMenuItem.value == 'Inventory'
+                      ? inventory_filled
+                      : inventory_not_filled,
+                  route: '/inventory',
+                )),
             SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'Goals',
-              image:
-                  selectedMenuItem == 'Goals' ? goals_filled : goals_not_filled,
-              route: '/goalList',
-              parameter: const GoalList(),
-            ),
+            Obx(() => buildMenuItem(
+                  title: 'Transactions',
+                  image: controller.selectedMenuItem.value == 'Transactions'
+                      ? transaction_filled
+                      : transaction_not_filled,
+                  route: '/transaction',
+                )),
             SizedBox(height: itemSpacing),
-            buildMenuItem(
-              title: 'Settings',
-              image: selectedMenuItem == 'Settings'
-                  ? settings_filled
-                  : settings_not_filled,
-              route: '/settings',
-              parameter: const Settings(),
-              
-            ),
+            Obx(() => buildMenuItem(
+                  title: 'Goals',
+                  image: controller.selectedMenuItem.value == 'Goals'
+                      ? goals_filled
+                      : goals_not_filled,
+                  route: '/goalList',
+                )),
+            SizedBox(height: itemSpacing),
+            Obx(() => buildMenuItem(
+                  title: 'Settings',
+                  image: controller.selectedMenuItem.value == 'Settings'
+                      ? settings_filled
+                      : settings_not_filled,
+                  route: '/settings',
+                )),
             SizedBox(height: itemSpacing),
             ListTile(
               leading:
                   const Icon(Icons.exit_to_app, size: 25, color: Colors.red),
               title:
-                  const Text('Logout account', style: TextStyle(fontSize: 20)),
+                   Text('Logout account', style: TextStyle(fontSize: screenWidth * 0.04)),
               onTap: () {
                 Navigator.pushReplacementNamed(context, '/signIn');
               },
@@ -171,27 +165,22 @@ class _SidebarState extends State<Sidebar> {
     );
   }
 
-  Widget buildMenuItem(
-      {required String title, required String image, required String route, required parameter}) {
+  Widget buildMenuItem({
+    required String title,
+    required String image,
+    required String route,
+  }) {
     return ListTile(
       leading: SizedBox(
         width: 25,
         height: 25,
         child: Image.asset(image, fit: BoxFit.cover),
       ),
-      title: Text(title, style: const TextStyle(fontSize: 20)),
-      
+      title: Text(title, style: TextStyle(fontSize: screenWidth * 0.04)),
       onTap: () {
-        Navigator.pop(context);
-        Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => parameter,
-        ),
-      );
-        setState(() {
-        selectedMenuItem = title;
-          
-        });
+        controller.selectedMenuItem(title);
+        Get.back();
+        Get.toNamed(route);
       },
     );
   }

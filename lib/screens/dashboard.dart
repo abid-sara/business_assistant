@@ -1,6 +1,8 @@
+import 'package:business_assistant/controllers/DrawerController.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'customers/customers_center.dart';
 
@@ -13,12 +15,19 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  //maybe we should add the dialog for adding customers and orders??
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
+    final controller = Get.put(DrawerControl());
 
+    var listTasks = [
+      "Update status of client",
+      "Prepare cookies",
+      "Buy material"
+    ];
+
+    var lowStockList = ["Sugar", "Chocolate", "Eggs"];
     return SafeArea(
       child: Scaffold(
         drawer: const Sidebar(),
@@ -26,18 +35,19 @@ class _DashboardState extends State<Dashboard> {
           leading: Builder(
             builder: (context) {
               return Padding(
-                padding: const EdgeInsets.all(8.0), // Adjust padding here
+                padding: const EdgeInsets.all(8.0),
                 child: IconButton(
-                  icon: const Icon(Icons.menu,
-                      size: 30), // Change the icon if needed
+                  icon: const Icon(Icons.menu, size: 30),
                   onPressed: () {
-                    Scaffold.of(context).openDrawer(); // Open the sidebar
+                    Scaffold.of(context).openDrawer();
                   },
                 ),
               );
             },
           ),
         ),
+
+        //body>>>>>>>>
         body: SingleChildScrollView(
           child: Stack(
             children: [
@@ -72,41 +82,7 @@ class _DashboardState extends State<Dashboard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.circle_outlined, size: 20),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "Buy material",
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 18),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 9),
-                              const Row(
-                                children: [
-                                  Icon(Icons.circle_outlined, size: 20),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "Prepare cookies",
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 18),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 9),
-                              const Row(
-                                children: [
-                                  Icon(Icons.circle_outlined, size: 20),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "Update status of client",
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 18),
-                                  ),
-                                ],
-                              ),
+                              for (var task in listTasks) showElements(task),
                               const SizedBox(height: 12),
                               const Text(
                                 "Today's Tasks",
@@ -120,16 +96,17 @@ class _DashboardState extends State<Dashboard> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    "# tasks",
-                                    style: TextStyle(
+                                  Text(
+                                    "${listTasks.length} tasks",
+                                    style: const TextStyle(
                                         color:
                                             Color.fromARGB(255, 118, 117, 117),
                                         fontSize: 18),
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
-                                      Navigator.pushNamed(context, '/Tasks');
+                                      controller.selectedMenuItem("To do");
+                                      Get.toNamed('/Tasks');
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color.fromARGB(
@@ -169,7 +146,7 @@ class _DashboardState extends State<Dashboard> {
                                       fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
                               const Text(
-                                "# tasks",
+                                "2 deliveries",
                                 style: TextStyle(
                                     color: Color.fromARGB(255, 118, 117, 117),
                                     fontSize: 18),
@@ -177,8 +154,8 @@ class _DashboardState extends State<Dashboard> {
                               const SizedBox(height: 9),
                               ElevatedButton(
                                 onPressed: () {
-                                  //MUST take us to the orders page
-                                  Navigator.pushNamed(context, '/orders');
+                                  controller.selectedMenuItem("Orders");
+                                  Get.toNamed('/orders');
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
@@ -210,29 +187,8 @@ class _DashboardState extends State<Dashboard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.circle, size: 10),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "Buy material",
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 18),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 9),
-                              const Row(
-                                children: [
-                                  Icon(Icons.circle, size: 10),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "Buy material",
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 18),
-                                  ),
-                                ],
-                              ),
+                              for (var element in lowStockList)
+                                showElements(element),
                               const SizedBox(height: 23),
                               const Text(
                                 "Low Stock Items",
@@ -246,17 +202,17 @@ class _DashboardState extends State<Dashboard> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    "# tasks",
-                                    style: TextStyle(
+                                  Text(
+                                    "${lowStockList.length} items",
+                                    style: const TextStyle(
                                         color:
                                             Color.fromARGB(255, 118, 117, 117),
                                         fontSize: 18),
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
-                                      Navigator.pushNamed(
-                                          context, '/inventory');
+                                      controller.selectedMenuItem("Inventory");
+                                      Get.toNamed('/inventory');
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color.fromARGB(
@@ -284,7 +240,8 @@ class _DashboardState extends State<Dashboard> {
                       width: screenWidth,
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/transaction');
+                          controller.selectedMenuItem("Transactions");
+                          Get.toNamed('/transaction');
                         },
                         child: const Card(
                           color: Color.fromARGB(255, 252, 249, 208),
@@ -299,7 +256,7 @@ class _DashboardState extends State<Dashboard> {
                                         fontWeight: FontWeight.bold)),
                                 SizedBox(height: 4),
                                 Text(
-                                  "# transactions",
+                                  "10 transactions",
                                   style: TextStyle(
                                       color: Color.fromARGB(255, 118, 117, 117),
                                       fontSize: 18),
@@ -324,20 +281,20 @@ class _DashboardState extends State<Dashboard> {
                       width: screenWidth,
                       child: GestureDetector(
                         onTap: () {
-                            Navigator.pushNamed(context, '/addtask');
+                          Navigator.pushNamed(context, '/addtask');
                         },
-                        child:const  Card(
+                        child: const Card(
                           color: AppColors.purpule,
                           child: Padding(
-                            padding: const EdgeInsets.all(12.0),
+                            padding: EdgeInsets.all(12.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
+                                Text(
                                   "Add a task",
                                   style: TextStyle(fontSize: 19),
                                 ),
-                                const Icon(Icons.add)
+                                Icon(Icons.add)
                               ],
                             ),
                           ),
@@ -357,14 +314,14 @@ class _DashboardState extends State<Dashboard> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text(
-                                "Add a client",
+                                "Add a customer",
                                 style: TextStyle(fontSize: 19),
                               ),
                               GestureDetector(
-                                  child: const Icon(Icons.add), onTap: () {
+                                  child: const Icon(Icons.add),
+                                  onTap: () {
                                     Navigator.pushNamed(context, '/customers');
                                   }),
-                              //it must show the add customer dialog
                             ],
                           ),
                         ),
@@ -406,4 +363,17 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+}
+
+Widget showElements(var element) {
+  return Row(
+    children: [
+      const Icon(Icons.circle_outlined, size: 20),
+      const SizedBox(width: 5),
+      Text(
+        element,
+        style: const TextStyle(color: Colors.black, fontSize: 18),
+      ),
+    ],
+  );
 }

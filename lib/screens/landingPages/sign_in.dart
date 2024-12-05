@@ -143,28 +143,31 @@ class _SignInState extends State<SignIn> {
                 const SizedBox(height: 20),
 
                 // Create Account
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Don't have an account?",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        // Navigate to create account
-                        Navigator.pushNamed(context, '/CreateAccount');
-                      },
-                      child: const Text(
-                        'Create Account',
-                        style: TextStyle(
-                          color: AppColors.darkGreen,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Don't have an account?",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Navigate to create account
+                          Navigator.pushNamed(context, '/CreateAccount');
+                        },
+                        child: const Text(
+                          'Create Account',
+                          style: TextStyle(
+                            color: AppColors.darkGreen,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

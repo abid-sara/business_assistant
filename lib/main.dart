@@ -1,9 +1,7 @@
-import 'package:business_assistant/data/customers.dart';
-import 'package:business_assistant/screens/customers/customers_center.dart';
-import 'package:business_assistant/screens/dashboard.dart';
-
+import 'package:get/get.dart';
 import 'constants/routes.dart';
 import 'package:flutter/material.dart';
+import 'screens/landingPages/reset_password.dart';
 import 'screens/landingPages/welcome_screen.dart';
 
 void main() {
@@ -15,13 +13,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Business Assistant',
       theme: ThemeData(
         fontFamily: 'Poppins',
       ),
       routes: routes,
-      home: WelcomeScreen(),
+      home: const WelcomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -7,6 +7,9 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -23,7 +26,7 @@ class WelcomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 70),
+                SizedBox(height: screenHeight * 0.04),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 35.0),
                   child: Text(
@@ -49,9 +52,9 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 400),
+                 SizedBox(height: screenHeight * 0.5),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(180, 0, 0, 0),
+                  padding: EdgeInsets.fromLTRB(screenWidth*0.35, 0, 0, 0),
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/signIn');

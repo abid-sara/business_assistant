@@ -1,6 +1,11 @@
 // This is a generated file; do not edit or check into version control.
+<<<<<<< Updated upstream
 FLUTTER_ROOT=C:\Users\TRETEC\Desktop\repository\flutter
 FLUTTER_APPLICATION_PATH=C:\Users\TRETEC\Desktop\mob project\business_assistant
+=======
+FLUTTER_ROOT=C:\Users\sara\Documents\FlutterDev\flutter
+FLUTTER_APPLICATION_PATH=C:\Users\sara\Desktop\tried\business_assistant
+>>>>>>> Stashed changes
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_TARGET=lib\main.dart
 FLUTTER_BUILD_DIR=build

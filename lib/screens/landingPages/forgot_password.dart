@@ -10,12 +10,14 @@ class ForgotPassword extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   static const String pageRoute = '/ForgotPassword';
-
+  final valid = FormFieldValidator;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar:  BackArrow(title: "",),
+        appBar: BackArrow(
+          title: "",
+        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -70,9 +72,11 @@ class ForgotPassword extends StatelessWidget {
                           child: ElevatedButton(
                             style: button,
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => CheckEmail(
-                                      email: _emailController.text)));
+                              if (formKey.currentState!.validate()) {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => CheckEmail(
+                                        email: _emailController.text)));
+                              }
                             },
                             child: const Text(
                               'Reset password',
