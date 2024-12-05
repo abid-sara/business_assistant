@@ -11,6 +11,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  //maybe we should add the dialog for adding customers and orders??
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -38,13 +39,10 @@ class _DashboardState extends State<Dashboard> {
         body: SingleChildScrollView(
           child: Stack(
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: Positioned.fill(
-                  child: Image.asset(
-                    "assets/images/Dashboard.png",
-                    fit: BoxFit.fill,
-                  ),
+              Positioned.fill(
+                child: Image.asset(
+                  "assets/images/Dashboard.png",
+                  fit: BoxFit.fill,
                 ),
               ),
               Padding(
@@ -174,7 +172,10 @@ class _DashboardState extends State<Dashboard> {
                               ),
                               const SizedBox(height: 9),
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  //MUST take us to the orders page
+                                  Navigator.pushNamed(context, '/orders');
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
                                       const Color.fromARGB(255, 228, 239, 223),
@@ -249,7 +250,10 @@ class _DashboardState extends State<Dashboard> {
                                         fontSize: 18),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                          context, '/inventory');
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color.fromARGB(
                                           255, 228, 239, 223),
@@ -331,18 +335,20 @@ class _DashboardState extends State<Dashboard> {
                     const SizedBox(height: 12),
                     SizedBox(
                       width: screenWidth,
-                      child: const Card(
+                      child: Card(
                         color: AppColors.purpule,
                         child: Padding(
-                          padding: EdgeInsets.all(12.0),
+                          padding: const EdgeInsets.all(12.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
+                              const Text(
                                 "Add a client",
                                 style: TextStyle(fontSize: 19),
                               ),
-                              Icon(Icons.add)
+                              GestureDetector(
+                                  child: const Icon(Icons.add), onTap: () {}),
+                              //it must show the add customer dialog
                             ],
                           ),
                         ),
