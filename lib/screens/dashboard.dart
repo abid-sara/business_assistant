@@ -4,7 +4,6 @@ import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
 
@@ -316,7 +315,8 @@ class _DashboardState extends State<Dashboard> {
                               GestureDetector(
                                   child: const Icon(Icons.add),
                                   onTap: () {
-                                    Navigator.pushNamed(context, '/customers');
+                                    controller.selectedMenuItem("Customers");
+                                    Get.toNamed('/customers');
                                   }),
                             ],
                           ),
@@ -330,7 +330,8 @@ class _DashboardState extends State<Dashboard> {
                       width: screenWidth,
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/orders');
+                          controller.selectedMenuItem("Orders");
+                          Get.toNamed('/orders');
                         },
                         child: const Card(
                           color: AppColors.purpule,

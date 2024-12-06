@@ -113,7 +113,7 @@ class _BusinessdetailsState extends State<Businessdetails> {
                               },
                               style: button,
                               child: const Text(
-                                "Save information",
+                                "Save",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 17,
