@@ -104,19 +104,21 @@ class _BusinessdetailsState extends State<Businessdetails> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              if (formKey.currentState!.validate()) {
-                                Navigator.pushNamed(context, '/dashboard');
-                              }
-                            },
-                            style: button,
-                            child: const Text(
-                              "Save information",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold),
+                          Flexible(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (formKey.currentState!.validate()) {
+                                  Navigator.pushNamed(context, '/dashboard');
+                                }
+                              },
+                              style: button,
+                              child: const Text(
+                                "Save information",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                           ElevatedButton(

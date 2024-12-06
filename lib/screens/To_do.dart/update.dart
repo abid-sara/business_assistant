@@ -10,10 +10,10 @@ class RescheduleTaskPage extends StatefulWidget {
   final Function(Task) onUpdateTask;
 
   const RescheduleTaskPage({
-    Key? key,
+    super.key,
     required this.task,
     required this.onUpdateTask,
-  }) : super(key: key);
+  });
 
   @override
   _RescheduleTaskPageState createState() => _RescheduleTaskPageState();
@@ -158,12 +158,14 @@ class _RescheduleTaskPageState extends State<RescheduleTaskPage> {
                               fontSize: 16,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _startTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                          const SizedBox(height: 3),
+                          Flexible(
+                             child: Text(
+                              _startTime.format(context),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -188,12 +190,14 @@ class _RescheduleTaskPageState extends State<RescheduleTaskPage> {
                               fontSize: 16,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _endTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                          const SizedBox(height: 3),
+                          Flexible(
+                            child: Text(
+                              _endTime.format(context),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],

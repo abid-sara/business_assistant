@@ -185,28 +185,32 @@ class _CreateAccountState extends State<CreateAccount> {
                 ),
 
                 // Create Account
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Already have an account?",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/signIn');
-                      },
-                      child: const Text(
-                        'Back to Sign In',
-                        style: TextStyle(
-                          color: Color(0xFF16423C),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+               FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Already have an account?",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/signIn');
+                        },
+                        child: const Text(
+                          'Back to Sign In',
+                          style: TextStyle(
+                            color: Color(0xFF16423C),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+
               ],
             ),
           ),

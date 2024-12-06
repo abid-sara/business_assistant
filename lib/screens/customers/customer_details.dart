@@ -304,73 +304,76 @@ class _customerDetailsState extends State<customerDetails> {
       },
     );
   }
+void _showEditCustomerDialog(Customer customer) {
+  _nameController.text = customer.name;
+  _addressController.text = customer.address;
+  _phoneController.text = customer.phone_num;
+  _emailController.text = customer.email;
+  _noteController.text = customer.note;
 
-  void _showEditCustomerDialog(Customer customer) {
-    _nameController.text = customer.name;
-    _addressController.text = customer.address;
-    _phoneController.text = customer.phone_num;
-    _emailController.text = customer.email;
-    _noteController.text = customer.note;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Customer'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Customer Name'),
-                controller: _nameController,
-              ),
-              TextField(
-                controller: _phoneController,
-                decoration:
-                    const InputDecoration(labelText: 'Customer phone number'),
-                keyboardType: TextInputType.phone,
-              ),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Customer Email'),
-              ),
-              TextField(
-                controller: _addressController,
-                decoration:
-                    const InputDecoration(labelText: 'Customer Address'),
-              ),
-              TextField(
-                controller: _noteController,
-                decoration: const InputDecoration(labelText: 'Additional note'),
-              ),
-              const SizedBox(height: 10),
-            ],
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Edit Customer'),
+        content: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: const InputDecoration(labelText: 'Customer Name'),
+                  controller: _nameController,
+                ),
+                TextField(
+                  controller: _phoneController,
+                  decoration: const InputDecoration(labelText: 'Customer phone number'),
+                  keyboardType: TextInputType.phone,
+                ),
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Customer Email'),
+                ),
+                TextField(
+                  controller: _addressController,
+                  decoration: const InputDecoration(labelText: 'Customer Address'),
+                ),
+                TextField(
+                  controller: _noteController,
+                  decoration: const InputDecoration(labelText: 'Additional note'),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  customer.name = _nameController.text;
-                  customer.address = _addressController.text;
-                  customer.phone_num = _phoneController.text;
-                  customer.email = _emailController.text;
-                  customer.note = _noteController.text;
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                customer.name = _nameController.text;
+                customer.address = _addressController.text;
+                customer.phone_num = _phoneController.text;
+                customer.email = _emailController.text;
+                customer.note = _noteController.text;
+              });
+              Navigator.of(context).pop();
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -395,152 +398,154 @@ class _customerDetailsState extends State<customerDetails> {
             ),
           ),
           Center(
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(63, 255, 255, 255),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              width: 400,
-              height: 700,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // const Divider(
-                  //   color: AppColors.darkGreen,
-                  //   thickness: 1,
-                  //   indent: 10,
-                  //   endIndent: 10,
-                  // ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.purpule,
-                      borderRadius: BorderRadius.circular(10),
+            child: SingleChildScrollView(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(63, 255, 255, 255),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                width: 400,
+                height: 700,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    // const Divider(
+                    //   color: AppColors.darkGreen,
+                    //   thickness: 1,
+                    //   indent: 10,
+                    //   endIndent: 10,
+                    // ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.purpule,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Personal information",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                _showEditCustomerDialog(customer);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Padding(
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(63, 255, 255, 255),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                "Name: ",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(customer.name),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                "Address: ",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(customer.address),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                "Phone number: ",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(customer.phone_num),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                "Email: ",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(customer.email),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                "Note: ",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(customer.note),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            "Personal information",
+                            ("Customer orders"),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {
-                              _showEditCustomerDialog(customer);
-                            },
-                          ),
+                          Text("Orders count ${customer.ordersCount()}"),
                         ],
                       ),
                     ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(63, 255, 255, 255),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            const Text(
-                              "Name: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(customer.name),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            const Text(
-                              "Address: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(customer.address),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            const Text(
-                              "Phone number: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(customer.phone_num),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            const Text(
-                              "Email: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(customer.email),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            const Text(
-                              "Note: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(customer.note),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          ("Customer orders"),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text("Orders count ${customer.ordersCount()}"),
-                      ],
-                    ),
-                  ),
-                  customer.ordersCount() == 0
-                      ? const Padding(
-                          padding: EdgeInsets.all(15.0),
-                          child: Text("No orders yet for the customer..."),
-                        )
-                      : Expanded(
-                          child: ListView(
-                          children: [
-                            for (var order in customer.orders)
-                              Orderline(
-                                order: order,
-                                markOrderAsDelivered: (order) {
-                                  setState(() {
-                                    order.setDelivered(!order.delivered);
-                                  });
-                                },
-                                deleteOrder: deleteOrder,
-                              ),
-                          ],
-                        )),
-                  ElevatedButton(
-                      onPressed: () {
-                        //adding an order
-                        _showAddOrderDialog(customer);
-                      },
-                      style: button,
-                      child: const Text("Add order" , style: TextStyle(color: Colors.white , fontSize: 20), ))
-                ],
+                    customer.ordersCount() == 0
+                        ? const Padding(
+                            padding: EdgeInsets.all(15.0),
+                            child: Text("No orders yet for the customer..."),
+                          )
+                        : Expanded(
+                            child: ListView(
+                            children: [
+                              for (var order in customer.orders)
+                                Orderline(
+                                  order: order,
+                                  markOrderAsDelivered: (order) {
+                                    setState(() {
+                                      order.setDelivered(!order.delivered);
+                                    });
+                                  },
+                                  deleteOrder: deleteOrder,
+                                ),
+                            ],
+                          )),
+                    ElevatedButton(
+                        onPressed: () {
+                          //adding an order
+                          _showAddOrderDialog(customer);
+                        },
+                        style: button,
+                        child: const Text("Add order" , style: TextStyle(color: Colors.white , fontSize: 20), ))
+                  ],
+                ),
               ),
             ),
           ),

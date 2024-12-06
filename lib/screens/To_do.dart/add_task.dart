@@ -8,7 +8,7 @@ import 'package:business_assistant/style/colors.dart';
 class AddTaskPage extends StatefulWidget {
   final Function(Task) onAddTask;
 
-  const AddTaskPage({Key? key, required this.onAddTask}) : super(key: key);
+  const AddTaskPage({super.key, required this.onAddTask});
 
   @override
   State<AddTaskPage> createState() => addTaskPageState();

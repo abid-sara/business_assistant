@@ -2,7 +2,6 @@ import 'package:business_assistant/style/containers.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/data/customers.dart'; // Import the customers.dart file
-import 'package:business_assistant/data/orders.dart';
 import 'package:business_assistant/style/colors.dart';
 
 class customersPage extends StatefulWidget {
@@ -59,170 +58,150 @@ class _customersPageState extends State<customersPage> {
   }
 
   void _showAddCustomerDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Customer'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Customer Name'),
-                controller: _customerNameController,
-                onChanged: (value) {
-                  setState(() {
-                    if (value.isEmpty) {
-                      nameError = 'Name of customer must be filled';
-                    } else {
-                      nameError = '';
-                    }
-                  });
-                },
-              ),
-              Text(
-                nameError,
-                style: const TextStyle(color: Colors.red),
-              ),
-              TextField(
-                controller: _customerPhoneController,
-                decoration:
-                    const InputDecoration(labelText: 'Customer phone number'),
-                keyboardType: TextInputType.phone,
-                onChanged: (value) {
-                  setState(() {
-                    if (value.isEmpty) {
-                      phoneError = 'Please enter a phone number';
-                    } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                      phoneError = 'Please enter a valid number';
-                    } else {
-                      phoneError = '';
-                    }
-                  });
-                },
-              ),
-              Text(
-                phoneError,
-                style: const TextStyle(color: Colors.red),
-              ),
-              TextField(
-                controller: _customerEmailController,
-                decoration: const InputDecoration(labelText: 'Customer Email'),
-                onChanged: (value) {
-                  setState(() {
-                    if (value.isEmpty) {
-                      emailError = 'Please enter an email';
-                    } else if (!RegExp(
-                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                        .hasMatch(value)) {
-                      emailError = 'Please enter a valid email';
-                    } else {
-                      emailError = '';
-                    }
-                  });
-                },
-              ),
-              Text(
-                emailError,
-                style: const TextStyle(color: Colors.red),
-              ),
-              TextField(
-                controller: _customerAddressController,
-                decoration:
-                    const InputDecoration(labelText: 'Customer Address'),
-                //it can be empty address
-              ),
-              TextField(
-                controller: _customerNoteController,
-                decoration: const InputDecoration(labelText: 'Additional note'),
-              ),
-              const SizedBox(height: 10),
-            ],
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Add Customer'),
+        content: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: const InputDecoration(labelText: 'Customer Name'),
+                  controller: _customerNameController,
+                  onChanged: (value) {
+                    setState(() {
+                      if (value.isEmpty) {
+                        nameError = 'Name of customer must be filled';
+                      } else {
+                        nameError = '';
+                      }
+                    });
+                  },
+                ),
+                Text(
+                  nameError,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                TextField(
+                  controller: _customerPhoneController,
+                  decoration:
+                      const InputDecoration(labelText: 'Customer phone number'),
+                  keyboardType: TextInputType.phone,
+                  onChanged: (value) {
+                    setState(() {
+                      if (value.isEmpty) {
+                        phoneError = 'Please enter a phone number';
+                      } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                        phoneError = 'Please enter a valid number';
+                      } else {
+                        phoneError = '';
+                      }
+                    });
+                  },
+                ),
+                Text(
+                  phoneError,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                TextField(
+                  controller: _customerEmailController,
+                  decoration: const InputDecoration(labelText: 'Customer Email'),
+                  onChanged: (value) {
+                    setState(() {
+                      if (value.isEmpty) {
+                        emailError = 'Please enter an email';
+                      } else if (!RegExp(
+                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                          .hasMatch(value)) {
+                        emailError = 'Please enter a valid email';
+                      } else {
+                        emailError = '';
+                      }
+                    });
+                  },
+                ),
+                Text(
+                  emailError,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                TextField(
+                  controller: _customerAddressController,
+                  decoration: const InputDecoration(labelText: 'Customer Address'),
+                ),
+                TextField(
+                  controller: _customerNoteController,
+                  decoration: const InputDecoration(labelText: 'Additional note'),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  if (_customerNameController.text.isEmpty) {
-                    nameError = 'Name of customer must be filled';
-                  }
-                  if (_customerPhoneController.text.isEmpty) {
-                    phoneError = 'Please enter a phone number';
-                  } else if (!RegExp(r'^[0-9]*$')
-                      .hasMatch(_customerPhoneController.text)) {
-                    phoneError = 'Please enter a valid number';
-                  }
-                  if (_customerEmailController.text.isEmpty) {
-                    emailError = 'Please enter an email';
-                  } else if (!RegExp(
-                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                      .hasMatch(_customerEmailController.text)) {
-                    emailError = 'Please enter a valid email';
-                  }
-                });
-
-                if (nameError.isNotEmpty ||
-                    phoneError.isNotEmpty ||
-                    emailError.isNotEmpty) {
-                  return;
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                if (_customerNameController.text.isEmpty) {
+                  nameError = 'Name of customer must be filled';
                 }
-
-                // Adding an item it means that we will append a new customer in the list of customers
-                // if none of them is empty then add the customer
-                if (_customerNameController.text.isEmpty ||
-                    _customerPhoneController.text.isEmpty ||
-                    _customerEmailController.text.isEmpty ||
-                    _customerAddressController.text.isEmpty) {
-                  return;
+                if (_customerPhoneController.text.isEmpty) {
+                  phoneError = 'Please enter a phone number';
+                } else if (!RegExp(r'^[0-9]*$')
+                    .hasMatch(_customerPhoneController.text)) {
+                  phoneError = 'Please enter a valid number';
                 }
-
-                // Email validation
-                String email = _customerEmailController.text;
-                bool emailValid = RegExp(
+                if (_customerEmailController.text.isEmpty) {
+                  emailError = 'Please enter an email';
+                } else if (!RegExp(
                         r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                    .hasMatch(email);
-                if (!emailValid) {
-                  // Show an error message or handle the invalid email case
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invalid email address')),
-                  );
-                  return;
+                    .hasMatch(_customerEmailController.text)) {
+                  emailError = 'Please enter a valid email';
                 }
+              });
 
-                setState(() {
-                  customersList.add(Customer(
-                      customerID: customers.length + 1,
-                      name: _customerNameController.text,
-                      address: _customerAddressController.text,
-                      phone_num: _customerPhoneController.text,
-                      email: _customerEmailController.text,
-                      note: _customerNoteController.text,
-                      orders: []));
-                  // empty orders at first because it is a new customer
-                  // clear the text fields
-                  _customerNameController.clear();
-                  _customerPhoneController.clear();
-                  _customerEmailController.clear();
-                  _customerAddressController.clear();
-                  _customerNoteController.clear();
-                });
+              if (nameError.isNotEmpty ||
+                  phoneError.isNotEmpty ||
+                  emailError.isNotEmpty) {
+                return;
+              }
 
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add customer'),
-              // its adding the customers to the list
-            ),
-          ],
-        );
-      },
-    );
-  }
+              setState(() {
+                customersList.add(Customer(
+                  customerID: customers.length + 1,
+                  name: _customerNameController.text,
+                  address: _customerAddressController.text,
+                  phone_num: _customerPhoneController.text,
+                  email: _customerEmailController.text,
+                  note: _customerNoteController.text,
+                  orders: [],
+                ));
+                _customerNameController.clear();
+                _customerPhoneController.clear();
+                _customerEmailController.clear();
+                _customerAddressController.clear();
+                _customerNoteController.clear();
+              });
+
+              Navigator.of(context).pop();
+            },
+            child: const Text('Add customer'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {

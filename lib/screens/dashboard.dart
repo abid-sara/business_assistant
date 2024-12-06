@@ -4,7 +4,6 @@ import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'customers/customers_center.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});

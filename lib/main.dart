@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'constants/routes.dart';
 import 'package:flutter/material.dart';
-import 'screens/landingPages/reset_password.dart';
 import 'screens/landingPages/welcome_screen.dart';
 
 void main() {

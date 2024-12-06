@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/customindicator.dart';
 import 'package:business_assistant/style/colors.dart';
-import 'update.dart';
 
 class Tasks extends StatefulWidget {
   const Tasks({super.key});
@@ -141,7 +140,25 @@ class _TasksState extends State<Tasks> with SingleTickerProviderStateMixin {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Icon(Icons.calendar_today),
+                IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () {
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          ).then((pickedDate) {
+                            setState(() {
+                              if (pickedDate != null) {
+                                final formattedDate =
+                                    DateFormat('MMMM yyyy').format(pickedDate);
+                                _selectedDate = formattedDate as DateTime;
+                              }
+                            });
+                          });
+                        },
+                      ),
               ],
             ),
           ),

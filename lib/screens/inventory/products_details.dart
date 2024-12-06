@@ -197,88 +197,94 @@ class _ItemDetailsState extends State<ItemDetails> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: SizedBox(
-                          width: 150,
-                          height: 140,
-                          child: Image.asset(product.image),
+                SingleChildScrollView(
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: SizedBox(
+                            width: 150,
+                            height: 140,
+                            child: Image.asset(product.image),
+                          ),
                         ),
                       ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                      Flexible(
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              width: 200,
-                              child: Text(
-                                product.name,
-                                overflow: TextOverflow.clip,
-                                maxLines: 2,
-                                style: const TextStyle(
-                                    fontSize: 22, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Center(
-                          child: SizedBox(
-                              width: 200,
-                              child: Text(
-                                product.description,
-                                //use of the overflow in order to handle the overflow!
-                                overflow: TextOverflow.clip,
-                                maxLines: 3,
-                              )),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                elevation: 0, // Remove shadow
-                                shadowColor:
-                                    Colors.transparent, // Remove shadow color
-                                splashFactory: NoSplash
-                                    .splashFactory, // Remove splash effect
-                              ).copyWith(
-                                overlayColor: WidgetStateProperty.all(
-                                    Colors.transparent), // Remove overlay color
-                              ),
-                              child: const Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Icon(
-                                    Icons.edit,
-                                    size: 20,
-                                    color: Colors.grey,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: Text(
+                                      product.name,
+                                      overflow: TextOverflow.clip,
+                                      maxLines: 2,
+                                      style: const TextStyle(
+                                          fontSize: 22, fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                  Text(" Edit item ",
-                                      style: TextStyle(
+                                ),
+                              ],
+                            ),
+                            Center(
+                              child: SizedBox(
+                                  width: 200,
+                                  child: Text(
+                                    product.description,
+                                    //use of the overflow in order to handle the overflow!
+                                    overflow: TextOverflow.clip,
+                                    maxLines: 3,
+                                  )),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    elevation: 0, // Remove shadow
+                                    shadowColor:
+                                        Colors.transparent, // Remove shadow color
+                                    splashFactory: NoSplash
+                                        .splashFactory, // Remove splash effect
+                                  ).copyWith(
+                                    overlayColor: WidgetStateProperty.all(
+                                        Colors.transparent), // Remove overlay color
+                                  ),
+                                  child: const Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Icon(
+                                        Icons.edit,
+                                        size: 20,
                                         color: Colors.grey,
-                                      ))
-                                ],
-                              ),
-                              onPressed: () {
-                                _showEditDialog(product);
-                              },
+                                      ),
+                                      Text(" Edit item ",
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                          ))
+                                    ],
+                                  ),
+                                  onPressed: () {
+                                    _showEditDialog(product);
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
                 // const SizedBox(height: 16),
                 Row(

@@ -4,7 +4,6 @@ import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:business_assistant/constants/routes.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});

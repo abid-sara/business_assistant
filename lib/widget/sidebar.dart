@@ -1,14 +1,4 @@
 import 'package:business_assistant/controllers/DrawerController.dart';
-import 'package:business_assistant/data/Task.dart';
-import 'package:business_assistant/screens/Analysis/analysis.dart';
-import 'package:business_assistant/screens/Analysis/transactions.dart';
-import 'package:business_assistant/screens/Settings/setting.dart';
-import 'package:business_assistant/screens/To_do.dart/all_tasks.dart';
-import 'package:business_assistant/screens/customers/customers_center.dart';
-import 'package:business_assistant/screens/dashboard.dart';
-import 'package:business_assistant/screens/goallist/goal_list.dart';
-import 'package:business_assistant/screens/inventory/products_center.dart';
-import 'package:business_assistant/screens/orders/orders_center.dart';
 import 'package:get/get.dart';
 
 import '/constants/imagePaths.dart';
