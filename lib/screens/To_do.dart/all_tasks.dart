@@ -20,35 +20,56 @@ class Tasks extends StatefulWidget {
 class _TasksState extends State<Tasks> with SingleTickerProviderStateMixin {
   DateTime _selectedDate = DateTime.now();
   TabController? _tabController;
-   
+
   // Dummy Task List
   final List<Task> _tasks = [
-    Task(title: "Meeting with client", date: DateTime.now(), status: "In progress", description: 'in the library'),
-    Task(title: "Submit project report", date: DateTime.now(), status: "Completed", description: 'writing the report of the se project ..'),
-    Task(title: "Design wireframes", date: DateTime.now().add(const Duration(hours: 2)), status: "Missed", description: ''),
-    Task(title: "Plan sprint", date: DateTime.now().subtract(const Duration(days: 1)), status: "Completed", description: 'doing the tasks'),
-    Task(title: "Update dashboard", date: DateTime.now(), status: "In progress", description: 'changing the appbar'),
+    Task(
+        title: "Update status of client",
+        date: DateTime.now(),
+        status: "In progress",
+        description: 'in the library'),
+    Task(
+        title: "Pack Orders",
+        date: DateTime.now(),
+        status: "Completed",
+        description: 'writing the report of the se project ..'),
+    Task(
+        title: "Buy material",
+        date: DateTime.now().add(const Duration(hours: 2)),
+        status: "Missed",
+        description: ''),
+    Task(
+        title: "Plan orders",
+        date: DateTime.now().subtract(const Duration(days: 1)),
+        status: "Completed",
+        description: 'doing the tasks'),
+    Task(
+        title: "Call customer1",
+        date: DateTime.now(),
+        status: "In progress",
+        description: 'changing the appbar'),
   ];
-  
-final Map<String, WidgetBuilder> routes = {
-  '/': (context) => Tasks(),
-  '/addtask': (context) => AddTaskPage(
-    onAddTask: (task) {
-      //  task addition logic
-    },
-  ),
-};
+
+  final Map<String, WidgetBuilder> routes = {
+    '/': (context) => const Tasks(),
+    '/addtask': (context) => AddTaskPage(
+          onAddTask: (task) {
+            //  task addition logic
+          },
+        ),
+  };
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
   }
+
   void addTask(Task task) {
-  setState(() {
-    _tasks.add(task);  
-  });
-  print("Task added: ${task.title}"); // Debugging
-}
+    setState(() {
+      _tasks.add(task);
+    });
+    print("Task added: ${task.title}"); // Debugging
+  }
 
   List<Task> _getTasksForSelectedDate() {
     return _tasks.where((task) {
@@ -64,7 +85,8 @@ final Map<String, WidgetBuilder> routes = {
       builder: (context) {
         return AlertDialog(
           title: const Text('Mark as Completed'),
-          content: const Text('Are you sure you want to mark this task as completed?'),
+          content: const Text(
+              'Are you sure you want to mark this task as completed?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -75,7 +97,7 @@ final Map<String, WidgetBuilder> routes = {
             TextButton(
               onPressed: () {
                 setState(() {
-                  task.status = "Completed"; 
+                  task.status = "Completed";
                 });
                 Navigator.of(context).pop();
               },
@@ -90,7 +112,7 @@ final Map<String, WidgetBuilder> routes = {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const  Sidebar(),
+      drawer: const Sidebar(),
       appBar: AppBar(
         backgroundColor: Colors.white.withOpacity(0),
         elevation: 0,
@@ -149,7 +171,7 @@ final Map<String, WidgetBuilder> routes = {
 
           const SizedBox(height: 16),
 
-          // Row for "Today . Wednesday" 
+          // Row for "Today . Wednesday"
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -208,17 +230,16 @@ final Map<String, WidgetBuilder> routes = {
 
                       // Tab Bar Views
                       Expanded(
-  child: TabBarView(
-    controller: _tabController,
-    children: [
-      _buildTaskList(),
-      _buildTaskList(filterStatus: "In progress"), 
-      _buildTaskList(filterStatus: "Completed"), 
-      _buildTaskList(filterStatus: "Missed"), 
-    ],
-  ),
-)
-
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildTaskList(),
+                            _buildTaskList(filterStatus: "In progress"),
+                            _buildTaskList(filterStatus: "Completed"),
+                            _buildTaskList(filterStatus: "Missed"),
+                          ],
+                        ),
+                      )
                     ],
                   ),
           ),
@@ -226,192 +247,196 @@ final Map<String, WidgetBuilder> routes = {
       ),
     );
   }
-Widget _buildTaskList({String? filterStatus}) {
-  // Get tasks for the selected date
-  final tasksForSelectedDate = _getTasksForSelectedDate();
 
-  // Filter tasks based on status if filterStatus is provided
-  final filteredTasks = filterStatus == null
-      ? tasksForSelectedDate
-      : tasksForSelectedDate.where((task) {
-          // Directly compare the task's status with the filterStatus string
-          return task.status == filterStatus;
-        }).toList();
+  Widget _buildTaskList({String? filterStatus}) {
+    // Get tasks for the selected date
+    final tasksForSelectedDate = _getTasksForSelectedDate();
 
-  return Stack(
-    children: [
-      // Task List
-      filteredTasks.isEmpty
-          ? const Center(
-              child: Text(
-                "No tasks for the selected date",
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              itemCount: filteredTasks.length,
-              itemBuilder: (context, index) {
-                final task = filteredTasks[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: task.status == "Completed"
-                        ? Colors.green[50]
-                        : task.status == "Missed"
-                            ? Colors.red[50]
-                            : Colors.orange[50],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: task.status == "Missed"
-                          ? Colors.red
-                          : Colors.transparent,
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
+    // Filter tasks based on status if filterStatus is provided
+    final filteredTasks = filterStatus == null
+        ? tasksForSelectedDate
+        : tasksForSelectedDate.where((task) {
+            // Directly compare the task's status with the filterStatus string
+            return task.status == filterStatus;
+          }).toList();
+
+    return Stack(
+      children: [
+        // Task List
+        filteredTasks.isEmpty
+            ? const Center(
+                child: Text(
+                  "No tasks for the selected date",
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              )
+            : ListView.builder(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                itemCount: filteredTasks.length,
+                itemBuilder: (context, index) {
+                  final task = filteredTasks[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: task.status == "Completed"
+                          ? Colors.green[50]
+                          : task.status == "Missed"
+                              ? Colors.red[50]
+                              : Colors.orange[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: task.status == "Missed"
+                            ? Colors.red
+                            : Colors.transparent,
+                        width: 1.5,
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Status Indicator
-                      GestureDetector(
-                        onTap: () => _markTaskAsCompleted(task),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: task.status == "Completed"
-                                ? Colors.green
-                                : task.status == "Missed"
-                                    ? Colors.red
-                                    : Colors.orange,
-                          ),
-                          child: Icon(
-                            task.status == "Completed"
-                                ? Icons.check
-                                : task.status == "Missed"
-                                    ? Icons.error_outline
-                                    : Icons.hourglass_top,
-                            color: Colors.white,
-                            size: 20,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Status Indicator
+                        GestureDetector(
+                          onTap: () => _markTaskAsCompleted(task),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: task.status == "Completed"
+                                  ? Colors.green
+                                  : task.status == "Missed"
+                                      ? Colors.red
+                                      : Colors.orange,
+                            ),
+                            child: Icon(
+                              task.status == "Completed"
+                                  ? Icons.check
+                                  : task.status == "Missed"
+                                      ? Icons.error_outline
+                                      : Icons.hourglass_top,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
+                        const SizedBox(width: 16),
 
-                      // Task Details
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              task.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: task.status == "Missed"
-                                    ? Colors.red
-                                    : Colors.grey[800],
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              task.description.isNotEmpty
-                                  ? task.description
-                                  : "No description provided",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  size: 16,
-                                  color: Colors.grey[600],
+                        // Task Details
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                task.title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: task.status == "Missed"
+                                      ? Colors.red
+                                      : Colors.grey[800],
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  DateFormat('h:mm a').format(task.date),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                task.description.isNotEmpty
+                                    ? task.description
+                                    : "No description provided",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 16,
+                                    color: Colors.grey[600],
                                   ),
-                                ),
-                              ],
-                            ),
-                            TextButton(
-                                    onPressed: (){Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RescheduleTaskPage(
-                                      task: _tasks[index],  // Pass the specific task to edit
-                                      onUpdateTask: (updatedTask) {
-                                        // Handle updated task
-                                        setState(() {
-                                          // Update the task list with the updated task
-                                          _tasks[index] = updatedTask;
-                                        });
-                                      },
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    DateFormat('h:mm a').format(task.date),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
                                     ),
                                   ),
-                                );
-                     }, child: Text('Reschedule' , style: TextStyle( color: AppColors.green, fontSize: 15),), 
-                                  ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-      // Add Task Button
-      Positioned(
-        bottom: 16,
-        right: 16,
-       child: ElevatedButton(
-             onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddTaskPage(
-                            onAddTask: (newTask) {
-                              setState(() {
-                                _tasks.add(newTask);
-                                print(_tasks); // Add the task to the list
-                              });
-                            },
+                                ],
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RescheduleTaskPage(
+                                        task: _tasks[
+                                            index], // Pass the specific task to edit
+                                        onUpdateTask: (updatedTask) {
+                                          // Handle updated task
+                                          setState(() {
+                                            // Update the task list with the updated task
+                                            _tasks[index] = updatedTask;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Reschedule',
+                                  style: TextStyle(
+                                      color: AppColors.green, fontSize: 15),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      );
+                      ],
+                    ),
+                  );
+                },
+              ),
 
-
-
-                  },
-              style: button,
-              child: Text("Add Task",
-              style: TextStyle( color: Colors.white , fontSize: 20),)
-              ,
+        // Add Task Button
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddTaskPage(
+                    onAddTask: (newTask) {
+                      setState(() {
+                        _tasks.add(newTask);
+                        print(_tasks); // Add the task to the list
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+            style: button,
+            child: const Text(
+              "Add Task",
+              style: TextStyle(color: Colors.white, fontSize: 20),
             ),
-
-      ),
-    ],
-  );
-}
-
-
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   void dispose() {

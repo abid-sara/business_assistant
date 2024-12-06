@@ -17,9 +17,9 @@ class _SettingsState extends State<Settings> {
   File? _profileImage; // To store the selected image
   bool _isEditing = false; // Track editing state
   final TextEditingController _businessNameController =
-      TextEditingController(text: 'Cosmetics business owner');
+      TextEditingController(text: 'Stationery online store');
 
-  bool _isNotificationsEnabled = false; 
+  bool _isNotificationsEnabled = false;
 
   void _handleNotificationToggle(bool value) {
     setState(() {
@@ -72,7 +72,7 @@ class _SettingsState extends State<Settings> {
             ),
           ),
           // Main Content
-           SafeArea(
+          SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
@@ -88,33 +88,39 @@ class _SettingsState extends State<Settings> {
                           const SizedBox(height: 16),
                           // Profile Section
                           SingleChildScrollView(
-                           // scrollDirection: Axis.horizontal,
+                            // scrollDirection: Axis.horizontal,
                             child: Container(
                               padding: const EdgeInsets.all(16.0),
                               height: 130,
                               decoration: BoxDecoration(
                                 color: const Color.fromARGB(195, 169, 169, 199),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey, width: 1), // Adding border around the container
+                                border: Border.all(
+                                    color: Colors.grey,
+                                    width:
+                                        1), // Adding border around the container
                               ),
                               child: Row(
                                 children: [
                                   GestureDetector(
                                     onTap: _pickImage,
                                     child: CircleAvatar(
-                                        radius: 50, // Set the radius for the avatar
-                                        backgroundImage: _profileImage != null
-                                            ? FileImage(_profileImage!) 
-                                            : const AssetImage('assets/images/default_profile.png') 
-                                                as ImageProvider,
-                                      ),
-
+                                      radius:
+                                          50, // Set the radius for the avatar
+                                      backgroundImage: _profileImage != null
+                                          ? FileImage(_profileImage!)
+                                          : const AssetImage(
+                                                  'assets/images/default_profile.jpg')
+                                              as ImageProvider,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           ' $userName $userSurname',
@@ -124,32 +130,37 @@ class _SettingsState extends State<Settings> {
                                           ),
                                         ),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             if (_isEditing)
                                               Expanded(
                                                 child: TextField(
-                                                  controller: _businessNameController,
+                                                  controller:
+                                                      _businessNameController,
                                                   style: const TextStyle(
-                                                    color: Color.fromARGB(255, 112, 112, 112),
+                                                    color: Color.fromARGB(
+                                                        255, 112, 112, 112),
                                                     fontWeight: FontWeight.bold,
                                                   ),
-                                                  decoration: const InputDecoration(
-                                                    border: UnderlineInputBorder(),
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    border:
+                                                        UnderlineInputBorder(),
                                                     isDense: true,
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 5),
+                                                    contentPadding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 5),
                                                   ),
-                                                  
                                                 ),
-                                                
                                               )
                                             else
-                                    
                                               Expanded(
                                                 child: Text(
                                                   _businessNameController.text,
                                                   style: const TextStyle(
-                                                    color: Color.fromARGB(255, 112, 112, 112),
+                                                    color: Color.fromARGB(
+                                                        255, 112, 112, 112),
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
@@ -161,7 +172,9 @@ class _SettingsState extends State<Settings> {
                                                 });
                                               },
                                               icon: Icon(
-                                                _isEditing ? Icons.check : Icons.edit,
+                                                _isEditing
+                                                    ? Icons.check
+                                                    : Icons.edit,
                                                 color: Colors.grey,
                                               ),
                                             ),
@@ -209,12 +222,9 @@ class _SettingsState extends State<Settings> {
                             SettingsOption(
                               title: 'Notifications',
                               icon: Icons.notifications,
-                              isNotificationOption:
-                                  true,
-                              isNotificationEnabled:
-                                  _isNotificationsEnabled, 
-                              onNotificationToggle:
-                                  _handleNotificationToggle,
+                              isNotificationOption: true,
+                              isNotificationEnabled: _isNotificationsEnabled,
+                              onNotificationToggle: _handleNotificationToggle,
                               onTap: () {
                                 //tap for Notifications if needed
                               },

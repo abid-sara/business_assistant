@@ -21,17 +21,14 @@ class _DashboardState extends State<Dashboard> {
     final double screenHeight = MediaQuery.of(context).size.height;
     final controller = Get.put(DrawerControl());
 
-    var listTasks = [
-      "Update status of client",
-      "Prepare cookies",
-      "Buy material"
-    ];
+    var listTasks = ["Update status of client", "Pack orders", "Buy material"];
 
-    var lowStockList = ["Sugar", "Chocolate", "Eggs"];
+    var lowStockList = ["Pink pen"];
     return SafeArea(
       child: Scaffold(
         drawer: const Sidebar(),
         appBar: AppBar(
+          // backgroundColor: AppColors.purpule,
           leading: Builder(
             builder: (context) {
               return Padding(
@@ -58,7 +55,7 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(30.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,10 +1,10 @@
 //this what will be shown after clicking on the order line
 import 'package:business_assistant/style/containers.dart';
-
-import 'package:business_assistant/widget/exportbutton.dart';
-
+import 'dart:typed_data';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:business_assistant/widget/button.dart';
-
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/data/orders.dart';
@@ -57,6 +57,86 @@ class detailsBox extends StatefulWidget {
 
 class _detailsBoxState extends State<detailsBox> {
   late String orderCode;
+  Future<Uint8List> _generateOrderPdf(Order order) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Order Details',
+                  style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 20),
+              pw.Text('Order Code: ${order.orderCode}',
+                  style: const pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 10),
+              pw.Text('Customer: ${order.customer.name}',
+                  style: const pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 10),
+              pw.Text('Order Date: ${order.orderDate}',
+                  style: const pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 10),
+              pw.Text('Delivery Date: ${order.deliveryDate}',
+                  style: const pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 10),
+              pw.Text('Delivery Address: ${order.deliveryAddress}',
+                  style: const pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 10),
+              pw.Text('Delivery Price: ${order.deliveryPrice}',
+                  style: const pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 20),
+              pw.Text('Items:',
+                  style: pw.TextStyle(
+                      fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.Table.fromTextArray(
+                headers: ['Item', 'Unit Price', 'Quantity', 'Total'],
+                data: order.products.entries
+                    .map((e) => [
+                          e.key.name,
+                          e.key.unitPrice.toString(),
+                          e.value.toString(),
+                          (e.key.unitPrice * e.value).toString()
+                        ])
+                    .toList(),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Text('Total Price: ${order.totalPrice}',
+                  style: pw.TextStyle(
+                      fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.Text(
+                  'Total Price with Delivery: ${order.getTotalWithDelivery()}',
+                  style: pw.TextStyle(
+                      fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.Spacer(),
+              pw.Text("Generated on: ${DateTime.now()}"),
+              pw.Text("Thank you for the order "),
+              pw.Text(
+                "Business Assistant",
+                style: pw.TextStyle(
+                    fontSize: 15,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.green),
+              ),
+              // pw.Text("Here we print the title of the business")
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  void _printOrderPdf(Order order) async {
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => _generateOrderPdf(order),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -224,6 +304,7 @@ class _detailsBoxState extends State<detailsBox> {
                   child: ElevatedButton(
                       style: button,
                       onPressed: () {
+                        _printOrderPdf(widget.order);
                         //we must add the logic that will export the correct PDF
                         print("Exporting PDF... ");
                       },

@@ -43,34 +43,39 @@ class _SidebarState extends State<Sidebar> {
         child: ListView(
           padding: const EdgeInsets.all(12),
           children: <Widget>[
-            Row(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: screenWidth * 0.18,
-                    height: screenWidth * 0.18,
-                    child: const DrawerHeader(
-                      decoration: BoxDecoration(
-                        color: AppColors.darkGreen,
-                        shape: BoxShape.circle,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/editprofil');
+              },
+              child: Row(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: screenWidth * 0.18,
+                      height: screenWidth * 0.18,
+                      child: const DrawerHeader(
+                        decoration: BoxDecoration(
+                          color: AppColors.darkGreen,
+                          shape: BoxShape.circle,
+                        ),
+                        child: SizedBox.shrink(),
                       ),
-                      child: SizedBox.shrink(),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Sara ABID',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: screenWidth * 0.056,
+                  const SizedBox(width: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Sara ABID',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: screenWidth * 0.056,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Container(
               height: 1,
@@ -153,8 +158,8 @@ class _SidebarState extends State<Sidebar> {
             ListTile(
               leading:
                   const Icon(Icons.exit_to_app, size: 25, color: Colors.red),
-              title:
-                   Text('Logout account', style: TextStyle(fontSize: screenWidth * 0.04)),
+              title: Text('Logout account',
+                  style: TextStyle(fontSize: screenWidth * 0.04)),
               onTap: () {
                 Navigator.pushReplacementNamed(context, '/signIn');
               },
