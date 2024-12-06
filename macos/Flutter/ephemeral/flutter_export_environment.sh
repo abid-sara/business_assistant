@@ -1,12 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-<<<<<<< Updated upstream
 export "FLUTTER_ROOT=C:\Users\TRETEC\Desktop\repository\flutter"
 export "FLUTTER_APPLICATION_PATH=C:\Users\TRETEC\Desktop\mob project\business_assistant"
-=======
-export "FLUTTER_ROOT=C:\Users\sara\Documents\FlutterDev\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Users\sara\Desktop\tried\business_assistant"
->>>>>>> Stashed changes
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"
