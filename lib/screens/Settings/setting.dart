@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:business_assistant/screens/Settings/editprofile.dart';
 import 'package:business_assistant/widget/settingoption.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/sidebar.dart';
@@ -193,21 +194,21 @@ class _SettingsState extends State<Settings> {
                               title: 'Edit Profile',
                               icon: Icons.edit,
                               onTap: () async {
-                                final result = await Navigator.pushNamed(
+                                final result = await Navigator.push(
                                   context,
-                                  '/editprofil',
-                                  arguments: {
-                                    'initialName': 'John',
-                                    'initialSurname': 'Doe',
-                                  },
+                                  MaterialPageRoute(
+                                    builder: (context) => EditProfile(
+                                      initialName: userName,
+                                      initialSurname: userSurname,
+                                      initialProfilePicture: null, // Pass the profile picture if needed
+                                    ),
+                                  ),
                                 );
 
-                                if (result != null &&
-                                    result is Map<String, String>) {
+                                if (result != null && result is Map<String, dynamic>) {
                                   setState(() {
                                     userName = result['name'] ?? userName;
-                                    userSurname =
-                                        result['surname'] ?? userSurname;
+                                    userSurname = result['surname'] ?? userSurname;
                                   });
                                 }
                               },
