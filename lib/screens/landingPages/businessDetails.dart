@@ -60,40 +60,6 @@ class _BusinessdetailsState extends State<Businessdetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Type of business",
-                        style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkGreen),
-                      ),
-                      const SizedBox(height: 5),
-                      DropdownButtonFormField<String>(
-                        dropdownColor: AppColors.lightGreen,
-                        value: selectedBusinessType,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedBusinessType = newValue;
-                          });
-                        },
-                        items: businessTypes
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: AppColors.darkGreen),
-                            )),
-                      ),
                       const SizedBox(height: 20),
                       structure(
                         "Name of your business",

@@ -1,6 +1,7 @@
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:business_assistant/database/db_utility.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -52,9 +53,9 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                 SizedBox(height: screenHeight * 0.5),
+                SizedBox(height: screenHeight * 0.5),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(screenWidth*0.35, 0, 0, 0),
+                  padding: EdgeInsets.fromLTRB(screenWidth * 0.35, 0, 0, 0),
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/signIn');
