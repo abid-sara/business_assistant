@@ -40,7 +40,9 @@ class DBHelper {
         order_date TEXT NOT NULL,
         delivery_date TEXT NOT NULL,
         delivery_address TEXT NOT NULL,
-        delivery_price DOUBLE NOT NULL
+        delivery_price DOUBLE NOT NULL,
+        customer_id INTEGER NOT NULL,
+        FOREIGN KEY (customer_id) REFERENCES "Customer" (id) ON DELETE CASCADE
         )
     ''');
 
@@ -52,6 +54,14 @@ class DBHelper {
         PRIMARY KEY (order_id, product_id),
         FOREIGN KEY (order_id) REFERENCES "Order" (id) ON DELETE CASCADE,
         FOREIGN KEY (product_id) REFERENCES Product (id) ON DELETE CASCADE
+        )
+    ''');
+
+    await db.execute('''
+        CREATE TABLE "Income" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER,
+        FOREIGN KEY (order_id) REFERENCES Order (id) ON DELETE CASCADE
         )
     ''');
   }
