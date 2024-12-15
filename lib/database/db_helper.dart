@@ -64,5 +64,15 @@ class DBHelper {
         FOREIGN KEY (order_id) REFERENCES Order (id) ON DELETE CASCADE
         )
     ''');
+
+    await db.execute('''
+    CREATE TABLE "Expense" (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    amount DOUBLE NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES Product (id) ON DELETE CASCADE
+    )
+''');
   }
 }
