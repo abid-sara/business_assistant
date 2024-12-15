@@ -20,10 +20,12 @@ import '/screens/landingPages/reset_password.dart';
 import '/screens/landingPages/businessDetails.dart';
 import '/screens/landingPages/create_account.dart';
 import '../screens/Analysis/transactions.dart';
-import '../screens/Analysis/analysis.dart';
+import '../screens/Analysis/analysis_month.dart';
 import '../screens/Analysis/analysis_week.dart';
+import '../screens/Analysis/analysis_year.dart';
 import '../screens/goallist/goal_list.dart';
 import '../screens/goallist/description.dart';
+
 
 var routes = {
   '/signIn': (ctx) => const SignIn(),
@@ -49,7 +51,8 @@ var routes = {
    '/addtask' : (context) => AddTaskPage(onAddTask: (task) {},),
   '/goalList': (context) => const GoalList(),
   '/description': (context) => const Description(),
-  '/analysis': (context) => const Analysis(),
   '/analysisweek': (context) => const AnalysisWeek(),
+  '/analysismonth': (context) => const AnalysisMonth(),
+  '/analysisyear': (context) => const AnalysisYear(),
   '/transaction': (context) => const Transaction(),
 };

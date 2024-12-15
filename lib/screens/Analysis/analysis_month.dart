@@ -7,14 +7,14 @@ import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 
-class Analysis extends StatefulWidget {
-  const Analysis({super.key});
+class AnalysisMonth extends StatefulWidget {
+  const AnalysisMonth({super.key});
 
   @override
-  State<Analysis> createState() => _AnalysisState();
+  State<AnalysisMonth> createState() => _AnalysisMonthState();
 }
 
-class _AnalysisState extends State<Analysis> {
+class _AnalysisMonthState extends State<AnalysisMonth> {
   List<TransactionData> transactions = [];
 
   int selectedIndex = -1;
@@ -33,10 +33,10 @@ class _AnalysisState extends State<Analysis> {
   void handleButtonPress(int index, String routeName) {
     setState(() {
       selectedIndex =
-          index; // Update selectedIndex locally when a button is pressed
+          index; 
     });
     Navigator.pushNamed(context, routeName,
-        arguments: index); // Pass selectedIndex when navigating
+        arguments: index); 
   }
 
   @override
@@ -49,24 +49,7 @@ class _AnalysisState extends State<Analysis> {
     transactions = List.from(Transactionlist);
   }
 
-  //get the row object to be displayed in the recent transactions list
-  List<Widget> buildTransactionRows() {
-    double screenWidth = MediaQuery.of(context).size.width;
-
-    return Transactionlist.map((transaction) {
-      return CustomRow(
-        title: transaction.source,
-        subtitle: DateFormat('dd MMM yyyy at hh:mm a').format(transaction.date),
-        value:
-            '${transaction.type == 'income' ? '+' : '-'} ${transaction.amount} DZD',
-        icon: Icon(
-          transaction.type == 'income' ? Icons.south_west : Icons.north_east,
-          size: screenWidth*0.016,
-          color: transaction.type == 'income' ? AppColors.green : Colors.red,
-        ),
-      );
-    }).toList();
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -133,23 +116,29 @@ class _AnalysisState extends State<Analysis> {
                     borderRadius: BorderRadius.circular(0),
                     color: Colors.white,
                   ),
-                  child: const CustomBarChart(isExpense: true),
+                  child: const CustomBarChart(isExpense: true ,viewType: "monthly",),
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
                 Column(
                   children: [
                     const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'May 2024',
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.all(10)),
-                    Column(
-                      children: buildTransactionRows(),
-                    ),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Your Income',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const Padding(padding: EdgeInsets.all(10)),
+                Container(
+                  width: screenWidth * 0.9,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(0),
+                    color: Colors.white,
+                  ),
+                  child: const CustomBarChart(isExpense: false ,viewType: "monthly",),
+                ),
+                    
                   ],
                 )
               ],

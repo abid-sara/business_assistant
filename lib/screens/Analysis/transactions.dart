@@ -81,8 +81,7 @@ class _TransactionState extends State<Transaction> {
   void _initializeTransaction(){
     transactions = List.from(Transactionlist);
   }
-  //the trasation list needs to be updated according to the data in transactionData
-
+  
   List<Widget> buildTransactionRows() {
     return transactions.map((transaction) {
       return CustomRow(
@@ -129,7 +128,7 @@ class _TransactionState extends State<Transaction> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          'Analytics',
+          'Transactions',
           style: TextStyle(
             fontSize: 16,
           ),

@@ -110,7 +110,7 @@ class _SidebarState extends State<Sidebar> {
                   image: controller.selectedMenuItem.value == 'Analysis'
                       ? analysis_filled
                       : analysis_not_filled,
-                  route: '/analysis',
+                  route: '/analysisweek',
                 )),
             SizedBox(height: itemSpacing),
             Obx(() => buildMenuItem(

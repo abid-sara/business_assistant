@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
 
+
+
 class SelectedButton extends StatefulWidget {
   final String label;
-  final int index;  // Add index to identify each button
-  final int selectedIndex;  // Add selectedIndex to track the currently selected button
+  final int index;  
+  final int selectedIndex;  
   final VoidCallback onPressed;
 
   const SelectedButton({super.key, 
@@ -54,16 +56,16 @@ class _AnalysisWeekState extends State<AnalysisWeek> {
         final int? index = ModalRoute.of(context)!.settings.arguments as int?;
         if (index != null && selectedIndex != index) {
           setState(() {
-            selectedIndex = index; // Ensure selectedIndex is updated from arguments
+            selectedIndex = index; 
           });
         }
       }
 
       void handleButtonPress(int index, String routeName) {
         setState(() {
-          selectedIndex = index; // Update selectedIndex locally when a button is pressed
+          selectedIndex = index; 
         });
-        Navigator.pushNamed(context, routeName, arguments: index); // Pass selectedIndex when navigating
+        Navigator.pushNamed(context, routeName, arguments: index); 
       }
 
       @override
@@ -132,7 +134,7 @@ class _AnalysisWeekState extends State<AnalysisWeek> {
           ),
           child: const Padding(
             padding: EdgeInsets.all(8.0),  
-            child: CustomBarChart(isExpense: true),
+            child: CustomBarChart(isExpense: true ,viewType: "weekly",),
        
       ),
     ),
@@ -155,7 +157,7 @@ class _AnalysisWeekState extends State<AnalysisWeek> {
           ),
           child: const Padding(
             padding: EdgeInsets.all(8.0),  
-            child:CustomBarChart(isExpense: false,),
+            child:CustomBarChart(isExpense: false, viewType: "weekly",),
        
       ),
     ),

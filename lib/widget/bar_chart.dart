@@ -1,114 +1,175 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:business_assistant/database/db_helper.dart';
+import 'package:intl/intl.dart';
+
 import '../style/colors.dart';
-import 'package:business_assistant/data/transactiondata.dart';
+
+
 
 class CustomBarChart extends StatefulWidget {
   final bool isExpense;
+  final String viewType; 
 
-  const CustomBarChart({super.key, required this.isExpense});
+  const CustomBarChart({super.key, required this.isExpense, required this.viewType});
 
   @override
   State<CustomBarChart> createState() => _CustomBarChartState();
 }
 
 class _CustomBarChartState extends State<CustomBarChart> {
+  List<Map<String, dynamic>> entries = []; 
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEntries();
+  }
+
+  Future<void> fetchEntries() async {
+    try {
+      final database = await DBHelper.getDatabase();
+      String tableName = widget.isExpense ? 'Expense' : 'Income';
+      List<Map<String, dynamic>> data = await database.query(tableName);
+
+      setState(() {
+        entries = data.map((item) {
+          return {
+            'amount': item['amount'] as double,
+            'date': item['date'] as String,
+          };
+        }).toList();
+      });
+    } catch (e) {
+      print('Error fetching entries: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Filter the transactions to be able to draw the bar chart of expense/income
-    List<TransactionData> filteredTransactions = filterTransactions(widget.isExpense);
+    Map<int, double> amountsByPeriod = aggregateAmountsByPeriod(entries, widget.viewType);
 
-    Map<int, double> amountsByDay = aggregateAmountsByDay(filteredTransactions);
-    List<BarChartGroupData> barChartData = prepareBarChartData(amountsByDay);
+    List<BarChartGroupData> barChartData = prepareBarChartData(amountsByPeriod);
+
+    double maxY = amountsByPeriod.values.isNotEmpty
+        ? amountsByPeriod.values.reduce((a, b) => a > b ? a : b)
+        : 100.0;
+    double minY = 0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-      child: BarChart(
-        BarChartData(
-          // Min and maximum value
-          minY: 20000,
-          maxY: 100000,
-          borderData: FlBorderData(show: false),
-          gridData: const FlGridData(
-            drawVerticalLine: true,
-            verticalInterval: 500,
-          ),
-          titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 60,
-                interval: 20000,
-                getTitlesWidget: (value, meta) {
-                  return Text(value.toString());
-                },
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      child: barChartData.isEmpty
+          ? Center(child: Text('No data available for the selected period.'))
+          : BarChart(
+              BarChartData(
+                minY: minY,
+                maxY: maxY,
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(
+                  drawHorizontalLine: true,
+                  horizontalInterval: maxY / 5,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(color: Colors.grey, strokeWidth: 0.5);
+                  },
+                ),
+                titlesData: FlTitlesData(
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: maxY / 5,
+                      getTitlesWidget: (value, meta) {
+                        return Text(value.toInt().toString(), style: TextStyle(fontSize: 10));
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (double value, TitleMeta meta) {
+                        return getBottomTitles(value.toInt(), widget.viewType);
+                      },
+                    ),
+                  ),
+                ),
+                groupsSpace: 10,
+                barGroups: barChartData,
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        'Period: ${group.x}\nAmount: ${rod.toY.toStringAsFixed(2)}',
+                        TextStyle(color: Colors.white),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (double value, TitleMeta meta) {
-                  switch (value.toInt()) {
-                    case 1:
-                      return const Text('Mon');
-                    case 2:
-                      return const Text('Tue');
-                    case 3:
-                      return const Text('Wed');
-                    case 4:
-                      return const Text('Thu');
-                    case 5:
-                      return const Text('Fri');
-                    case 6:
-                      return const Text('Sat');
-                    case 7:
-                      return const Text('Sun');
-                    default:
-                      return const Text('');
-                  }
-                },
-              ),
-            ),
-          ),
-          groupsSpace: 10, 
-          barGroups: barChartData,
-        ),
-      ),
     );
   }
 
-  // Filter transactions based on whether they are income or expense
-  List<TransactionData> filterTransactions(bool isExpense) {
-    return Transactionlist.where((transaction) => transaction.type == (isExpense ? 'expense' : 'income')).toList();
-  }
+  Map<int, double> aggregateAmountsByPeriod(List<Map<String, dynamic>> entries, String viewType) {
+    Map<int, double> amountsByPeriod = {};
+    DateTime now = DateTime.now();
 
-  /// Assigns the values to the days in the bar chart widget.
-  Map<int, double> aggregateAmountsByDay(List<TransactionData> transactions) {
-    Map<int, double> amountsByDay = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0, 6: 0.0, 7: 0.0};
-    for (var transaction in transactions) {
-      int dayOfWeek = transaction.date.weekday;
-      amountsByDay[dayOfWeek] = (amountsByDay[dayOfWeek] ?? 0.0) + transaction.amount;
+    for (var entry in entries) {
+      DateTime date = DateTime.parse(entry['date']);
+      double amount = entry['amount'];
+      int periodKey;
+
+      if (viewType == 'weekly') {
+        DateTime startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+        int daysDifference = date.difference(startOfWeek).inDays;
+        periodKey = (daysDifference >= 0 && daysDifference < 7) ? daysDifference : -1;
+      } else if (viewType == 'monthly') {
+        DateTime startOfMonth = DateTime(now.year, now.month, 1);
+        int weekOfMonth = ((date.day - 1) ~/ 7) + 1;
+        periodKey = weekOfMonth;
+      } else if (viewType == 'yearly') {
+        periodKey = date.month;
+      } else {
+        throw Exception('Invalid view type');
+      }
+
+      if (periodKey >= 0) {
+        amountsByPeriod[periodKey] = (amountsByPeriod[periodKey] ?? 0) + amount;
+      }
     }
-    return amountsByDay;
+
+    return amountsByPeriod;
   }
 
-  // Assign the values to the bar chart widget
-  List<BarChartGroupData> prepareBarChartData(Map<int, double> amountsByDay) {
-    return amountsByDay.entries.map((entry) {
-      int day = entry.key;
+  List<BarChartGroupData> prepareBarChartData(Map<int, double> amountsByPeriod) {
+    return amountsByPeriod.entries.map((entry) {
+      int period = entry.key;
       double amount = entry.value;
       return BarChartGroupData(
-        x: day,
+        x: period,
         barRods: [
           BarChartRodData(
             toY: amount,
-            width: 20, 
+            width: 20,
             color: AppColors.darkGreen,
+            borderRadius: BorderRadius.circular(4),
           ),
         ],
       );
     }).toList();
+  }
+
+  Widget getBottomTitles(int value, String viewType) {
+    if (viewType == 'weekly') {
+      List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      return Text(days[value % 7], style: TextStyle(fontSize: 10));
+    } else if (viewType == 'monthly') {
+      return Text('Week $value', style: TextStyle(fontSize: 10));
+    } else if (viewType == 'yearly') {
+      return Text(DateFormat.MMM().format(DateTime(0, value)), style: TextStyle(fontSize: 10));
+    } else {
+      return Text('', style: TextStyle(fontSize: 10));
+    }
   }
 }
