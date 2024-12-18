@@ -2,9 +2,9 @@ import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/orderLine.dart';
-import 'package:business_assistant/data/customers.dart'; // Import the customers.dart file
-import 'package:business_assistant/data/orders.dart'; // Import the orders.dart file
-import 'package:business_assistant/data/products.dart'; // Import the products.dart file
+import 'package:business_assistant/models/customer.dart';
+import 'package:business_assistant/models/order.dart';
+import 'package:business_assistant/models/product.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 
@@ -294,7 +294,6 @@ class _customerDetailsState extends State<customerDetails> {
 
                     Navigator.of(context).pop();
                   },
-                  
                   child: const Text('Add Order'),
                 ),
               ],
@@ -304,76 +303,82 @@ class _customerDetailsState extends State<customerDetails> {
       },
     );
   }
-void _showEditCustomerDialog(Customer customer) {
-  _nameController.text = customer.name;
-  _addressController.text = customer.address;
-  _phoneController.text = customer.phone_num;
-  _emailController.text = customer.email;
-  _noteController.text = customer.note;
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Edit Customer'),
-        content: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Customer Name'),
-                  controller: _nameController,
-                ),
-                TextField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'Customer phone number'),
-                  keyboardType: TextInputType.phone,
-                ),
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Customer Email'),
-                ),
-                TextField(
-                  controller: _addressController,
-                  decoration: const InputDecoration(labelText: 'Customer Address'),
-                ),
-                TextField(
-                  controller: _noteController,
-                  decoration: const InputDecoration(labelText: 'Additional note'),
-                ),
-                const SizedBox(height: 10),
-              ],
+  void _showEditCustomerDialog(Customer customer) {
+    _nameController.text = customer.name;
+    _addressController.text = customer.address;
+    _phoneController.text = customer.phone_num;
+    _emailController.text = customer.email;
+    _noteController.text = customer.note;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Customer'),
+          content: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    decoration:
+                        const InputDecoration(labelText: 'Customer Name'),
+                    controller: _nameController,
+                  ),
+                  TextField(
+                    controller: _phoneController,
+                    decoration: const InputDecoration(
+                        labelText: 'Customer phone number'),
+                    keyboardType: TextInputType.phone,
+                  ),
+                  TextField(
+                    controller: _emailController,
+                    decoration:
+                        const InputDecoration(labelText: 'Customer Email'),
+                  ),
+                  TextField(
+                    controller: _addressController,
+                    decoration:
+                        const InputDecoration(labelText: 'Customer Address'),
+                  ),
+                  TextField(
+                    controller: _noteController,
+                    decoration:
+                        const InputDecoration(labelText: 'Additional note'),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                customer.name = _nameController.text;
-                customer.address = _addressController.text;
-                customer.phone_num = _phoneController.text;
-                customer.email = _emailController.text;
-                customer.note = _noteController.text;
-              });
-              Navigator.of(context).pop();
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  customer.name = _nameController.text;
+                  customer.address = _addressController.text;
+                  customer.phone_num = _phoneController.text;
+                  customer.email = _emailController.text;
+                  customer.note = _noteController.text;
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -543,7 +548,10 @@ void _showEditCustomerDialog(Customer customer) {
                           _showAddOrderDialog(customer);
                         },
                         style: button,
-                        child: const Text("Add order" , style: TextStyle(color: Colors.white , fontSize: 20), ))
+                        child: const Text(
+                          "Add order",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ))
                   ],
                 ),
               ),

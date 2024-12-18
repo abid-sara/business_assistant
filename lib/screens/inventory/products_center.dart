@@ -23,7 +23,7 @@ class _InventoryState extends State<Inventory>
   final TextEditingController _unitController = TextEditingController();
   final TextEditingController _unitPriceController = TextEditingController();
   final TextEditingController _costPriceController = TextEditingController();
-  final TextEditingController _totalUnitsController = TextEditingController();
+  // final TextEditingController _totalUnitsController = TextEditingController();
   final TextEditingController _supplierNameController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _supplierPhoneController =
@@ -258,24 +258,24 @@ class _InventoryState extends State<Inventory>
                           return null;
                         },
                       ),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: 'Total units bought'),
-                        keyboardType: TextInputType.number,
-                        controller: _totalUnitsController,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the total units bought';
-                          }
-                          if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                      ),
+                      // TextFormField(
+                      //   decoration: const InputDecoration(
+                      //       labelText: 'Total units bought'),
+                      //   keyboardType: TextInputType.number,
+                      //   controller: _totalUnitsController,
+                      //   inputFormatters: <TextInputFormatter>[
+                      //     FilteringTextInputFormatter.digitsOnly,
+                      //   ],
+                      //   validator: (value) {
+                      //     if (value == null || value.isEmpty) {
+                      //       return 'Please enter the total units bought';
+                      //     }
+                      //     if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                      //       return 'Please enter a valid number';
+                      //     }
+                      //     return null;
+                      //   },
+                      // ),
                       const SizedBox(height: 30),
                       Center(
                         child: Text("Supplier information", style: title_style),
@@ -404,7 +404,7 @@ class _InventoryState extends State<Inventory>
                       minThreshold: double.parse(
                           _minController.text), // default threshold
                       unitCost: double.parse(_costPriceController.text),
-                      unitsBought: double.parse(_totalUnitsController.text),
+                      // unitsBought: double.parse(_totalUnitsController.text),
                       supplierName: _supplierNameController.text,
                       supplierPhone: _supplierPhoneController.text,
                       supplierAddress: _supplierAddressController.text,
@@ -423,7 +423,7 @@ class _InventoryState extends State<Inventory>
                     _unitController.clear();
                     _unitPriceController.clear();
                     _costPriceController.clear();
-                    _totalUnitsController.clear();
+                    // _totalUnitsController.clear();
                     _supplierNameController.clear();
                     _supplierPhoneController.clear();
                     _supplierAddressController.clear();
@@ -531,10 +531,7 @@ class _InventoryState extends State<Inventory>
                   },
                 ),
               ),
-              // Padding(
-              //   padding: EdgeInsets.all(8.0),
-              //   child: SortByDropdown(),
-              // ),
+             
 
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

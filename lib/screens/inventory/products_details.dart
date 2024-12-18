@@ -16,7 +16,7 @@ class _ItemDetailsState extends State<ItemDetails> {
   late TextEditingController _quantityController;
   late TextEditingController _remainingQuantityController;
   late TextEditingController _unitCostController;
-  late TextEditingController _unitsBoughtController;
+  // late TextEditingController _unitsBoughtController;
   late TextEditingController _supplierNameController;
   late TextEditingController _supplierPhoneController;
   late TextEditingController _supplierAddressController;
@@ -30,7 +30,7 @@ class _ItemDetailsState extends State<ItemDetails> {
     _quantityController = TextEditingController();
     _remainingQuantityController = TextEditingController();
     _unitCostController = TextEditingController();
-    _unitsBoughtController = TextEditingController();
+    // _unitsBoughtController = TextEditingController();
     _supplierNameController = TextEditingController();
     _supplierPhoneController = TextEditingController();
     _supplierAddressController = TextEditingController();
@@ -50,7 +50,7 @@ class _ItemDetailsState extends State<ItemDetails> {
       _quantityController.text = product.quantity.toString();
       _remainingQuantityController.text = product.remainingQuantity.toString();
       _unitCostController.text = product.unitCost.toString();
-      _unitsBoughtController.text = product.unitsBought.toString();
+      // _unitsBoughtController.text = product.unitsBought.toString();
       _supplierNameController.text = product.supplierName;
       _supplierPhoneController.text = product.supplierPhone;
       _supplierAddressController.text = product.supplierAddress;
@@ -65,7 +65,7 @@ class _ItemDetailsState extends State<ItemDetails> {
     _quantityController.dispose();
     _remainingQuantityController.dispose();
     _unitCostController.dispose();
-    _unitsBoughtController.dispose();
+    // _unitsBoughtController.dispose();
     _supplierNameController.dispose();
     _supplierPhoneController.dispose();
     _supplierAddressController.dispose();
@@ -118,12 +118,12 @@ class _ItemDetailsState extends State<ItemDetails> {
                           const InputDecoration(labelText: 'Item unit cost'),
                       keyboardType: TextInputType.number,
                     ),
-                    TextFormField(
-                      controller: _unitsBoughtController,
-                      decoration:
-                          const InputDecoration(labelText: 'Item units bought'),
-                      keyboardType: TextInputType.number,
-                    ),
+                    // TextFormField(
+                    //   controller: _unitsBoughtController,
+                    //   decoration:
+                    //       const InputDecoration(labelText: 'Item units bought'),
+                    //   keyboardType: TextInputType.number,
+                    // ),
                     TextFormField(
                       controller: _supplierNameController,
                       decoration:
@@ -157,12 +157,11 @@ class _ItemDetailsState extends State<ItemDetails> {
                   product.name = _nameController.text;
                   product.unitPrice = double.parse(_unitPriceController.text);
                   product.description = _descriptionController.text;
-                  product.quantity = double.parse(_quantityController.text);
+                  product.quantity = double.parse(_quantityController
+                      .text); //call the check checkQuantityIfAdded if it is true generate an expense
                   product.remainingQuantity =
                       double.parse(_remainingQuantityController.text);
                   product.unitCost = double.parse(_unitCostController.text);
-                  product.unitsBought =
-                      double.parse(_unitsBoughtController.text);
                   product.supplierName = _supplierNameController.text;
                   product.supplierPhone = _supplierPhoneController.text;
                   product.supplierAddress = _supplierAddressController.text;
@@ -228,7 +227,8 @@ class _ItemDetailsState extends State<ItemDetails> {
                                       overflow: TextOverflow.clip,
                                       maxLines: 2,
                                       style: const TextStyle(
-                                          fontSize: 22, fontWeight: FontWeight.bold),
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ),
@@ -251,13 +251,13 @@ class _ItemDetailsState extends State<ItemDetails> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
                                     elevation: 0, // Remove shadow
-                                    shadowColor:
-                                        Colors.transparent, // Remove shadow color
+                                    shadowColor: Colors
+                                        .transparent, // Remove shadow color
                                     splashFactory: NoSplash
                                         .splashFactory, // Remove splash effect
                                   ).copyWith(
-                                    overlayColor: WidgetStateProperty.all(
-                                        Colors.transparent), // Remove overlay color
+                                    overlayColor: WidgetStateProperty.all(Colors
+                                        .transparent), // Remove overlay color
                                   ),
                                   child: const Row(
                                     mainAxisAlignment:
@@ -403,15 +403,15 @@ class _ItemDetailsState extends State<ItemDetails> {
                           Text(product.unitCost.toString()),
                         ],
                       ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Item units bought: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.unitsBought.toString()),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     const Text(
+                      //       "Item units bought: ",
+                      //       style: TextStyle(fontWeight: FontWeight.bold),
+                      //     ),
+                      //     Text(product.unitsBought.toString()),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),
