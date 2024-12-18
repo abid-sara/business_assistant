@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../style/text.dart';
 import '../style/colors.dart';
-import 'package:business_assistant/data/customers.dart';
-import 'package:business_assistant/data/orders.dart';
+import 'package:business_assistant/models/customer.dart';
+import 'package:business_assistant/models/order.dart';
 
 // ignore: must_be_immutable
 class Orderline extends StatefulWidget {
@@ -74,7 +74,7 @@ class _OrderlineState extends State<Orderline> {
                   // crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(widget.order.orderCode, style: title_style),
+                    Text(widget.order.id.toString(), style: title_style),
                     Text(widget.order.customer.name,
                         style: const TextStyle(
                             color: Color.fromARGB(255, 70, 66, 66))),
@@ -95,14 +95,16 @@ class _OrderlineState extends State<Orderline> {
                       widget.markOrderAsDelivered(widget.order);
                       //update the delivery status
                       print(
-                          "The delivery status of the order now is ${widget.order.delivered}");
+                          "The delivery status of the order now is ${widget.order.status}");
                     });
                   },
                   icon: Icon(
-                    widget.order.delivered
+                    widget.order.status == "delivered"
                         ? Icons.check_circle
                         : Icons.radio_button_unchecked,
-                    color: widget.order.delivered ? Colors.green : Colors.grey,
+                    color: widget.order.status == "delivered"
+                        ? Colors.green
+                        : Colors.grey,
                   ),
                 ),
               ],

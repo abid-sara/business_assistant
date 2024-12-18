@@ -11,7 +11,7 @@ class Product {
   double remainingQuantity;
   double minThreshold;
   double unitCost;
-  double unitsBought;
+  // double unitsBought;
   String supplierName;
   String supplierPhone;
   String supplierAddress;
@@ -25,7 +25,7 @@ class Product {
     required this.remainingQuantity,
     required this.minThreshold,
     required this.unitCost,
-    required this.unitsBought,
+    // required this.unitsBought,
     required this.supplierName,
     required this.supplierPhone,
     required this.supplierAddress,
@@ -44,7 +44,7 @@ final List<Product> products = [
     remainingQuantity: 1.0,
     minThreshold: 10,
     unitCost: 800.0,
-    unitsBought: 10.0,
+    // unitsBought: 10.0,
     supplierName: "Supplier1",
     supplierPhone: "123456789",
     supplierAddress: "Algeria",
@@ -59,7 +59,7 @@ final List<Product> products = [
     remainingQuantity: 80.0,
     minThreshold: 10, //maybe we add that the user enters
     unitCost: 100.0,
-    unitsBought: 10.0,
+    // unitsBought: 10.0,
     supplierName: "Supplier2",
     supplierPhone: "06748392",
     supplierAddress: "Algiers",
@@ -74,7 +74,7 @@ final List<Product> products = [
     remainingQuantity: 4,
     minThreshold: 5,
     unitCost: 400.0,
-    unitsBought: 150.0,
+    // unitsBought: 150.0,
     supplierName: "Supplier3",
     supplierPhone: "123456789",
     supplierAddress: "Algeria",
@@ -89,7 +89,7 @@ final List<Product> products = [
     remainingQuantity: 23.0,
     minThreshold: 30,
     unitCost: 150.0,
-    unitsBought: 150.0,
+    // unitsBought: 150.0,
     supplierName: "Supplier4",
     supplierPhone: "067283927",
     supplierAddress: "Algeria",
@@ -104,7 +104,7 @@ final List<Product> products = [
     remainingQuantity: 50,
     minThreshold: 20,
     unitCost: 20,
-    unitsBought: 300,
+    // unitsBought: 300,
     supplierName: "Supplier5",
     supplierPhone: "055673829",
     supplierAddress: "Algiers",

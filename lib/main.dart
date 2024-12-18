@@ -1,3 +1,4 @@
+import 'package:business_assistant/screens/dashboard.dart';
 import 'package:get/get.dart';
 import 'constants/routes.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,8 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Poppins',
       ),
       routes: routes,
-      home: const WelcomeScreen(),
+      // home: const WelcomeScreen(),
+      home: Dashboard(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -22,18 +22,18 @@ class DBHelper {
 
   static Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-          CREATE TABLE "User" (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          email TEXT,
-          username TEXT,
-          password TEXT,
-          business_name TEXT,
+        CREATE TABLE "User" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT,
+        username TEXT,
+        password TEXT,
+        business_name TEXT,
           )
       ''');
 
     await db.execute('''
         CREATE TABLE "Order" (
-        code INTEGER PRIMARY KEY,
+        id INTEGER PRIMARY KEY,
         price DOUBLE NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',  
         deleted BOOLEAN NOT NULL DEFAULT 0,
@@ -44,6 +44,23 @@ class DBHelper {
         customer_id INTEGER NOT NULL,
         FOREIGN KEY (customer_id) REFERENCES "Customer" (id) ON DELETE CASCADE
         )
+    ''');
+
+    await db.execute('''
+        CREATE TABLE Product (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        unit_price REAL NOT NULL,
+        quantity INTEGER NOT NULL,
+        deleted BOOLEAN NOT NULL DEFAULT 0,
+        supplier_name TEXT NOT NULL,
+        supplier_phone_num TEXT NOT NULL,
+        supplier_address TEXT NOT NULL,
+        product_description TEXT,
+        minimum_quantity INTEGER NOT NULL,
+        additional_info TEXT,
+        product_image TEXT
+    )
     ''');
 
     await db.execute('''
@@ -65,12 +82,12 @@ class DBHelper {
         )
     ''');
 
-      await db.execute('''
-      CREATE TABLE "Expense" (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      product_id INTEGER NOT NULL,
-      date TEXT NOT NULL,
-      FOREIGN KEY (product_id) REFERENCES Product (id) ON DELETE CASCADE
+    await db.execute('''
+        CREATE TABLE "Expense" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        FOREIGN KEY (product_id) REFERENCES Product (id) ON DELETE CASCADE
       )
   ''');
   }

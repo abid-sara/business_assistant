@@ -15,14 +15,14 @@ class DBAssistant {
     final database = await DBHelper.getDatabase();
     try {
       return await database.rawUpdate(
-          '''UPDATE $tableName SET deleted = ? where id = ? ''', [0, id]);
+          '''UPDATE $tableName SET deleted = ? WHERE id = ?''', [1, id]);
     } catch (e) {
-      print("Error deleting from into table $tableName: $e");
+      print("Error deleting from table $tableName: $e");
       return -1;
     }
   }
 
-  static Future<int> update(
+  static Future<bool> update(
       String tableName, int id, Map<String, dynamic> data) async {
     final database = await DBHelper.getDatabase();
     try {
@@ -33,20 +33,18 @@ class DBAssistant {
         whereArgs: [id],
       );
     } catch (e) {
-      print("Error updating into table $tableName: $e");
-      return -1;
+      print("Error updating table $tableName: $e");
+      return false;
     }
   }
 
-  static Future<int> selectAll(String tableName) async {
+  static Future<List<Map<String, dynamic>>> selectAll(String tableName) async {
     final database = await DBHelper.getDatabase();
-
     try {
-      return await database.rawQuery('''SELECT * FROM $tableName ''');
+      return await database.query(tableName);
     } catch (e) {
-      print("Error selecting from $tableName");
-      return -1;
+      print("Error selecting from table $tableName: $e");
+      return [];
     }
   }
-  
 }
