@@ -2,11 +2,13 @@ import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/text.dart';
 import 'package:business_assistant/style/colors.dart';
-import 'package:business_assistant/data/products.dart';
+import 'package:business_assistant/models/product.dart';
 import 'package:image_input/image_input.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
+
+import '../../database/db_product.dart';
 
 class Inventory extends StatefulWidget {
   const Inventory({super.key});
@@ -22,8 +24,6 @@ class _InventoryState extends State<Inventory>
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _unitController = TextEditingController();
   final TextEditingController _unitPriceController = TextEditingController();
-  final TextEditingController _costPriceController = TextEditingController();
-  // final TextEditingController _totalUnitsController = TextEditingController();
   final TextEditingController _supplierNameController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _supplierPhoneController =
@@ -35,7 +35,9 @@ class _InventoryState extends State<Inventory>
   final TextEditingController _minController = TextEditingController();
 
   late TabController _tabController;
-  List<Product> filtered_products = products;
+
+  List<Product> filtered_products = [];
+  List<Product> products = [];
   String _searchQuery = '';
   String unitPriceError = '';
   String currentQuantityError = '';
@@ -49,10 +51,17 @@ class _InventoryState extends State<Inventory>
   File? _image;
   String _imagePath = "";
 
+  Future<void> initialize() async {
+    List<Map<String, dynamic>> productsUnformated = await showProducts();
+    products = productsUnformated.map((map) => Product.fromMap(map)).toList();
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    initialize();
   }
 
   List<Product> _filterItems(String category) {
@@ -68,24 +77,67 @@ class _InventoryState extends State<Inventory>
       return filteredResults;
     } else if (category == 'Low-stock') {
       return filteredResults
-          .where((product) => product.quantity < product.minThreshold)
+          .where((product) => product.quantity < product.minimumQuantity)
           .toList();
     } else if (category == 'High-stock') {
       return filteredResults
           .where((product) =>
               product.quantity >=
               product
-                  .minThreshold) // we should just consider the min threshold in each product
+                  .minimumQuantity) // we should just consider the min threshold in each product
           .toList();
     } else {
       return filteredResults;
     }
   }
 
-  void _addNewItem(Product product) {
+  void _addNewItem(Product product) async {
+    // Add the product to the local filtered products list
     setState(() {
       filtered_products.add(product);
     });
+
+    // Prepare the product data as a map for database insertion
+    Map<String, dynamic> productData = {
+      'name': product.name,
+      'quantity': product.quantity,
+      'product_image': product.productImage,
+      'unit_price': product.unitPrice,
+      'product_description': product.productDescription,
+      'minimum_quantity': product.minimumQuantity,
+      'deleted': 0,
+      'supplier_name': product.supplierName,
+      'supplier_phone_num': product.supplierPhoneNum,
+      'supplier_address': product.supplierAddress,
+    };
+
+    // Add the product to the database
+    bool success = await addProduct(product: productData);
+
+    if (!success) {
+      // If database insertion fails, remove the product from the local list
+      setState(() {
+        filtered_products.remove(product);
+      });
+
+      // Optionally show an error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to add product to database')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('YES to add product to database')),
+      );
+      // Re-fetch the entire product list from the database
+      List<Map<String, dynamic>> productsUnformated = await showProducts();
+      setState(() {
+        products =
+            productsUnformated.map((map) => Product.fromMap(map)).toList();
+        // Reset the search query to show the updated list
+        _searchQuery = '';
+        _searchController.clear();
+      });
+    }
   }
 
   void _showAddItemDialog() {
@@ -124,25 +176,13 @@ class _InventoryState extends State<Inventory>
                         },
                       ),
 
-                      //for now we remove the unit and we work with one unit only
-                      // TextFormField(
-                      //   decoration: const InputDecoration(labelText: 'Unit'),
-                      //   controller: _unitController,
-                      //   keyboardType: TextInputType.text,
-                      //   validator: (value) {
-                      //     if (value == null || value.isEmpty) {
-                      //       return 'Please enter a unit';
-                      //     }
-                      //     return null;
-                      //   },
-                      // ),
                       TextFormField(
                         onChanged: (value) {
                           if (value.isEmpty) {
                             unitPriceError = 'Please enter a unit price';
                             setState(() {});
                           }
-                          if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                          if (!RegExp(r'^\d+(\.\d+)?$').hasMatch(value)) {
                             unitPriceError = 'Please enter a valid number';
                             setState(() {});
                           }
@@ -238,44 +278,7 @@ class _InventoryState extends State<Inventory>
                           minThresholdError = '';
                         },
                       ),
-                      const SizedBox(height: 30),
-                      Text("Cost details", style: title_style),
-                      TextFormField(
-                        decoration:
-                            const InputDecoration(labelText: 'Cost price'),
-                        keyboardType: TextInputType.number,
-                        controller: _costPriceController,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the cost price';
-                          }
-                          if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                      ),
-                      // TextFormField(
-                      //   decoration: const InputDecoration(
-                      //       labelText: 'Total units bought'),
-                      //   keyboardType: TextInputType.number,
-                      //   controller: _totalUnitsController,
-                      //   inputFormatters: <TextInputFormatter>[
-                      //     FilteringTextInputFormatter.digitsOnly,
-                      //   ],
-                      //   validator: (value) {
-                      //     if (value == null || value.isEmpty) {
-                      //       return 'Please enter the total units bought';
-                      //     }
-                      //     if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                      //       return 'Please enter a valid number';
-                      //     }
-                      //     return null;
-                      //   },
-                      // ),
+
                       const SizedBox(height: 30),
                       Center(
                         child: Text("Supplier information", style: title_style),
@@ -394,19 +397,15 @@ class _InventoryState extends State<Inventory>
                     final newProduct = Product(
                       id: products.length + 1,
                       name: _nameController.text,
-                      quantity: double.parse(_quantityController.text),
-                      image: imagePath ??
+                      quantity: int.parse(_quantityController.text),
+                      productImage: imagePath ??
                           "assets/images/default.png", // must be a default image
                       unitPrice: double.parse(_unitPriceController.text),
-                      description: _additionalInfoController.text,
-                      remainingQuantity: double.parse(_quantityController
-                          .text), // in the start the remaining quantity is the same as the bought
-                      minThreshold: double.parse(
-                          _minController.text), // default threshold
-                      unitCost: double.parse(_costPriceController.text),
-                      // unitsBought: double.parse(_totalUnitsController.text),
+                      productDescription: _additionalInfoController.text,
+                      minimumQuantity: int.parse(_minController.text),
+                      deleted: false,
                       supplierName: _supplierNameController.text,
-                      supplierPhone: _supplierPhoneController.text,
+                      supplierPhoneNum: _supplierPhoneController.text,
                       supplierAddress: _supplierAddressController.text,
                     );
 
@@ -422,8 +421,6 @@ class _InventoryState extends State<Inventory>
                     _quantityController.clear();
                     _unitController.clear();
                     _unitPriceController.clear();
-                    _costPriceController.clear();
-                    // _totalUnitsController.clear();
                     _supplierNameController.clear();
                     _supplierPhoneController.clear();
                     _supplierAddressController.clear();
@@ -448,7 +445,7 @@ class _InventoryState extends State<Inventory>
 
   void _deleteProduct(int id) {
     setState(() {
-      deleteProductById(id);
+      deleteProduct(id);
       filtered_products.removeWhere((product) => product.id == id);
     });
   }
@@ -531,14 +528,12 @@ class _InventoryState extends State<Inventory>
                   },
                 ),
               ),
-             
 
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text("Item            ",
-                      style: TextStyle(color: Colors.grey)),
-                  Text("  Stock-level", style: TextStyle(color: Colors.grey)),
+                  Text("Item", style: TextStyle(color: Colors.grey)),
+                  Text("Stock-level", style: TextStyle(color: Colors.grey)),
                 ],
               ),
               // Expanded widget to make the TabBarView scrollable
@@ -595,7 +590,7 @@ class _InventoryState extends State<Inventory>
           id: item.id,
           quantity: item.quantity,
           title: item.name,
-          image: item.image,
+          image: item.productImage,
           itemObj: item,
           onDelete: _deleteProduct,
         );
@@ -607,7 +602,7 @@ class _InventoryState extends State<Inventory>
 // Ignore: must_be_immutable
 class ItemLine extends StatelessWidget {
   final int id;
-  final double quantity;
+  final int quantity;
   final String title;
   final String image; // Path to the image
   final Product itemObj;

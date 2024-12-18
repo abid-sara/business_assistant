@@ -2,9 +2,15 @@ import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/orderLine.dart';
-import 'package:business_assistant/models/customer.dart';
-import 'package:business_assistant/models/order.dart';
-import 'package:business_assistant/models/product.dart';
+// import 'package:business_assistant/models/customer.dart';
+import 'package:business_assistant/data/customers.dart';
+
+// import 'package:business_assistant/models/order.dart';
+import 'package:business_assistant/data/orders.dart';
+
+// import 'package:business_assistant/models/product.dart';
+import 'package:business_assistant/data/products.dart';
+
 import 'dart:math';
 import 'package:intl/intl.dart';
 
@@ -529,19 +535,22 @@ class _customerDetailsState extends State<customerDetails> {
                           )
                         : Expanded(
                             child: ListView(
-                            children: [
-                              for (var order in customer.orders)
-                                Orderline(
-                                  order: order,
-                                  markOrderAsDelivered: (order) {
-                                    setState(() {
-                                      order.setDelivered(!order.delivered);
-                                    });
-                                  },
-                                  deleteOrder: deleteOrder,
-                                ),
-                            ],
-                          )),
+                              children: [
+                                // for (var order in customer.orders)
+                                //   Orderline(
+                                //     order: order,
+                                //     markOrderAsDelivered: (order) {
+                                //       setState(() {
+                                //         order.setDelivered(!order.delivered);
+                                //       });
+                                //     },
+                                //     deleteOrder: deleteOrder,
+                                //   ),
+                                Text(
+                                    "removed the orderLine from here until it is solved")
+                              ],
+                            ),
+                          ),
                     ElevatedButton(
                         onPressed: () {
                           //adding an order

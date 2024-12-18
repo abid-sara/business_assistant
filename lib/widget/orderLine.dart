@@ -22,7 +22,7 @@ class Orderline extends StatefulWidget {
 class _OrderlineState extends State<Orderline> {
   late bool isChecked;
 
-  bool _isHovered = true;
+  bool _isHovered = false;
   @override
   void initState() {
     super.initState();

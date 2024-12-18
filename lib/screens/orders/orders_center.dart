@@ -28,32 +28,86 @@ class _OrdersPageState extends State<OrdersPage>
   DateFormat dateFormat = DateFormat('yyyy-MM-dd');
   String DateError = "";
   String priceError = ""; //it must be only numbers and no char
-  late List<Product> products;
-  late List<Order> ordersCenter;
-  late List<Customer> customers;
+  List<Product> products = [];
+  List<Order> ordersCenter = [];
+  List<Customer> customers = [];
 
   Future<bool> _initializeData() async {
     try {
       filteredOrders = await _filterOrders('All'); //at first we start by all
 
-      List<Map<String, dynamic>> ordersUnformated = await showOrders();
-      ordersCenter = ordersUnformated.map((map) => Order.fromMap(map)).toList();
+      List<Map<String, dynamic>> ordersUnformated =
+          await showOrders(); //get the orders from the db
 
-      List<Map<String, dynamic>> productsUnformated = await showProducts();
-      products = productsUnformated.map((map) => Product.fromMap(map)).toList();
-
-      List<Map<String, dynamic>> customersUnformated = await showCustomers();
-      customers =
-          customersUnformated.map((map) => Customer.fromMap(map)).toList();
-
-      for (var product in productsUnformated) {
-        print(product);
-        return true;
+      for (var map in ordersUnformated) {
+        Order order = await Order.fromMap(map); // Await each Order creation
+        ordersCenter.add(order);
       }
+
+      // List<Map<String, dynamic>> productsUnformated = await showProducts();
+      // products = productsUnformated.map((map) => Product.fromMap(map)).toList();
+      products = [
+        Product(
+          id: 1,
+          name: 'NoteBook',
+          productImage: "assets/images/notebookBlack.jpeg",
+          unitPrice: 1000.0,
+          quantity: 100,
+          deleted: false,
+          supplierName: "Supplier1",
+          productDescription: "192 pages",
+          minimumQuantity: 10,
+          supplierPhoneNum: "123456789",
+          supplierAddress: "Algeria",
+        ),
+        Product(
+          id: 2,
+          name: 'Sticky Notes',
+          quantity: 100,
+          productImage: "assets/images/stickyNotes.jpg",
+          unitPrice: 200.0,
+          productDescription: "100 note page",
+          minimumQuantity: 10,
+          supplierName: "Supplier2",
+          supplierPhoneNum: "06748392",
+          supplierAddress: "Algiers",
+          deleted: false,
+        )
+      ];
+      // List<Map<String, dynamic>> customersUnformated = await showCustomers();
+      // customers =
+      //     customersUnformated.map((map) => Customer.fromMap(map)).toList();
+      customers = [
+        Customer(
+          id: 1,
+          name: 'Ahmed',
+          address: 'Algeria',
+          phone_num: "123456789",
+          email: 'hello@gmail.com',
+        ),
+        Customer(
+          id: 2,
+          name: 'Mohamed',
+          address: 'Egypt',
+          phone_num: "987654321",
+          email: 'hello@there.com',
+        ),
+        Customer(
+          id: 3,
+          name: 'Ali',
+          address: 'Tunisia',
+          phone_num: "123456789",
+          email: 'email@gmail.com',
+        ),
+      ];
+
+      for (var product in products) {
+        print(product);
+      }
+      return true;
     } catch (e) {
       return false;
     }
-    return false;
   }
 
   @override
@@ -168,20 +222,20 @@ class _OrdersPageState extends State<OrdersPage>
     }
   }
 
-  String generateOrderCode() {
-    final random = Random();
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const codeLength = 8;
+  // String generateOrderCode() {
+  //   final random = Random();
+  //   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  //   const codeLength = 8;
 
-    String randomString(int length) {
-      return String.fromCharCodes(Iterable.generate(
-        length,
-        (_) => characters.codeUnitAt(random.nextInt(characters.length)),
-      ));
-    }
+  //   String randomString(int length) {
+  //     return String.fromCharCodes(Iterable.generate(
+  //       length,
+  //       (_) => characters.codeUnitAt(random.nextInt(characters.length)),
+  //     ));
+  //   }
 
-    return randomString(codeLength);
-  }
+  //   return randomString(codeLength);
+  // }
 //defining the date Times that will be compared
 
   void _showAddOrderDialog() {
@@ -271,6 +325,7 @@ class _OrdersPageState extends State<OrdersPage>
                         decoration:
                             const InputDecoration(labelText: 'Customer'),
                         items: customers.map((Customer customer) {
+                          print(customer); //>>>>>>>>>>>
                           return DropdownMenuItem<Customer>(
                             value: customer,
                             child: Text(customer.name),
@@ -334,7 +389,6 @@ class _OrdersPageState extends State<OrdersPage>
                         child: AbsorbPointer(
                           child: TextField(
                             onChanged: (value) {
-                              print("helloo we are hereee!");
                               setState(() {
                                 if (deliveryDateController.text.isNotEmpty) {
                                   deliveryDate = dateFormat
@@ -345,12 +399,10 @@ class _OrdersPageState extends State<OrdersPage>
                                 setState(() {
                                   DateError =
                                       "Delivery date must be after the order date";
-                                  print("There is an error !");
                                 });
                               } else if (deliveryDate.isAfter(orderDate)) {
                                 setState(() {
                                   DateError = "";
-                                  print("Delivery date is before order date");
                                 });
                               }
                             },
@@ -385,7 +437,6 @@ class _OrdersPageState extends State<OrdersPage>
                         deliveryDateController.text.isEmpty ||
                         deliveryAddressController.text.isEmpty ||
                         orderDateController.text.isEmpty) {
-                      print("Some fields are empty !!");
                       return;
                     }
 
@@ -394,7 +445,7 @@ class _OrdersPageState extends State<OrdersPage>
                         orderDate = dateFormat.parse(orderDateController.text);
                       }
                     });
-                    print("helloo we are hereee!");
+
                     setState(() {
                       if (deliveryDateController.text.isNotEmpty) {
                         deliveryDate =
@@ -405,12 +456,10 @@ class _OrdersPageState extends State<OrdersPage>
                       setState(() {
                         DateError =
                             "Delivery date must be after the order date";
-                        print("There is an error !");
                       });
                     } else if (deliveryDate.isAfter(orderDate)) {
                       setState(() {
                         DateError = "";
-                        print("Delivery date is before order date");
                       });
                     }
 

@@ -1,4 +1,6 @@
 import 'package:business_assistant/screens/dashboard.dart';
+import 'package:business_assistant/screens/inventory/products_center.dart';
+import 'package:business_assistant/screens/orders/orders_center.dart';
 import 'package:get/get.dart';
 import 'constants/routes.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
       ),
       routes: routes,
       // home: const WelcomeScreen(),
-      home: Dashboard(),
+      home: Inventory(),
       debugShowCheckedModeBanner: false,
     );
   }

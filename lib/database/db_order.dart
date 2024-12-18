@@ -116,7 +116,7 @@ Future<int> addOrder({
   await _updateProductQuantities(database, products);
 
   // Step 5: Update customer order count
-  await _incrementCustomerOrderCount(database, order["customerId"]);
+  await incrementCustomerOrderCount(database, order["customerId"]);
 
   print('Order added successfully');
   return orderId;
@@ -199,8 +199,10 @@ Future<void> _updateProductQuantities(
   }
 }
 
-Future<void> _incrementCustomerOrderCount(
-    Database database, int customerId) async {
+Future<void> incrementCustomerOrderCount(
+    /*this should be implemented in the db_customer */
+    Database database,
+    int customerId) async {
   // Fetch customer details
   List<Map<String, dynamic>> customer = await database.query(
     'Customer',
@@ -249,13 +251,56 @@ Future<String> getOrderStatus(int orderId) async {
   }
 }
 
-
-Future<String> getCustomerName(int customerId) async{
+Future<String> getCustomerName(int customerId) async {
   try {
     return await DBHelper.database
         .rawQuery('''SELECT name FROM Customer WHERE id = ?''', [customerId]);
   } catch (e) {
     print("Error getting the status from Order: $e");
     return "";
+  }
+}
+
+Future<List<Map<String, dynamic>>> getProducts(int orderId) async {
+  final result = await DBHelper.database.rawQuery('''
+    SELECT 
+      Product.name AS name,
+      Product.unit_price AS unitPrice,
+      OrderProduct.quantity AS quantity
+    FROM 
+      Product
+    INNER JOIN 
+      OrderProduct
+    ON 
+      Product.id = OrderProduct.product_id
+    WHERE 
+      OrderProduct.order_id = ?
+  ''', [orderId]);
+
+  return result;
+}
+
+Future<double> getTotalWithDelivery(int orderID) async {
+  try {
+    final priceResult = await DBHelper.database.rawQuery(
+      '''SELECT price FROM Order WHERE id = ?''',
+      [orderID],
+    );
+    final deliveryResult = await DBHelper.database.rawQuery(
+      '''SELECT delivery_price FROM Order WHERE id = ?''',
+      [orderID],
+    );
+
+    double price = priceResult.isNotEmpty
+        ? (priceResult.first['price'] as double? ?? 0)
+        : 0;
+    double delivery = deliveryResult.isNotEmpty
+        ? (deliveryResult.first['delivery_price'] as double? ?? 0)
+        : 0;
+
+    return price + delivery;
+  } catch (e) {
+    print("Error getting the total with delivery: $e");
+    return 0;
   }
 }

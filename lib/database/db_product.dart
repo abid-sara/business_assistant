@@ -93,27 +93,3 @@ Future<bool> checkQuantityIfAdded(int productID, int newQuantity) async {
   }
   return newQuantity > oldQuantity;
 }
-
-// Future<int> getAddedQuantity(
-//     //this function will be used for the expense
-//     int productId,
-//     Map<String, dynamic> productUpdated) async {
-//   bool result =
-//       await checkQuantityIfAdded(productId, productUpdated["quantity"]);
-//   if (result) {
-//     //if a quantity is added, get the value that added
-//     int oldQuantity = await getQuantity(productId);
-//     int newQuantity = productUpdated["quantity"];
-//     return newQuantity - oldQuantity;
-//   }
-//   return 0; //there is no added quantity
-// }
-
-// Future<bool> checkIfProductUpdated(Map<String, dynamic> productUpdated) async {
-//   if (productUpdated["quantity"] != null) {
-//     return true; //if the quantity field in the update is not null then the quantity was updated
-//   }
-//   return false;
-// }
-
-//when we update the product, we check if we edited the quantity

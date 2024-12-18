@@ -1,16 +1,16 @@
 class Product {
-  final int id;
-  final String name;
-  final double unitPrice;
-  final int quantity;
-  final bool deleted;
-  final String supplierName;
-  final String supplierPhoneNum;
-  final String supplierAddress;
-  final String? productDescription;
-  final int minimumQuantity;
-  final String? additionalInfo;
-  final String? productImage;
+  int id;
+  String name;
+  double unitPrice;
+  int quantity;
+  bool deleted;
+  String supplierName;
+  String supplierPhoneNum;
+  String supplierAddress;
+  String productDescription;
+  int minimumQuantity;
+  String? additionalInfo;
+  String productImage;
 
   Product({
     required this.id,
@@ -21,10 +21,10 @@ class Product {
     required this.supplierName,
     required this.supplierPhoneNum,
     required this.supplierAddress,
-    this.productDescription,
+    required this.productDescription,
     required this.minimumQuantity,
     this.additionalInfo,
-    this.productImage,
+    required this.productImage,
   });
 
   factory Product.fromMap(Map<String, dynamic> map) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/text.dart';
 import 'package:business_assistant/style/colors.dart';
-import 'package:business_assistant/data/products.dart'; // Import the product data
+import 'package:business_assistant/models/product.dart'; // Import the product data
 
 class ItemDetails extends StatefulWidget {
   const ItemDetails({super.key});
@@ -14,9 +14,7 @@ class _ItemDetailsState extends State<ItemDetails> {
   late TextEditingController _unitPriceController;
   late TextEditingController _descriptionController;
   late TextEditingController _quantityController;
-  late TextEditingController _remainingQuantityController;
-  late TextEditingController _unitCostController;
-  // late TextEditingController _unitsBoughtController;
+  late TextEditingController _minQuantity;
   late TextEditingController _supplierNameController;
   late TextEditingController _supplierPhoneController;
   late TextEditingController _supplierAddressController;
@@ -28,9 +26,7 @@ class _ItemDetailsState extends State<ItemDetails> {
     _unitPriceController = TextEditingController();
     _descriptionController = TextEditingController();
     _quantityController = TextEditingController();
-    _remainingQuantityController = TextEditingController();
-    _unitCostController = TextEditingController();
-    // _unitsBoughtController = TextEditingController();
+    _minQuantity = TextEditingController();
     _supplierNameController = TextEditingController();
     _supplierPhoneController = TextEditingController();
     _supplierAddressController = TextEditingController();
@@ -46,14 +42,12 @@ class _ItemDetailsState extends State<ItemDetails> {
     Future.microtask(() {
       _nameController.text = product.name;
       _unitPriceController.text = product.unitPrice.toString();
-      _descriptionController.text = product.description;
+      _descriptionController.text = product.productDescription;
       _quantityController.text = product.quantity.toString();
-      _remainingQuantityController.text = product.remainingQuantity.toString();
-      _unitCostController.text = product.unitCost.toString();
-      // _unitsBoughtController.text = product.unitsBought.toString();
       _supplierNameController.text = product.supplierName;
-      _supplierPhoneController.text = product.supplierPhone;
+      _supplierPhoneController.text = product.supplierPhoneNum;
       _supplierAddressController.text = product.supplierAddress;
+      _minQuantity.text = product.minimumQuantity.toString();
     });
   }
 
@@ -63,9 +57,7 @@ class _ItemDetailsState extends State<ItemDetails> {
     _unitPriceController.dispose();
     _descriptionController.dispose();
     _quantityController.dispose();
-    _remainingQuantityController.dispose();
-    _unitCostController.dispose();
-    // _unitsBoughtController.dispose();
+    _minQuantity.dispose();
     _supplierNameController.dispose();
     _supplierPhoneController.dispose();
     _supplierAddressController.dispose();
@@ -107,17 +99,17 @@ class _ItemDetailsState extends State<ItemDetails> {
                       keyboardType: TextInputType.number,
                     ),
                     TextFormField(
-                      controller: _remainingQuantityController,
+                      controller: _minQuantity,
                       decoration: const InputDecoration(
-                          labelText: 'Item remaining quantity'),
+                          labelText: 'Item minimum accepted quantity'),
                       keyboardType: TextInputType.number,
                     ),
-                    TextFormField(
-                      controller: _unitCostController,
-                      decoration:
-                          const InputDecoration(labelText: 'Item unit cost'),
-                      keyboardType: TextInputType.number,
-                    ),
+                    // TextFormField(
+                    //   controller: _unitCostController,
+                    //   decoration:
+                    //       const InputDecoration(labelText: 'Item unit cost'),
+                    //   keyboardType: TextInputType.number,
+                    // ),
                     // TextFormField(
                     //   controller: _unitsBoughtController,
                     //   decoration:
@@ -156,14 +148,12 @@ class _ItemDetailsState extends State<ItemDetails> {
                 setState(() {
                   product.name = _nameController.text;
                   product.unitPrice = double.parse(_unitPriceController.text);
-                  product.description = _descriptionController.text;
-                  product.quantity = double.parse(_quantityController
+                  product.productDescription = _descriptionController.text;
+                  product.quantity = int.parse(_quantityController
                       .text); //call the check checkQuantityIfAdded if it is true generate an expense
-                  product.remainingQuantity =
-                      double.parse(_remainingQuantityController.text);
-                  product.unitCost = double.parse(_unitCostController.text);
+
                   product.supplierName = _supplierNameController.text;
-                  product.supplierPhone = _supplierPhoneController.text;
+                  product.supplierPhoneNum = _supplierPhoneController.text;
                   product.supplierAddress = _supplierAddressController.text;
                 });
                 Navigator.of(context).pop();
@@ -206,7 +196,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                           child: SizedBox(
                             width: 150,
                             height: 140,
-                            child: Image.asset(product.image),
+                            child: Image.asset(product.productImage),
                           ),
                         ),
                       ),
@@ -238,7 +228,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                               child: SizedBox(
                                   width: 200,
                                   child: Text(
-                                    product.description,
+                                    product.productDescription,
                                     //use of the overflow in order to handle the overflow!
                                     overflow: TextOverflow.clip,
                                     maxLines: 3,
@@ -331,7 +321,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                             "Item description: ",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          Text(product.description),
+                          Text(product.productDescription),
                         ],
                       ),
                     ],
@@ -364,58 +354,11 @@ class _ItemDetailsState extends State<ItemDetails> {
                           Text(product.quantity.toString()),
                         ],
                       ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Item remaining quantity: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.remainingQuantity.toString()),
-                        ],
-                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("  Cost details", style: title_style),
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.lightGreen,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Item unit cost: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.unitCost.toString()),
-                        ],
-                      ),
-                      // Row(
-                      //   children: [
-                      //     const Text(
-                      //       "Item units bought: ",
-                      //       style: TextStyle(fontWeight: FontWeight.bold),
-                      //     ),
-                      //     Text(product.unitsBought.toString()),
-                      //   ],
-                      // ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -448,7 +391,7 @@ class _ItemDetailsState extends State<ItemDetails> {
                             "Supplier phone: ",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          Text(product.supplierPhone),
+                          Text(product.supplierPhoneNum),
                         ],
                       ),
                       Row(

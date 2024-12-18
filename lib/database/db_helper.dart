@@ -27,7 +27,7 @@ class DBHelper {
         email TEXT,
         username TEXT,
         password TEXT,
-        business_name TEXT,
+        business_name TEXT
           )
       ''');
 
@@ -70,7 +70,7 @@ class DBHelper {
         quantity INTEGER NOT NULL,
         PRIMARY KEY (order_id, product_id),
         FOREIGN KEY (order_id) REFERENCES "Order" (id) ON DELETE CASCADE,
-        FOREIGN KEY (product_id) REFERENCES Product (id) ON DELETE CASCADE
+        FOREIGN KEY (product_id) REFERENCES "Product" (id) ON DELETE CASCADE
         )
     ''');
 
@@ -78,7 +78,7 @@ class DBHelper {
         CREATE TABLE "Income" (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         order_id INTEGER,
-        FOREIGN KEY (order_id) REFERENCES Order (code) ON DELETE CASCADE
+        FOREIGN KEY (order_id) REFERENCES "Order" (id) ON DELETE CASCADE
         )
     ''');
 
@@ -87,7 +87,7 @@ class DBHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id INTEGER NOT NULL,
         date TEXT NOT NULL,
-        FOREIGN KEY (product_id) REFERENCES Product (id) ON DELETE CASCADE
+        FOREIGN KEY (product_id) REFERENCES "Product" (id) ON DELETE CASCADE
       )
   ''');
   }
