@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../style/colors.dart';
 import 'analysis_week.dart';
-import 'transactions.dart';
 import 'package:business_assistant/data/transactiondata.dart';
-import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 
