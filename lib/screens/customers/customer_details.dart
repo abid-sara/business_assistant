@@ -55,7 +55,7 @@ class _customerDetailsState extends State<customerDetails> {
     setState(() {
       customer.orders.remove(order);
       ordersCenter.remove(order);
-    });cd business_assistant
+    });
     print(
         "Delete from the customers has worked and the order is deleted from the list of the customer");
   }
