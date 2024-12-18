@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../../style/colors.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
 
-
-
 class SelectedButton extends StatefulWidget {
   final String label;
   final int index;  
