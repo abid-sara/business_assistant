@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:business_assistant/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/goal_card.dart';
@@ -5,6 +7,7 @@ import 'package:business_assistant/data/goaldata.dart';
 import 'package:business_assistant/widget/past_due_goal.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/sidebar.dart';
+import 'package:business_assistant/database/goal_db.dart';
 
 class GoalList extends StatefulWidget {
   const GoalList({super.key});
@@ -14,30 +17,95 @@ class GoalList extends StatefulWidget {
 }
 
 class _GoalListState extends State<GoalList> {
-  String _selectedDate =
-      'November 2024'; //initiale date to be displayed at the top of the page
-
+  String _selectedDate = 'November 2024'; // Initial date to display
   List<Goal> goals = [];
+  final GoalDB _goalDB = GoalDB.instance;
 
   @override
   void initState() {
     super.initState();
-    _initializeGoals();
+    _loadGoals();
   }
 
-  void _initializeGoals() {
-    goals = List.from(goallist);
+  Future<void> _loadGoals() async {
+  // Fetch only non-deleted goals from the database
+  final loadedGoals = await _goalDB.fetchGoals();
+  setState(() {
+    goals = loadedGoals;
+  });
+}
+
+
+  Future<void> _addGoal(Goal goal) async {
+    await _goalDB.insertGoal(goal);
+    _loadGoals();
   }
 
-  //change the status according to the limit date
+  void _deleteGoal(Goal goal) async {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Delete goal'),
+        content: const Text('Are you sure you want to delete this goal?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              // Ensure the goal id is not null before deleting
+              if (goal.id != null) {
+                await _goalDB.deleteGoal(goal.id!);  // Use the null check operator here
+                setState(() {
+                  goals.remove(goal);
+                });
+              } else {
+                // Handle the case where goal.id is null
+                print('Goal ID is null, cannot delete.');
+              }
+
+              Navigator.of(context).pop();
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+
+
+  Future<void> _updateGoal(Goal goal) async {
+    await _goalDB.updateGoal(goal);
+    _loadGoals();
+  }
+  Future<void> _updateGoalStatus(Goal goal, String newStatus) async {
+  final updatedGoal = Goal(
+    id: goal.id,
+    title: goal.title,
+    description: goal.description,
+    startDate: goal.startDate,
+    limitDate: goal.limitDate,
+    status: newStatus,
+  );
+
+  await _goalDB.updateGoal(updatedGoal); // Update the status in the database
+  await _loadGoals(); // Reload goals to refresh the UI
+} 
+
+  // Change the status according to the limit date
   String _getStatus(Goal goal) {
-    if (goal.limit_date.isBefore(DateTime.now()) &&
+    if (goal.limitDate.isBefore(DateTime.now()) &&
         goal.status == 'In progress') return 'Missed';
     if (goal.status == 'Completed') return 'Completed';
     return goal.status;
   }
 
-  // Function to determine status background color based on the getstatus function
+  // Function to determine status background color based on the getStatus function
   Color _getStatusColor(String status) {
     if (status == 'In progress') return AppColors.lightGreen;
     return AppColors.green;
@@ -50,23 +118,19 @@ class _GoalListState extends State<GoalList> {
   }
 
   List<PastDueGoalRow> _checkPastDueGoals() {
-    List<PastDueGoalRow> pastDueRows = [];
-    for (Goal goal in goals) {
-      if (goal.limit_date.isBefore(DateTime.now())) {
-        pastDueRows.add(
-          PastDueGoalRow(
-            title: goal.title,
-            date: DateFormat('dd/MM/yyyy').format(goal.limit_date),
-            icon: (goal.status == 'Completed')
-                ? Icons.sentiment_satisfied_rounded
-                : Icons.sentiment_dissatisfied_rounded,
-            iconColor:
-                (goal.status == 'Completed') ? AppColors.darkGreen : Colors.red,
-          ),
-        );
-      }
-    }
-    return pastDueRows;
+    return goals
+        .where((goal) => goal.limitDate.isBefore(DateTime.now()))
+        .map((goal) {
+      return PastDueGoalRow(
+        title: goal.title,
+        date: DateFormat('dd/MM/yyyy').format(goal.limitDate),
+        icon: (goal.status == 'Completed')
+            ? Icons.sentiment_satisfied_rounded
+            : Icons.sentiment_dissatisfied_rounded,
+        iconColor:
+            (goal.status == 'Completed') ? AppColors.darkGreen : Colors.red,
+      );
+    }).toList();
   }
 
   @override
@@ -121,10 +185,10 @@ class _GoalListState extends State<GoalList> {
                           setState(() {
                             DateTime currentDate =
                                 DateFormat('MMMM yyyy').parse(_selectedDate);
-                            DateTime previousMonth = DateTime(
-                                currentDate.year, currentDate.month + 1);
+                            DateTime nextMonth =
+                                DateTime(currentDate.year, currentDate.month + 1);
                             _selectedDate =
-                                DateFormat('MMMM yyyy').format(previousMonth);
+                                DateFormat('MMMM yyyy').format(nextMonth);
                           });
                         },
                       ),
@@ -162,10 +226,22 @@ class _GoalListState extends State<GoalList> {
                             goal: goal,
                             title: goal.title,
                             date:
-                                '${DateFormat('dd/MM/yyyy').format(goal.startDateOnly)} - ${DateFormat('dd/MM/yyyy').format(goal.limitDateOnly)}',
-                            status: goal.status,
-                            backgroundColor: _getStatusColor(goal.status),
+                                '${DateFormat('dd/MM/yyyy').format(goal.startDate)} - ${DateFormat('dd/MM/yyyy').format(goal.limitDate)}',
+                            status: _getStatus(goal),
                             statusColor: _getStatusTextColor(goal.status),
+                            backgroundColor: _getStatusColor(goal.status),
+                            onMarkAsCompleted: () => _updateGoalStatus(goal, 'Completed'),
+                            onDelete: () => _deleteGoal(goal),
+                            onStatusChange: (newStatus) => _updateGoalStatus(goal, newStatus),
+                            onUpdate: (updatedGoal) {
+                              // Update the goal in the list and refresh UI
+                              setState(() {
+                                final index = goals.indexWhere((g) => g.id == updatedGoal.id);
+                                if (index != -1) {
+                                  goals[index] = updatedGoal;
+                                }
+                              });
+                            },
                           ),
                         );
                       },
@@ -190,19 +266,20 @@ class _GoalListState extends State<GoalList> {
                   color: AppColors.green,
                   size: 40,
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(
+                onPressed: () async {
+                  // Navigate to the AddGoalPage and wait for the result
+                  final newGoal = await Navigator.pushNamed(
                     context,
                     '/description',
-                  ).then((newGoal) {
-                    if (newGoal != null) {
-                      setState(() {
-                        goals.add(newGoal as Goal);
-                      });
-                    }
-                  });
+                  );
+
+                  // Reload goals from the database to avoid duplicate entries
+                  if (newGoal != null) {
+                    await _loadGoals();
+                  }
                 },
               ),
+
             ],
           ),
         ),
