@@ -30,7 +30,8 @@ class TaskDB {
         date TEXT,
         startTime TEXT,
         endTime TEXT,
-        status TEXT,
+        status TEXT
+      
         
       )
     ''');
