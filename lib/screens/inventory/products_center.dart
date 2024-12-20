@@ -53,7 +53,7 @@ class _InventoryState extends State<Inventory>
 
   Future<void> initialize() async {
     List<Map<String, dynamic>> productsUnformated = await showProducts();
-    products = productsUnformated.map((map) => Product.fromMap(map)).toList();
+    products = productsUnformated.map((map) => Product.fromMap(map as Map<String, dynamic>)).toList();
     setState(() {});
   }
 
@@ -132,7 +132,7 @@ class _InventoryState extends State<Inventory>
       List<Map<String, dynamic>> productsUnformated = await showProducts();
       setState(() {
         products =
-            productsUnformated.map((map) => Product.fromMap(map)).toList();
+            productsUnformated.map((map) => Product.fromMap(map as Map<String, dynamic>)).toList();
         // Reset the search query to show the updated list
         _searchQuery = '';
         _searchController.clear();

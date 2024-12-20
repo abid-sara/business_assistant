@@ -5,9 +5,16 @@ import 'package:get/get.dart';
 import 'constants/routes.dart';
 import 'package:flutter/material.dart';
 import 'screens/landingPages/welcome_screen.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
-  runApp(const MyApp());
+  // Initialize FFI
+  sqfliteFfiInit();
+
+  // Set the database factory
+  databaseFactory = databaseFactoryFfi;
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -21,8 +28,8 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Poppins',
       ),
       routes: routes,
-      // home: const WelcomeScreen(),
-      home: Inventory(),
+      home: const WelcomeScreen(),
+      // home: Inventory(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,15 +1,13 @@
 import 'package:business_assistant/database/db_customer.dart';
+import 'package:business_assistant/database/db_order.dart';
 import 'package:business_assistant/database/db_product.dart';
 import 'package:business_assistant/models/order.dart';
+import 'package:business_assistant/models/customer.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/sidebar.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
 import 'package:business_assistant/widget/orderLine.dart';
-import 'dart:math';
-import 'package:business_assistant/database/db_order.dart';
+import 'package:flutter/material.dart';
 import 'package:business_assistant/models/product.dart';
-import 'package:business_assistant/models/customer.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -18,97 +16,15 @@ class OrdersPage extends StatefulWidget {
   _OrdersPageState createState() => _OrdersPageState();
 }
 
-class _OrdersPageState extends State<OrdersPage>
-    with SingleTickerProviderStateMixin {
+class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  Customer? selectedCustomer;
   List<Order> filteredOrders = [];
-  DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-  String DateError = "";
-  String priceError = ""; //it must be only numbers and no char
-  List<Product> products = [];
   List<Order> ordersCenter = [];
   List<Customer> customers = [];
-
-  Future<bool> _initializeData() async {
-    try {
-      filteredOrders = await _filterOrders('All'); //at first we start by all
-
-      List<Map<String, dynamic>> ordersUnformated =
-          await showOrders(); //get the orders from the db
-
-      for (var map in ordersUnformated) {
-        Order order = await Order.fromMap(map); // Await each Order creation
-        ordersCenter.add(order);
-      }
-
-      // List<Map<String, dynamic>> productsUnformated = await showProducts();
-      // products = productsUnformated.map((map) => Product.fromMap(map)).toList();
-      products = [
-        Product(
-          id: 1,
-          name: 'NoteBook',
-          productImage: "assets/images/notebookBlack.jpeg",
-          unitPrice: 1000.0,
-          quantity: 100,
-          deleted: false,
-          supplierName: "Supplier1",
-          productDescription: "192 pages",
-          minimumQuantity: 10,
-          supplierPhoneNum: "123456789",
-          supplierAddress: "Algeria",
-        ),
-        Product(
-          id: 2,
-          name: 'Sticky Notes',
-          quantity: 100,
-          productImage: "assets/images/stickyNotes.jpg",
-          unitPrice: 200.0,
-          productDescription: "100 note page",
-          minimumQuantity: 10,
-          supplierName: "Supplier2",
-          supplierPhoneNum: "06748392",
-          supplierAddress: "Algiers",
-          deleted: false,
-        )
-      ];
-      // List<Map<String, dynamic>> customersUnformated = await showCustomers();
-      // customers =
-      //     customersUnformated.map((map) => Customer.fromMap(map)).toList();
-      customers = [
-        Customer(
-          id: 1,
-          name: 'Ahmed',
-          address: 'Algeria',
-          phone_num: "123456789",
-          email: 'hello@gmail.com',
-        ),
-        Customer(
-          id: 2,
-          name: 'Mohamed',
-          address: 'Egypt',
-          phone_num: "987654321",
-          email: 'hello@there.com',
-        ),
-        Customer(
-          id: 3,
-          name: 'Ali',
-          address: 'Tunisia',
-          phone_num: "123456789",
-          email: 'email@gmail.com',
-        ),
-      ];
-
-      for (var product in products) {
-        print(product);
-      }
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
+  List<Product> products = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -118,439 +34,345 @@ class _OrdersPageState extends State<OrdersPage>
     _initializeData();
   }
 
-  Future<bool> _markOrderAsDelivered(Order order) async {
-    try {
-      // Directly await the updateOrderStatus method
-      bool success = await updateOrderStatus(order.id);
+     
+   Future<void> _fetchAndUpdateOrders() async {
+  try {
+    // Fetch orders and map customers
+    List<Order> ordersUnformatted = await displayOrder();
+    print("Orders fetched: ${ordersUnformatted.length}");
 
-      if (success) {
-        // Update filtered orders if status update was successful
-        await _updateFilteredOrders();
-        return true;
-      } else {
-        // Show an error message to the user
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update order status')),
-        );
-        return false;
-      }
-    } catch (e) {
-      // Handle any unexpected errors
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-      return false;
+    setState(() {
+      ordersCenter = ordersUnformatted;
+      print("Orders mapped: ${ordersCenter.length}");
+    });
+
+    // Initially filter all orders
+    filteredOrders = await _filterOrders('All');
+    print("Orders filtered: ${filteredOrders.length}");
+  } catch (e) {
+    print("Error fetching and updating orders: $e");
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading orders: $e')));
+  }
+}
+
+Future<void> _initializeData() async {
+  try {
+    // Fetch customers
+    customers = await displayCustomer();
+    print("Fetched customers: $customers");
+    customers.forEach((customer) => print("Customer: $customer"));
+
+    print("Customers fetched: ${customers.length}");
+
+    // Fetch products
+    products = await displayProduct();
+    print("Products fetched: ${products.length}");
+
+    // Extract product names
+    List<String> productNames = products.map((product) => product.name).toList();
+    print("Product names extracted: ${productNames.length}");
+
+    // Fetch orders
+    List<Map<String, dynamic>> ordersUnformatted = await showOrders();
+    print("Orders fetched: ${ordersUnformatted.length}");
+
+    // Resolve all orders
+   final futures = ordersUnformatted.map((map) async {
+  try {
+    final customerId = map['customer_id'];
+    if (customerId == null) {
+      print("Error: customer_id is null.");
+      return null; // Skip invalid orders
     }
-  }
 
-  @override
-  void dispose() {
-    _tabController.removeListener(_updateFilteredOrders);
-    _tabController.dispose();
-    super.dispose();
+    final customer = customers.firstWhere(
+      (c) => c.id == customerId,
+      orElse: () => Customer(
+        id: 0,
+        name: '',
+        address: '',
+        phoneNum: '',
+        email: '',
+        note: '',
+        deleted: 0,
+      ),
+    );
+
+    if (customer.id == 0) {
+      print("Warning: Placeholder customer used for order with customer_id: $customerId");
+    }
+
+    await _fetchAndUpdateOrders();
+  } catch (e) {
+    print("Error mapping order: $e");
+    return null; // Handle invalid order gracefully
   }
+});
+
+// Filter out null futures and wait for the remaining ones
+ordersCenter = await Future.wait(futures.whereType<Future<Order>>());
+print("Orders mapped: ${ordersCenter.length}");
+
+
+    // Remove null entries
+    ordersCenter.removeWhere((order) => order == null);
+    print("Orders mapped: ${ordersCenter.length}");
+
+    // Filter all orders
+    filteredOrders = await _filterOrders('All');
+    print("Orders filtered: ${filteredOrders.length}");
+  } catch (e) {
+    print("Error initializing data: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error loading data: $e')),
+    );
+  } finally {
+    setState(() {
+  filteredOrders = ordersCenter;
+});
+
+  }
+}
+
+
 
   Future<List<Order>> _filterOrders(String filter) async {
     List<Order> filtered = ordersCenter;
 
-    // Filter orders by status
-    if (filter == 'All') {
-      filtered = ordersCenter;
-    } else if (filter == 'Delivered') {
-      filtered =
-          ordersCenter.where((order) => order.status == "delivered").toList();
-    } else if (filter == 'Pending') {
-      filtered =
-          ordersCenter.where((order) => order.status == "pending").toList();
+    if (filter != 'All') {
+      filtered = ordersCenter.where((order) => order.status == filter.toLowerCase()).toList();
     }
 
-    // Search query filter
     if (_searchQuery.isNotEmpty) {
-      filtered = await Future.wait(filtered.map((order) async {
-        String customerName = await getCustomerName(order.customer.id);
-        bool matchesSearchQuery = order.id
-                .toString()
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            customerName.toLowerCase().contains(_searchQuery.toLowerCase());
-
-        return matchesSearchQuery
-            ? order
-            : null; // Return order if it matches the search query, else null
-      })).then((results) =>
-          results.whereType<Order>().toList()); // Filter out null values
+      filtered = filtered.where((order) {
+        final customerName = order.customer.name.toLowerCase();
+        return order.id.toString().contains(_searchQuery) ||
+            customerName.contains(_searchQuery.toLowerCase());
+      }).toList();
     }
 
     return filtered;
   }
 
-  Future<bool> _updateFilteredOrders() async {
-    try {
-      List<Order> filtered = await _filterOrders(
-        _tabController.index == 0
-            ? 'All'
-            : _tabController.index == 1
-                ? 'Delivered'
-                : 'Pending',
-      );
-
-      setState(() {
-        filteredOrders = filtered;
-      });
-
-      return true;
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating orders: ${e.toString()}')),
-      );
-      return false;
-    }
+  Future<void> _updateFilteredOrders() async {
+    final filter = _tabController.index == 0
+        ? 'All'
+        : _tabController.index == 1
+            ? 'Delivered'
+            : 'Pending';
+    filteredOrders = await _filterOrders(filter);
+    setState(() {});
   }
 
-  Future<void> _selectDate(
-      BuildContext context, TextEditingController controller) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      setState(() {
-        controller.text = "${picked.toLocal()}".split(' ')[0];
-      });
-    }
+  void _showAddOrderDialog() async {
+  final TextEditingController deliveryPriceController = TextEditingController();
+  final TextEditingController deliveryDateController = TextEditingController();
+  final TextEditingController deliveryAddressController = TextEditingController();
+  final TextEditingController orderDateController = TextEditingController();
+  List<Map<String, dynamic>> selectedProducts = [];
+  Customer? selectedCustomer;
+
+  // Ensure products are loaded before showing the dialog
+  List<Product> products = await displayProduct();
+
+  void addProductField(StateSetter setState) {
+    setState(() {
+      selectedProducts.add({'product': null, 'quantity': 1});
+    });
   }
 
-  // String generateOrderCode() {
-  //   final random = Random();
-  //   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  //   const codeLength = 8;
+  void removeProductField(int index, StateSetter setState) {
+    setState(() {
+      selectedProducts.removeAt(index);
+    });
+  }
 
-  //   String randomString(int length) {
-  //     return String.fromCharCodes(Iterable.generate(
-  //       length,
-  //       (_) => characters.codeUnitAt(random.nextInt(characters.length)),
-  //     ));
-  //   }
-
-  //   return randomString(codeLength);
-  // }
-//defining the date Times that will be compared
-
-  void _showAddOrderDialog() {
-    final TextEditingController deliveryPriceController =
-        TextEditingController();
-    final TextEditingController deliveryDateController =
-        TextEditingController();
-    final TextEditingController deliveryAddressController =
-        TextEditingController();
-    final TextEditingController orderDateController = TextEditingController();
-    List<Map<String, dynamic>> selectedProducts = [];
-    late DateTime deliveryDate;
-    late DateTime orderDate;
-    void addProductField(StateSetter setState) {
-      setState(() {
-        selectedProducts.add({'product': null, 'quantity': 1});
-      });
-    }
-
-    void removeProductField(int index, StateSetter setState) {
-      setState(() {
-        selectedProducts.removeAt(index);
-      });
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Add Order'),
-              content: SingleChildScrollView(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ...selectedProducts.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        Map<String, dynamic> productData = entry.value;
-                        return Column(
-                          children: [
-                            DropdownButtonFormField<Product>(
-                              decoration:
-                                  const InputDecoration(labelText: 'Product'),
-                              items: products.map((Product product) {
-                                return DropdownMenuItem<Product>(
-                                  value: product,
-                                  child: Text(product.name),
-                                );
-                              }).toList(),
-                              onChanged: (Product? newValue) {
-                                setState(() {
-                                  productData['product'] = newValue;
-                                });
-                              },
-                              value: productData['product'],
-                            ),
-                            TextField(
-                              decoration: const InputDecoration(
-                                  labelText: 'Product Quantity'),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {
-                                  productData['quantity'] =
-                                      int.tryParse(value) ?? 1;
-                                });
-                              },
-                              controller: TextEditingController(
-                                  text: productData['quantity'].toString()),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle),
-                              onPressed: () {
-                                removeProductField(index, setState);
-                              },
-                            ),
-                          ],
-                        );
-                      }),
-                      TextButton(
-                        onPressed: () => addProductField(setState),
-                        child: const Text('Add a Product'),
-                      ),
-                      DropdownButtonFormField<Customer>(
-                        decoration:
-                            const InputDecoration(labelText: 'Customer'),
-                        items: customers.map((Customer customer) {
-                          print(customer); //>>>>>>>>>>>
-                          return DropdownMenuItem<Customer>(
-                            value: customer,
-                            child: Text(customer.name),
-                          );
-                        }).toList(),
-                        onChanged: (Customer? newValue) {
-                          setState(() {
-                            selectedCustomer = newValue;
-                          });
-                        },
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          _selectDate(context, orderDateController);
-                        },
-                        child: AbsorbPointer(
-                          child: TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                if (orderDateController.text.isNotEmpty) {
-                                  orderDate = dateFormat
-                                      .parse(orderDateController.text);
-                                }
-                              });
-                            },
-                            controller: orderDateController,
-                            decoration:
-                                const InputDecoration(labelText: 'Order date'),
-                          ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Add Order'),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Product selection
+                  ...selectedProducts.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Map<String, dynamic> productData = entry.value;
+                    return Column(
+                      children: [
+                        DropdownButtonFormField<Product>(
+                          decoration: const InputDecoration(labelText: 'Product'),
+                          items: products.map((Product product) {
+                            return DropdownMenuItem<Product>(
+                              value: product,
+                              child: Text(product.name),
+                            );
+                          }).toList(),
+                          onChanged: (Product? newValue) {
+                            setState(() {
+                              productData['product'] = newValue;
+                            });
+                          },
+                          value: productData['product'],
                         ),
-                      ),
-                      TextField(
-                        controller: deliveryPriceController,
-                        decoration:
-                            const InputDecoration(labelText: 'Delivery Price'),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          setState(() {
-                            if (RegExp(r'^[0-9]*$').hasMatch(value)) {
-                              priceError = '';
-                            } else {
-                              priceError = 'Please enter a valid number';
-                            }
-                          });
-                        },
-                      ),
-                      //display the error in case something is wrong
-                      Text(
-                        priceError,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                      TextField(
-                        controller: deliveryAddressController,
-                        decoration: const InputDecoration(
-                            labelText: 'Delivery Address'),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          _selectDate(context, deliveryDateController);
-                        },
-                        child: AbsorbPointer(
-                          child: TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                if (deliveryDateController.text.isNotEmpty) {
-                                  deliveryDate = dateFormat
-                                      .parse(deliveryDateController.text);
-                                }
-                              });
-                              if (deliveryDate.isBefore(orderDate)) {
-                                setState(() {
-                                  DateError =
-                                      "Delivery date must be after the order date";
-                                });
-                              } else if (deliveryDate.isAfter(orderDate)) {
-                                setState(() {
-                                  DateError = "";
-                                });
-                              }
-                            },
-                            controller: deliveryDateController,
-                            decoration: const InputDecoration(
-                                labelText: 'Estimated Delivery Date'),
-                          ),
+                        TextField(
+                          decoration: const InputDecoration(labelText: 'Quantity'),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setState(() {
+                              productData['quantity'] = int.tryParse(value) ?? 1;
+                            });
+                          },
+                          controller: TextEditingController(text: productData['quantity'].toString()),
                         ),
-                      ),
-                      //display the error in case something is wrong
-                      Text(
-                        DateError,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ],
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle),
+                          onPressed: () {
+                            removeProductField(index, setState);
+                          },
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                  TextButton(
+                    onPressed: () => addProductField(setState),
+                    child: const Text('Add Product'),
                   ),
-                ),
+                  // Customer selection
+                  DropdownButtonFormField<Customer>(
+  decoration: const InputDecoration(labelText: 'Customer'),
+  items: customers.map((Customer customer) {
+    return DropdownMenuItem<Customer>(
+      value: customer,
+      child: Text(customer.name),
+    );
+  }).toList(),
+  onChanged: (Customer? newValue) {
+    setState(() {
+      selectedCustomer = newValue;
+    });
+    print("Customer selected: ${newValue?.name}, ID: ${newValue?.id}");
+  },
+  value: selectedCustomer,
+),
+
+                  TextField(
+                    controller: orderDateController,
+                    decoration: const InputDecoration(labelText: 'Order Date'),
+                    keyboardType: TextInputType.datetime,
+                  ),
+                  TextField(
+                    controller: deliveryDateController,
+                    decoration: const InputDecoration(labelText: 'Delivery Date'),
+                    keyboardType: TextInputType.datetime,
+                  ),
+                  TextField(
+                    controller: deliveryPriceController,
+                    decoration: const InputDecoration(labelText: 'Delivery Price'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  TextField(
+                    controller: deliveryAddressController,
+                    decoration: const InputDecoration(labelText: 'Delivery Address'),
+                  ),
+                ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    if (selectedProducts.any(
-                            (productData) => productData['product'] == null) ||
-                        selectedCustomer == null ||
-                        deliveryPriceController.text.isEmpty ||
-                        deliveryDateController.text.isEmpty ||
-                        deliveryAddressController.text.isEmpty ||
-                        orderDateController.text.isEmpty) {
-                      return;
-                    }
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+  onPressed: () async {
+    if (selectedCustomer == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a customer.')),
+      );
+      return;
+    }
 
-                    setState(() {
-                      if (orderDateController.text.isNotEmpty) {
-                        orderDate = dateFormat.parse(orderDateController.text);
-                      }
-                    });
+    // Validate `customer_id`
+    print("Adding order for Customer ID: ${selectedCustomer!.id}");
 
-                    setState(() {
-                      if (deliveryDateController.text.isNotEmpty) {
-                        deliveryDate =
-                            dateFormat.parse(deliveryDateController.text);
-                      }
-                    });
-                    if (deliveryDate.isBefore(orderDate)) {
-                      setState(() {
-                        DateError =
-                            "Delivery date must be after the order date";
-                      });
-                    } else if (deliveryDate.isAfter(orderDate)) {
-                      setState(() {
-                        DateError = "";
-                      });
-                    }
+    Map<String, dynamic> orderData = {
+  'price': selectedProducts.fold(0.0, (sum, item) =>
+      sum + (item['product']?.unitPrice ?? 0.0) * (item['quantity'] ?? 1)),
+  'delivery_price': double.tryParse(deliveryPriceController.text) ?? 0.0,
+  'delivery_date': deliveryDateController.text.isEmpty ? null : deliveryDateController.text,
+  'delivery_address': deliveryAddressController.text.isEmpty ? '' : deliveryAddressController.text,
+  'order_date': orderDateController.text.isEmpty ? null : orderDateController.text,
+  'status': 'pending',
+  'deleted': 0,
+  'customer_id': selectedCustomer!.id,
+};
 
-                    //check if there is an error in the date, in that case we return without adding the order
-                    if (DateError.isNotEmpty) {
-                      return;
-                    }
 
-                    // Prepare order data for database
-                    Map<String, dynamic> orderData = {
-                      "status": "pending",
-                      "orderDate": orderDateController.text,
-                      "deliveryDate": deliveryDateController.text,
-                      "deliveryAddress": deliveryAddressController.text,
-                      "deliveryPrice":
-                          double.parse(deliveryPriceController.text),
-                      "customerId": selectedCustomer!.id,
-                    };
+    try {
+  int orderId = await addOrder(order: orderData, products: selectedProducts);
+  if (orderId > 0) {
+    setState(() {
+      ordersCenter.add(Order(
+        id: orderId,
+        totalPrice: orderData['price'],
+        deliveryPrice: orderData['delivery_price'],
+        deliveryDate: orderData['delivery_date'] ?? '',
+        deliveryAddress: orderData['delivery_address'] ?? '',
+        orderDate: orderData['order_date'] ?? '',
+        status: orderData['status'],
+        deleted: orderData['deleted'],
+        customer: selectedCustomer!,
+      ));
+    });
 
-                    // Prepare products data for database
-                    List<Map<String, dynamic>> orderProducts =
-                        selectedProducts.map((productData) {
-                      return {
-                        "id": productData['product'].id,
-                        "product_id": productData['product'].id,
-                        "quantity": productData['quantity']
-                      };
-                    }).toList();
-
-                    // Add order to database
-                    int orderId = await addOrder(
-                        order: orderData, products: orderProducts);
-
-                    if (orderId > 0) {
-                      // Refresh orders list
-                      _initializeData();
-                      Navigator.of(context).pop();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Failed to add order')),
-                      );
-                    }
-
-                    // setState(() {
-                    //   ordersCenter.add(newOrder);
-                    //   selectedCustomer?.addOrder(newOrder);
-                    //   _updateFilteredOrders(); // Update filtered orders
-                    //   //We have to update the quantity of the order
-
-                    //   for (var productData in selectedProducts) {
-                    //     productData['product'].quantity -=
-                    //         productData['quantity'];
-                    //     print(
-                    //         "We are reducing the quantity for the used ones ");
-                    //   }
-                    // });
-
-                    // Navigator.of(context).pop();
-                  },
-                  child: const Text('Add Order'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+    filteredOrders = await _filterOrders('All');
+    Navigator.of(context).pop();
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Failed to add order.')),
     );
   }
+} catch (e) {
+  print("Error adding order: $e");
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Error adding order: $e')),
+  );
+}
+  },
+  child: const Text('Add Order'),
+),
 
-  void _deleteOrder(Order orderToDelete, Customer customer) async {
-    try {
-      // Find the corresponding order from the orders center
-      var orderToRemove = ordersCenter.firstWhere(
-        (order) => order.id == orderToDelete.id,
+            ],
+          );
+        },
       );
+    },
+  );
+}
 
-      bool success = await deleteOrder(orderToRemove.id, customer.id);
 
+
+
+  void _deleteOrder(Order order, Customer customer) async {
+    try {
+      bool success = await deleteOrder(order.id, customer.id);
       if (success) {
         setState(() {
-          filteredOrders.removeWhere((order) => order.id == orderToDelete.id);
-          ordersCenter.removeWhere((order) => order.id == orderToDelete.id);
+          ordersCenter.remove(order);
+          filteredOrders.remove(order);
         });
-      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete order')),
+          const SnackBar(content: Text('Order deleted successfully.')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Order not found')),
+        SnackBar(content: Text('Error deleting order: $e')),
       );
     }
   }
@@ -560,7 +382,7 @@ class _OrdersPageState extends State<OrdersPage>
     return Scaffold(
       drawer: const Sidebar(),
       appBar: AppBar(
-        title: const Text("Orders center"),
+        title: const Text('Orders Center'),
         backgroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
@@ -571,152 +393,187 @@ class _OrdersPageState extends State<OrdersPage>
           ],
         ),
       ),
-      backgroundColor: Colors.transparent,
-      body: FutureBuilder<void>(
-          future: _initializeData(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            // Handle any errors during data initialization
-            if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Failed to load data'),
-                    ElevatedButton(
-                      onPressed: () => _initializeData(),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return Stack(
+      body: 
+           Column(
               children: [
-                //background image
-                Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/background.png"),
-                      fit: BoxFit.cover,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search orders...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
+                    onChanged: (query) {
+                      _searchQuery = query;
+                      _updateFilteredOrders();
+                    },
                   ),
                 ),
-                Center(
-                  child: Column(
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            labelText: 'Search for an order...',
-                            prefixIcon: const Icon(Icons.search),
-                            fillColor: AppColors.purpule,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide.none, // Remove the border side
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide.none, // Remove the border side
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide.none, // Remove the border side
-                            ),
-                            filled: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 20.0),
-                          ),
-                          onChanged: (query) {
-                            setState(() {
-                              _searchQuery = query;
-                              _updateFilteredOrders(); // Update filtered orders on search query change
-                            });
-                          },
-                        ),
-                      ),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text("Order", style: TextStyle(color: Colors.grey)),
-                          Text("Due Date",
-                              style: TextStyle(color: Colors.grey)),
-                          Text("Delivered",
-                              style: TextStyle(color: Colors.grey)),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _buildOrderList('All'),
-                            _buildOrderList('Delivered'),
-                            _buildOrderList('Pending'),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        width: 170,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.darkGreen,
-                          ),
-                          onPressed: _showAddOrderDialog,
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 8),
-                              Text('Add Order',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      //considering this, as our bottom bar
-                      const SizedBox(
-                        width: double.infinity,
-                        height: 80,
-                      ),
+                      _buildOrderList('All'),
+                      _buildOrderList('Delivered'),
+                      _buildOrderList('Pending'),
                     ],
                   ),
                 ),
+                ElevatedButton(
+                  onPressed: _showAddOrderDialog,
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.darkGreen),
+                  child: const Text('Add Order'),
+                ),
               ],
-            );
-          }),
+            ),
     );
   }
 
   Widget _buildOrderList(String filter) {
-    return ListView.builder(
-      itemCount: filteredOrders.length,
-      itemBuilder: (context, index) {
-        final order = filteredOrders[index];
-        return Orderline(
-          order: order,
-          markOrderAsDelivered: _markOrderAsDelivered,
-          deleteOrder: _deleteOrder,
-        );
-      },
-    );
+  return ListView.builder(
+    itemCount: filteredOrders.length,
+    itemBuilder: (context, index) {
+      final order = filteredOrders[index];
+      return Orderline(
+        order: order,
+        markOrderAsDelivered: (o) async => await _markOrderAsDelivered(o),
+        deleteOrder: (order, customer) => _deleteOrder(order, customer),
+      );
+    },
+  );
+}
+
+
+  Future<bool> _markOrderAsDelivered(Order order) async {
+    try {
+      bool success = await updateOrderStatus(order.id, 'delivered');
+      if (success) {
+        await _updateFilteredOrders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error marking order as delivered: $e");
+      return false;
+    }
   }
 }
 
-//it is adding the order immediately to the list of orders
-//and it is also moving the delivred ones to their respective page
+class DetailsBox extends StatefulWidget {
+  final Order order;
+
+  const DetailsBox({super.key, required this.order});
+
+  @override
+  State<DetailsBox> createState() => _DetailsBoxState();
+}
+
+class _DetailsBoxState extends State<DetailsBox> {
+  late List<Map<String, dynamic>> products = [];
+  double totalPriceOfProduct = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize(widget.order);
+  }
+
+  Future<void> _initialize(Order order) async {
+  try {
+    // Fetch the products for this order
+    List<Map<String, dynamic>> rawProducts = await getProductsForOrder(order.id);
+
+    // Check if rawProducts is null or empty
+    if (rawProducts == null || rawProducts.isEmpty) {
+      products = []; // Assign an empty list if no products are found
+    } else {
+      products = rawProducts.map((entry) {
+        // Ensure unitPrice and quantity are not null, default to 0.0 and 0 respectively
+        double unitPrice = (entry['unitPrice'] ?? 0.0).toDouble(); // Make sure it's a valid double
+        int quantity = (entry['quantity'] ?? 0);      // Default to 0 if null
+
+        // Check that unitPrice and quantity are valid numbers before multiplying
+        double total = unitPrice * quantity; // Only multiply when values are non-null
+
+        return {
+          'name': entry['name'],
+          'unitPrice': unitPrice,
+          'quantity': quantity,
+          'total': total, // Corrected the total field
+          'supplierName': entry['supplierName'],
+          'supplierPhoneNum': entry['supplierPhoneNum'],
+          'supplierAddress': entry['supplierAddress'],
+          'productDescription': entry['productDescription'],
+          'minimumQuantity': entry['minimumQuantity'],
+          'additionalInfo': entry['additionalInfo'],
+          'productImage': entry['productImage'],
+        };
+      }).toList();
+    }
+
+    // Get the total price including delivery
+    totalPriceOfProduct = await getTotalWithDelivery(order.id);
+
+    // After initialization, update the UI
+    setState(() {});
+  } catch (e) {
+    print("Error initializing details: $e");
+  }
+}
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Order Details'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Order ID: ${widget.order.id}',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text('Customer: ${widget.order.customer.name}'),
+            const SizedBox(height: 10),
+            Text('Delivery Address: ${widget.order.deliveryAddress}'),
+            const SizedBox(height: 10),
+            Text('Order Date: ${widget.order.orderDate}'),
+            const SizedBox(height: 10),
+            Text('Delivery Date: ${widget.order.deliveryDate}'),
+            const SizedBox(height: 10),
+            Text(
+              'Total Price: \$${totalPriceOfProduct.toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text('Products:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Expanded(
+              child: ListView.builder(
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return ListTile(
+                    title: Text(product['name']),
+                    subtitle: Text(
+                      'Unit Price: \$${product['unitPrice']}, Quantity: ${product['quantity']}}',
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

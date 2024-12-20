@@ -1,6 +1,6 @@
 import 'package:business_assistant/database/db_helper.dart';
 import 'package:business_assistant/database/db_utility.dart';
-
+import 'package:business_assistant/models/product.dart';
 Future<List<Map<String, dynamic>>> showProducts() async {
   final database = await DBHelper.getDatabase();
 
@@ -22,7 +22,7 @@ Future<Map<String, dynamic>> getOneProduct(int productId) async {
   try {
     return await database.query(
       'Product',
-      where: 'deleted = ? && id = ?',
+      where: 'deleted = ? AND id = ?',
       whereArgs: [
         0,
         productId
@@ -92,4 +92,20 @@ Future<bool> checkQuantityIfAdded(int productID, int newQuantity) async {
     return false;
   }
   return newQuantity > oldQuantity;
+}
+
+Future<List<Product>> displayProduct() async {
+  final database = await DBHelper.getDatabase();
+
+  try {
+    final List<Map<String, dynamic>> productData = await database.query(
+      'Product',
+      where: 'deleted = ?',
+      whereArgs: [0], // Fetch only non-deleted products
+    );
+    return productData.map((map) => Product.fromMap(map)).toList();
+  } catch (e) {
+    print("Error selecting from Product: $e");
+    return [];
+  }
 }

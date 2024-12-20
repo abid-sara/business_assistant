@@ -62,7 +62,7 @@ class _detailsBoxState extends State<detailsBox> {
   late double totalPriceOfProduct;
 
   Future<void> initialize(Order order) async {
-    products = await getProducts(order.id);
+    products = await getProductsForOrder(order.id);
 
     products = products
         .map((entry) => {
@@ -252,7 +252,7 @@ class _detailsBoxState extends State<detailsBox> {
 Future<Uint8List> _generateOrderPdf(Order order) async {
   final pdf = pw.Document();
   final totalPriceOfProduct = await getTotalWithDelivery(order.id);
-  final products = await getProducts(order.id);
+  final products = await getProductsForOrder(order.id);
   final productData = products.map((entry) {
     return [
       entry["name"],

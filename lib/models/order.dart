@@ -24,23 +24,23 @@ class Order {
     this.deleted = 0,
   });
 
-  static Future<Order> fromMap(Map<String, dynamic> map) async {  //returns order per order
-    Map<String, dynamic> customerUnformatted =
-        await getOneCustomer(map['customer_id']);
-    Customer customer = Customer.fromMap(customerUnformatted);
+  static Future<Order> fromMap(Map<String, dynamic> map, [Customer? customer]) async {
+  Map<String, dynamic> customerUnformatted = await getOneCustomer(map['customer_id']);
+  Customer customer = Customer.fromMap(customerUnformatted);
 
-    return Order(
-      id: map['id'],
-      totalPrice: (map['price'] ?? 0.0).toDouble(),
-      customer: customer, // Assign the customer object
-      deliveryPrice: (map['delivery_price'] ?? 0.0).toDouble(),
-      deliveryDate: map['delivery_date'] ?? '',
-      deliveryAddress: map['delivery_address'] ?? '',
-      orderDate: map['order_date'] ?? '',
-      status: map['status'] ?? 'pending',
-      deleted: map['deleted'],
-    );
-  }
+  return Order(
+    id: map['id'],
+    totalPrice: (map['price'] ?? 0.0).toDouble(),
+    customer: customer, // Assign the customer object
+    deliveryPrice: (map['delivery_price'] ?? 0.0).toDouble(),
+    deliveryDate: map['delivery_date'] ?? '',
+    deliveryAddress: map['delivery_address'] ?? '',
+    orderDate: map['order_date'] ?? '',
+    status: map['status'] ?? 'pending',
+    deleted: map['deleted'],
+  );
+}
+
 
   Map<String, dynamic> toMap() {
     return {

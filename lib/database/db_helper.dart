@@ -42,9 +42,24 @@ class DBHelper {
         delivery_address TEXT NOT NULL,
         delivery_price DOUBLE NOT NULL,
         customer_id INTEGER NOT NULL,
-        FOREIGN KEY (customer_id) REFERENCES "Customer" (id) ON DELETE CASCADE
+        FOREIGN KEY (customer_id) REFERENCES Customer (id) ON DELETE CASCADE
         )
     ''');
+
+    await db.execute(
+      '''
+        CREATE TABLE "Customer" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        address TEXT NOT NULL,
+        phone_num TEXT NOT NULL,
+        email TEXT NOT NULL,
+        note TEXT,
+        count INTEGER NOT NULL DEFAULT 0,
+        deleted BOOLEAN NOT NULL DEFAULT 0
+        )
+      ''',
+    );
 
     await db.execute('''
         CREATE TABLE Product (
@@ -74,10 +89,12 @@ class DBHelper {
         )
     ''');
 
-    await db.execute('''
+     await db.execute('''
         CREATE TABLE "Income" (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         order_id INTEGER,
+        date TEXT NOT NULL,
+        amount DOUBLE NOT NULL,
         FOREIGN KEY (order_id) REFERENCES "Order" (id) ON DELETE CASCADE
         )
     ''');
@@ -87,8 +104,9 @@ class DBHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id INTEGER NOT NULL,
         date TEXT NOT NULL,
+        amount DOUBLE NOT NULL,
         FOREIGN KEY (product_id) REFERENCES "Product" (id) ON DELETE CASCADE
-      )
-  ''');
+        )
+    ''');
   }
 }

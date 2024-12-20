@@ -1,16 +1,16 @@
 class Product {
-  int id;
-  String name;
-  double unitPrice;
-  int quantity;
-  bool deleted;
-  String supplierName;
-  String supplierPhoneNum;
-  String supplierAddress;
-  String productDescription;
-  int minimumQuantity;
-  String? additionalInfo;
-  String productImage;
+  final int id;
+  late final String name;
+  late final double unitPrice;
+  late final int quantity;
+  final bool deleted;
+  late final String supplierName;
+  late final String supplierPhoneNum;
+  late final String supplierAddress;
+  late final String productDescription;
+  final int minimumQuantity;
+  final String? additionalInfo;
+  final String productImage;
 
   Product({
     required this.id,
