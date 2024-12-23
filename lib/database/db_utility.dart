@@ -26,12 +26,13 @@ class DBAssistant {
       String tableName, int id, Map<String, dynamic> data) async {
     final database = await DBHelper.getDatabase();
     try {
-      return await database.update(
+      int result = await database.update(
         tableName,
         data,
         where: "id = ?",
         whereArgs: [id],
       );
+      return result > 0;
     } catch (e) {
       print("Error updating table $tableName: $e");
       return false;

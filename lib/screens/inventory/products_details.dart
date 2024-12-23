@@ -1,166 +1,140 @@
+import 'package:business_assistant/cubits/product/product_state.dart';
 import 'package:flutter/material.dart';
-import 'package:business_assistant/style/text.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/product/product_cubit.dart';
+import 'package:business_assistant/models/product.dart';
 import 'package:business_assistant/style/colors.dart';
-import 'package:business_assistant/models/product.dart'; // Import the product data
+import 'package:business_assistant/style/text.dart';
 
-class ItemDetails extends StatefulWidget {
-  const ItemDetails({super.key});
-  @override
-  _ItemDetailsState createState() => _ItemDetailsState();
-}
+class ItemDetails extends StatelessWidget {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _unitPriceController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _minQuantityController = TextEditingController();
+  final TextEditingController _supplierNameController = TextEditingController();
+  final TextEditingController _supplierPhoneController =
+      TextEditingController();
+  final TextEditingController _supplierAddressController =
+      TextEditingController();
 
-class _ItemDetailsState extends State<ItemDetails> {
-  late TextEditingController _nameController;
-  late TextEditingController _unitPriceController;
-  late TextEditingController _descriptionController;
-  late TextEditingController _quantityController;
-  late TextEditingController _minQuantity;
-  late TextEditingController _supplierNameController;
-  late TextEditingController _supplierPhoneController;
-  late TextEditingController _supplierAddressController;
+  ItemDetails({super.key});
 
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController();
-    _unitPriceController = TextEditingController();
-    _descriptionController = TextEditingController();
-    _quantityController = TextEditingController();
-    _minQuantity = TextEditingController();
-    _supplierNameController = TextEditingController();
-    _supplierPhoneController = TextEditingController();
-    _supplierAddressController = TextEditingController();
+  void _populateFields(Product product) {
+    _nameController.text = product.name;
+    _unitPriceController.text = product.unitPrice.toString();
+    _descriptionController.text = product.productDescription;
+    _quantityController.text = product.quantity.toString();
+    _minQuantityController.text = product.minimumQuantity.toString();
+    _supplierNameController.text = product.supplierName;
+    _supplierPhoneController.text = product.supplierPhoneNum;
+    _supplierAddressController.text = product.supplierAddress;
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    //PASS the product itself
-    final Product product =
-        ModalRoute.of(context)!.settings.arguments as Product;
+  void _showEditDialog(BuildContext context, Product product) {
+    _populateFields(product);
 
-    Future.microtask(() {
-      _nameController.text = product.name;
-      _unitPriceController.text = product.unitPrice.toString();
-      _descriptionController.text = product.productDescription;
-      _quantityController.text = product.quantity.toString();
-      _supplierNameController.text = product.supplierName;
-      _supplierPhoneController.text = product.supplierPhoneNum;
-      _supplierAddressController.text = product.supplierAddress;
-      _minQuantity.text = product.minimumQuantity.toString();
-    });
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _unitPriceController.dispose();
-    _descriptionController.dispose();
-    _quantityController.dispose();
-    _minQuantity.dispose();
-    _supplierNameController.dispose();
-    _supplierPhoneController.dispose();
-    _supplierAddressController.dispose();
-    super.dispose();
-  }
-
-  void _showEditDialog(Product product) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Product'),
-          content: SingleChildScrollView(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
-              child: Form(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Item name'),
-                    ),
-                    TextFormField(
-                      controller: _unitPriceController,
-                      decoration:
-                          const InputDecoration(labelText: 'Item unit price'),
-                      keyboardType: TextInputType.number,
-                    ),
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration:
-                          const InputDecoration(labelText: 'Item description'),
-                    ),
-                    TextFormField(
-                      controller: _quantityController,
-                      decoration:
-                          const InputDecoration(labelText: 'Item quantity'),
-                      keyboardType: TextInputType.number,
-                    ),
-                    TextFormField(
-                      controller: _minQuantity,
-                      decoration: const InputDecoration(
-                          labelText: 'Item minimum accepted quantity'),
-                      keyboardType: TextInputType.number,
-                    ),
-                    // TextFormField(
-                    //   controller: _unitCostController,
-                    //   decoration:
-                    //       const InputDecoration(labelText: 'Item unit cost'),
-                    //   keyboardType: TextInputType.number,
-                    // ),
-                    // TextFormField(
-                    //   controller: _unitsBoughtController,
-                    //   decoration:
-                    //       const InputDecoration(labelText: 'Item units bought'),
-                    //   keyboardType: TextInputType.number,
-                    // ),
-                    TextFormField(
-                      controller: _supplierNameController,
-                      decoration:
-                          const InputDecoration(labelText: 'Supplier name'),
-                    ),
-                    TextFormField(
-                      controller: _supplierPhoneController,
-                      decoration:
-                          const InputDecoration(labelText: 'Supplier phone'),
-                    ),
-                    TextFormField(
-                      controller: _supplierAddressController,
-                      decoration:
-                          const InputDecoration(labelText: 'Supplier address'),
-                    ),
-                  ],
+        return BlocConsumer<ProductCubit, ProductState>(
+          listener: (context, state) {
+            if (state is ProductUpdated) {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Updated successfully")));
+            } else if (state is ProductError) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(content: Text("Update failed")));
+            }
+          },
+          builder: (context, state) {
+            return AlertDialog(
+              title: const Text('Edit Product'),
+              content: SingleChildScrollView(
+                child: Form(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        decoration:
+                            const InputDecoration(labelText: 'Item name'),
+                      ),
+                      TextFormField(
+                        controller: _unitPriceController,
+                        decoration:
+                            const InputDecoration(labelText: 'Item unit price'),
+                        keyboardType: TextInputType.number,
+                      ),
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: const InputDecoration(
+                            labelText: 'Item description'),
+                      ),
+                      TextFormField(
+                        controller: _quantityController,
+                        decoration:
+                            const InputDecoration(labelText: 'Item quantity'),
+                        keyboardType: TextInputType.number,
+                      ),
+                      TextFormField(
+                        controller: _minQuantityController,
+                        decoration: const InputDecoration(
+                            labelText: 'Item minimum quantity'),
+                        keyboardType: TextInputType.number,
+                      ),
+                      TextFormField(
+                        controller: _supplierNameController,
+                        decoration:
+                            const InputDecoration(labelText: 'Supplier name'),
+                      ),
+                      TextFormField(
+                        controller: _supplierPhoneController,
+                        decoration:
+                            const InputDecoration(labelText: 'Supplier phone'),
+                      ),
+                      TextFormField(
+                        controller: _supplierAddressController,
+                        decoration: const InputDecoration(
+                            labelText: 'Supplier address'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  product.name = _nameController.text;
-                  product.unitPrice = double.parse(_unitPriceController.text);
-                  product.productDescription = _descriptionController.text;
-                  product.quantity = int.parse(_quantityController
-                      .text); //call the check checkQuantityIfAdded if it is true generate an expense
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final id = product.id;
+                    final updatedProduct = product.copyWith(
+                      id: product.id,
+                      name: _nameController.text,
+                      unitPrice:
+                          double.tryParse(_unitPriceController.text) ?? 0.0,
+                      productDescription: _descriptionController.text,
+                      quantity: int.tryParse(_quantityController.text) ?? 0,
+                      minimumQuantity:
+                          int.tryParse(_minQuantityController.text) ?? 0,
+                      supplierName: _supplierNameController.text,
+                      supplierPhoneNum: _supplierPhoneController.text,
+                      supplierAddress: _supplierAddressController.text,
+                    );
 
-                  product.supplierName = _supplierNameController.text;
-                  product.supplierPhoneNum = _supplierPhoneController.text;
-                  product.supplierAddress = _supplierAddressController.text;
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
+                    context
+                        .read<ProductCubit>()
+                        .updateProduct(id!, updatedProduct);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -168,13 +142,41 @@ class _ItemDetailsState extends State<ItemDetails> {
 
   @override
   Widget build(BuildContext context) {
-    final Product product =
-        ModalRoute.of(context)!.settings.arguments as Product;
+    return BlocConsumer<ProductCubit, ProductState>(
+      listener: (context, state) {
+        if (state is ProductLoaded) {
+          // Refresh the product data when state updates
+          final updatedProduct = state.products.firstWhere(
+            (p) =>
+                p.id ==
+                (ModalRoute.of(context)?.settings.arguments as Product).id,
+            orElse: () => ModalRoute.of(context)?.settings.arguments as Product,
+          );
+        }
+      },
+      builder: (context, state) {
+        final originalProduct =
+            ModalRoute.of(context)!.settings.arguments as Product;
+        Product displayProduct = originalProduct;
 
+        if (state is ProductUpdated &&
+            state.updatedProduct.id == originalProduct.id) {
+          displayProduct = state.updatedProduct;
+        } else if (state is ProductLoaded) {
+          final updatedProduct = state.products.firstWhere(
+            (p) => p.id == originalProduct.id,
+            orElse: () => originalProduct,
+          );
+          displayProduct = updatedProduct;
+        }
+        return _buildScaffold(context, displayProduct);
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, Product product) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Product details"),
-      ),
+      appBar: AppBar(title: const Text("Product Details")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -186,233 +188,79 @@ class _ItemDetailsState extends State<ItemDetails> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SingleChildScrollView(
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: SizedBox(
-                            width: 150,
-                            height: 140,
-                            child: Image.asset(product.productImage),
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Flexible(
-                                  child: SizedBox(
-                                    width: 200,
-                                    child: Text(
-                                      product.name,
-                                      overflow: TextOverflow.clip,
-                                      maxLines: 2,
-                                      style: const TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Center(
-                              child: SizedBox(
-                                  width: 200,
-                                  child: Text(
-                                    product.productDescription,
-                                    //use of the overflow in order to handle the overflow!
-                                    overflow: TextOverflow.clip,
-                                    maxLines: 3,
-                                  )),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    elevation: 0, // Remove shadow
-                                    shadowColor: Colors
-                                        .transparent, // Remove shadow color
-                                    splashFactory: NoSplash
-                                        .splashFactory, // Remove splash effect
-                                  ).copyWith(
-                                    overlayColor: WidgetStateProperty.all(Colors
-                                        .transparent), // Remove overlay color
-                                  ),
-                                  child: const Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Icon(
-                                        Icons.edit,
-                                        size: 20,
-                                        color: Colors.grey,
-                                      ),
-                                      Text(" Edit item ",
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                          ))
-                                    ],
-                                  ),
-                                  onPressed: () {
-                                    _showEditDialog(product);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "   Item information",
-                      style: title_style,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: SizedBox(
+                          width: 150,
+                          height: 140,
+                          child: Image.asset(product.productImage ??
+                              'assets/images/default.png'),
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(product.name,
+                              style: const TextStyle(
+                                  fontSize: 22, fontWeight: FontWeight.bold)),
+                          Text(product.productDescription, maxLines: 3),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.edit, color: Colors.grey),
+                            label: const Text('Edit item',
+                                style: TextStyle(color: Colors.grey)),
+                            onPressed: () => _showEditDialog(context, product),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.lightGreen,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Item name: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.name),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Item unit price: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.unitPrice.toString()),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Item description: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.productDescription),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("   Inventory information", style: title_style),
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.lightGreen,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Item quantity: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.quantity.toString()),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                Text("Item Information", style: title_style),
+                _buildInfoBox("Item name", product.name),
+                _buildInfoBox("Unit price", product.unitPrice.toString()),
+                _buildInfoBox("Description", product.productDescription),
+                Text("Inventory Information", style: title_style),
+                _buildInfoBox("Item quantity", product.quantity.toString()),
+                _buildInfoBox("Item minimum required quantity",
+                    product.minimumQuantity.toString()),
                 const SizedBox(height: 16),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("   Supplier information", style: title_style),
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.lightGreen,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Supplier name: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.supplierName),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Supplier phone: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.supplierPhoneNum),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Supplier address: ",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(product.supplierAddress),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
+                Text("Supplier Information", style: title_style),
+                _buildInfoBox("Supplier name", product.supplierName),
+                _buildInfoBox("Supplier phone", product.supplierPhoneNum),
+                _buildInfoBox("Supplier address", product.supplierAddress),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoBox(String label, String value) {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: AppColors.lightGreen,
+      ),
+      child: Row(
+        children: [
+          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(value),
+        ],
       ),
     );
   }

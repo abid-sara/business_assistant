@@ -26,7 +26,6 @@ import '../screens/Analysis/analysis_year.dart';
 import '../screens/goallist/goal_list.dart';
 import '../screens/goallist/description.dart';
 
-
 var routes = {
   '/signIn': (ctx) => const SignIn(),
   '/CreateAccount': (ctx) => const CreateAccount(),
@@ -35,20 +34,25 @@ var routes = {
   '/Businessdetails': (ctx) => const Businessdetails(),
   '/details': (context) => const orderDetails(),
   '/orders': (context) => const OrdersPage(),
-  '/customers': (context) =>  const CustomersPage(),
+  '/customers': (context) => const CustomersPage(),
   '/customerDetails': (context) => const CustomerDetails(),
-  '/inventory': (context) => const Inventory(),
-  '/itemDetails': (context) => const ItemDetails(),
+  '/inventory': (context) => Inventory(),
+  '/itemDetails': (context) => ItemDetails(),
   '/dashboard': (context) => const Dashboard(),
-   '/settings' : (context) => const Settings(),
-   '/editprofil' : (context) => const EditProfile(initialName: 'Sara', initialSurname: 'Abid',),
-   '/changepassword' : (context) => const ChangePassword(),
-   '/subscription' : (context) => const SubscriptionPage(),
-   '/reportproblem' : (context) => const ReportProblemPage(),
-   '/help&support' : (context) => const HelpSupportPage(),
-   '/feedback' : (context) => const Feedback(),
-   '/Tasks' : (cntext) => const Tasks(),
-   '/addtask' : (context) => AddTaskPage(onAddTask: (task) {},),
+  '/settings': (context) => const Settings(),
+  '/editprofil': (context) => const EditProfile(
+        initialName: 'Sara',
+        initialSurname: 'Abid',
+      ),
+  '/changepassword': (context) => const ChangePassword(),
+  '/subscription': (context) => const SubscriptionPage(),
+  '/reportproblem': (context) => const ReportProblemPage(),
+  '/help&support': (context) => const HelpSupportPage(),
+  '/feedback': (context) => const Feedback(),
+  '/Tasks': (cntext) => const Tasks(),
+  '/addtask': (context) => AddTaskPage(
+        onAddTask: (task) {},
+      ),
   '/goalList': (context) => const GoalList(),
   '/description': (context) => const AddGoalPage(),
   '/analysisweek': (context) => const AnalysisWeek(),

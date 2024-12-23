@@ -1,6 +1,7 @@
 import 'package:business_assistant/database/db_helper.dart';
 import 'package:business_assistant/database/db_utility.dart';
 import 'package:business_assistant/models/product.dart';
+
 Future<List<Map<String, dynamic>>> showProducts() async {
   final database = await DBHelper.getDatabase();
 
@@ -58,6 +59,7 @@ Future<bool> editProduct(
     int productId, Map<String, dynamic> productUpdated) async {
   try {
     await DBAssistant.update("Product", productId, productUpdated);
+    print("update done");
     return true;
   } catch (e) {
     print("error updating the product");

@@ -1,5 +1,5 @@
 class Product {
-  final int id;
+  final int? id;
   late final String name;
   late final double unitPrice;
   late final int quantity;
@@ -10,10 +10,10 @@ class Product {
   late final String productDescription;
   final int minimumQuantity;
   final String? additionalInfo;
-  final String productImage;
+  final String? productImage;
 
   Product({
-    required this.id,
+    this.id,
     required this.name,
     required this.unitPrice,
     required this.quantity,
@@ -24,7 +24,7 @@ class Product {
     required this.productDescription,
     required this.minimumQuantity,
     this.additionalInfo,
-    required this.productImage,
+    this.productImage,
   });
 
   factory Product.fromMap(Map<String, dynamic> map) {
@@ -46,7 +46,7 @@ class Product {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      // 'id': id,
       'name': name,
       'unit_price': unitPrice,
       'quantity': quantity,
@@ -59,5 +59,30 @@ class Product {
       'additional_info': additionalInfo,
       'product_image': productImage,
     };
+  }
+
+  Product copyWith({
+    int? id,
+    String? name,
+    double? unitPrice,
+    String? productDescription,
+    int? quantity,
+    int? minimumQuantity,
+    String? supplierName,
+    String? supplierPhoneNum,
+    String? supplierAddress,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      unitPrice: unitPrice ?? this.unitPrice,
+      quantity: quantity ?? this.quantity,
+      deleted: false,
+      supplierName: supplierName ?? this.supplierName,
+      supplierPhoneNum: supplierPhoneNum ?? this.supplierPhoneNum,
+      supplierAddress: supplierAddress ?? this.supplierAddress,
+      productDescription: productDescription ?? this.productDescription,
+      minimumQuantity: minimumQuantity ?? this.minimumQuantity,
+    );
   }
 }
