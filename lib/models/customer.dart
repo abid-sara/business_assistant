@@ -1,23 +1,23 @@
 class Customer {
-  final int id;
+  final int? id;
   late final String name;
   late final String address;
   late final String phoneNum;
   late final String email;
   late final String note;
   final int deleted;
-  final int ordersCountValue;
+  final int count;
 
   // Constructor with required named parameters
   Customer({
-    required this.id,
+    this.id,
     required this.name,
     required this.address,
     required this.phoneNum,
     required this.email,
     required this.note,
     required this.deleted,
-    this.ordersCountValue = 0,
+    this.count = 0,
   });
 
   // Factory method for creating a Customer from a map
@@ -30,21 +30,20 @@ class Customer {
       email: map['email'] as String,
       note: map['note'] ?? '',
       deleted: map['deleted'] as int,
-      ordersCountValue: map['ordersCountValue'] ?? 0,
+      count: map['ordersCountValue'] ?? 0,
     );
   }
 
   // Convert a Customer object to a map
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'name': name,
       'address': address,
       'phone_num': phoneNum,
       'email': email,
       'note': note,
       'deleted': deleted,
-      'ordersCountValue': ordersCountValue,
+      'count': count,
     };
   }
 
@@ -52,6 +51,28 @@ class Customer {
   @override
   String toString() {
     return 'Customer{id: $id, name: $name, address: $address, phoneNum: $phoneNum, '
-        'email: $email, note: $note, deleted: $deleted, ordersCountValue: $ordersCountValue}';
+        'email: $email, note: $note, deleted: $deleted, count: $count}';
+  }
+
+  Customer copyWith({
+    int? id,
+    String? name,
+    String? address,
+    String? phoneNum,
+    String? email,
+    String? note,
+    int? deleted,
+    int? count,
+  }) {
+    return Customer(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      phoneNum: phoneNum ?? this.phoneNum,
+      email: email ?? this.email,
+      note: note ?? this.note,
+      deleted: deleted ?? this.deleted,
+      count: count ?? this.count,
+    );
   }
 }

@@ -1,32 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubits/order/order_cubit.dart';
+import '../cubits/order/order_state.dart';
 import '../style/text.dart';
 import '../style/colors.dart';
 import 'package:business_assistant/models/customer.dart';
 import 'package:business_assistant/models/order.dart';
 
-// ignore: must_be_immutable
-class Orderline extends StatefulWidget {
-  Order order;
+class Orderline extends StatelessWidget {
+  final Order order;
   final Function(Order) markOrderAsDelivered;
   final Function(Order, Customer) deleteOrder;
-  Orderline(
-      {super.key,
-      required this.order,
-      required this.markOrderAsDelivered,
-      required this.deleteOrder});
 
-  @override
-  State<Orderline> createState() => _OrderlineState();
-}
-
-class _OrderlineState extends State<Orderline> {
-  late bool isChecked;
-
-  bool _isHovered = false;
-  @override
-  void initState() {
-    super.initState();
-  }
+  const Orderline({
+    super.key,
+    required this.order,
+    required this.markOrderAsDelivered,
+    required this.deleteOrder,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,87 +26,76 @@ class _OrderlineState extends State<Orderline> {
         Navigator.pushNamed(
           context,
           '/details',
-          arguments: widget.order, // Pass the order object as an argument
+          arguments: order,
         );
       },
-      child: MouseRegion(
-        onEnter: (_) => setState(() {
-          _isHovered = true;
-        }),
-        onExit: (_) => setState(() {
-          _isHovered = false;
-        }),
-        child: Container(
-          margin: const EdgeInsets.all(3),
-          width: double.infinity,
-          height: 80,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            color: AppColors.lightGreen,
-          ),
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      child: Container(
+        margin: const EdgeInsets.all(3),
+        width: double.infinity,
+        height: 80,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: AppColors.lightGreen,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Left section with delete button and order info
             Row(
-              // mainAxisAlignment: MainAxisAlignment,
               children: [
-                _isHovered
-                    ? IconButton(
-                        onPressed: () {
-                          widget.deleteOrder(
-                              widget.order, widget.order.customer);
-                        },
+                BlocBuilder<OrderCubit, OrderState>(
+                  builder: (context, state) {
+                    if (state is OrderLoaded) {
+                      return IconButton(
+                        onPressed: () => deleteOrder(order, order.customer),
                         icon: const Icon(
                           Icons.delete,
                           size: 20,
-                        ))
-                    : const SizedBox(width: 40),
-                //the first main title
+                          color: Colors.grey,
+                        ),
+                      );
+                    }
+                    return const SizedBox(width: 40);
+                  },
+                ),
                 Column(
-                  // crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.order.id.toString(), style: title_style),
-                    Text(widget.order.customer.name,
-                        style: const TextStyle(
-                            color: Color.fromARGB(255, 70, 66, 66))),
+                    Text(
+                      "#${order.id}",
+                      style: title_style,
+                    ),
+                    Text(
+                      order.customer.name,
+                      style: const TextStyle(
+                        color: Color.fromARGB(255, 70, 66, 66),
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
-            Text(widget.order.deliveryDate),
-            Row(
-              children: [
-                //delivery date
 
-                //here we need to handle the click logic
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      //toggles the state of delivred
-                      widget.markOrderAsDelivered(widget.order);
-                      //update the delivery status
-                      print(
-                          "The delivery status of the order now is ${widget.order.status}");
-                    });
-                  },
-                  icon: Icon(
-                    widget.order.status == "delivered"
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    color: widget.order.status == "delivered"
-                        ? Colors.green
-                        : Colors.grey,
-                  ),
+            Text(order.deliveryDate),
+
+            // Delivery status icon
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: IconButton(
+                onPressed: () => markOrderAsDelivered(order),
+                icon: Icon(
+                  order.status == "delivered"
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  color:
+                      order.status == "delivered" ? Colors.green : Colors.grey,
                 ),
-              ],
+              ),
             ),
-          ]),
+          ],
         ),
       ),
     );
   }
 }
-
-
-
-//you should try to test the hovering effect 

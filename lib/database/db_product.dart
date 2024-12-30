@@ -21,7 +21,7 @@ Future<Map<String, dynamic>> getOneProduct(int productId) async {
   final database = await DBHelper.getDatabase();
 
   try {
-    return await database.query(
+    final result = await database.query(
       'Product',
       where: 'deleted = ? AND id = ?',
       whereArgs: [
@@ -29,6 +29,12 @@ Future<Map<String, dynamic>> getOneProduct(int productId) async {
         productId
       ], //show the order specified by the id if it is not deleted
     );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      return {};
+    }
   } catch (e) {
     print("Error selecting from Order: $e");
     return {};
@@ -45,9 +51,9 @@ Future<bool> addProduct({required Map<String, dynamic> product}) async {
   }
 }
 
-Future<bool> deleteProduct(int productId) async {
+Future<bool> deleteProduct(int? productId) async {
   try {
-    await DBAssistant.delete("Product", productId);
+    await DBAssistant.delete("Product", productId!);
     return true;
   } catch (e) {
     print("error deleting the product");
@@ -56,9 +62,9 @@ Future<bool> deleteProduct(int productId) async {
 }
 
 Future<bool> editProduct(
-    int productId, Map<String, dynamic> productUpdated) async {
+    int? productId, Map<String, dynamic> productUpdated) async {
   try {
-    await DBAssistant.update("Product", productId, productUpdated);
+    await DBAssistant.update("Product", productId!, productUpdated);
     print("update done");
     return true;
   } catch (e) {

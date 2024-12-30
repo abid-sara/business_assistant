@@ -12,13 +12,18 @@ class ProductRepository {
     await addProduct(product: productData);
   }
 
-  Future<void> deleteProductRepo(int id) async {
+  Future<void> deleteProductRepo(int? id) async {
     await deleteProduct(id);
   }
 
-  Future<void> updateProductRepo(int id, Product product) async {
+  Future<void> updateProductRepo(int? id, Product product) async {
     Map<String, dynamic> productData = product.toMap();
 
     await editProduct(id, productData);
+  }
+
+  Future<Product> getProductByIdRepo(int? id) async {
+    Map<String, dynamic> productData = await getOneProduct(id!);
+    return Product.fromMap(productData);
   }
 }

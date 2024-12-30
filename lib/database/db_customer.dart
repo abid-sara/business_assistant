@@ -1,19 +1,22 @@
 // ignore_for_file: avoid_print
 
+import 'package:business_assistant/database/db_order.dart';
 import 'package:business_assistant/database/db_utility.dart';
 import 'package:business_assistant/database/db_helper.dart';
 import 'package:business_assistant/models/order.dart';
 import 'package:business_assistant/models/customer.dart';
 
 /// Show all customers that are not marked as deleted
-Future<List<Object>> showCustomers() async {
+Future<List<Customer>> showCustomers() async {
   try {
-    final database = await DBHelper.getDatabase(); // Ensure database initialization
+    final database =
+        await DBHelper.getDatabase(); // Ensure database initialization
     final List<Map<String, dynamic>> customerData = await database.query(
       'Customer',
       where: 'deleted = ?',
       whereArgs: [0], // Fetch only non-deleted customers
     );
+    print(customerData.map(Customer.fromMap).toList());
     return customerData.map(Customer.fromMap).toList();
   } catch (e) {
     print("Error fetching customers: $e");
@@ -33,14 +36,15 @@ Future<int> getOrdersCountForCustomer(int customerId) async {
 }
 
 /// Mark a customer as deleted
-Future<bool> deleteCustomer(int customerId) async {
+Future<bool> deleteCustomer(int? customerId) async {
   try {
-    final database = await DBHelper.getDatabase(); // Ensure database initialization
+    final database =
+        await DBHelper.getDatabase(); // Ensure database initialization
     await database.update(
       'Customer',
       {'deleted': 1},
       where: 'id = ?',
-      whereArgs: [customerId],
+      whereArgs: [customerId!],
     );
     return true;
   } catch (e) {
@@ -50,21 +54,22 @@ Future<bool> deleteCustomer(int customerId) async {
 }
 
 /// Insert a new customer into the database
-Future<bool> insertCustomer(Map<String, dynamic> customerData) async {
+Future<int> insertCustomer(Map<String, dynamic> customerData) async {
   try {
-    final database = await DBHelper.getDatabase(); // Ensure proper database initialization
-    await database.insert('Customer', customerData);
-    return true;
+    final database = await DBHelper.getDatabase();
+    final id = await database.insert('Customer', customerData);
+    return id;
   } catch (e) {
     print("Error inserting customer: $e");
-    return false;
+    return -1;
   }
 }
 
 /// Get a customer by ID (excluding deleted ones)
 Future<Map<String, dynamic>> getCustomerById(int customerId) async {
   try {
-    final database = await DBHelper.getDatabase(); // Ensure database initialization
+    final database =
+        await DBHelper.getDatabase(); // Ensure database initialization
     final result = await database.query(
       'Customer',
       where: 'id = ? AND deleted = 0',
@@ -86,9 +91,11 @@ Future<List<Order>> getOrdersForCustomer(int customerId) async {
       where: 'customer_id = ? AND deleted = ?',
       whereArgs: [customerId, 0],
     );
+    final customerData = await getOneCustomer(customerId);
+    final Customer customer = Customer.fromMap(customerData);
 
-    // Use Future mapping to handle async calls
-    return await Future.wait(result.map((orderMap) => Order.fromMap(orderMap)));
+    return (result.map((orderMap) => Order.fromMap(orderMap, customer)))
+        .toList();
   } catch (e) {
     print("Error fetching orders for customer: $e");
     return [];
@@ -98,19 +105,26 @@ Future<List<Order>> getOrdersForCustomer(int customerId) async {
 /// Update an existing customer in the database
 Future<bool> updateCustomer(Customer customer) async {
   try {
-    final database = await DBHelper.getDatabase(); // Ensure database initialization
-    await database.update(
-      'Customer', // Table name
-      customer.toMap(), // Customer data in map form
-      where: 'id = ?', // Specify which customer to update
-      whereArgs: [customer.id], // Match by customer ID
+    final database = await DBHelper.getDatabase();
+
+    if (customer.id == null) {
+      return false;
+    }
+
+    int rowsAffected = await database.update(
+      'Customer',
+      customer.toMap(),
+      where: 'id = ?',
+      whereArgs: [customer.id!],
     );
-    return true;
+
+    return rowsAffected > 0;
   } catch (e) {
     print("Error updating customer: $e");
     return false;
   }
 }
+
 Future<List<String>> getCustomerNames() async {
   final db = await DBHelper.getDatabase();
   final List<Map<String, dynamic>> result = await db.query(
@@ -124,7 +138,8 @@ Future<List<String>> getCustomerNames() async {
 
 Future<List<Customer>> displayCustomer() async {
   try {
-    final database = await DBHelper.getDatabase(); // Ensure database initialization
+    final database =
+        await DBHelper.getDatabase(); // Ensure database initialization
     final List<Map<String, dynamic>> customerData = await database.query(
       'Customer',
       where: 'deleted = ?',

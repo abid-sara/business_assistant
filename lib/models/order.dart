@@ -2,7 +2,7 @@ import 'package:business_assistant/database/db_order.dart';
 import 'package:business_assistant/models/customer.dart';
 
 class Order {
-  final int id;
+  final int? id;
   final double totalPrice;
   final Customer customer;
   final double deliveryPrice;
@@ -13,7 +13,7 @@ class Order {
   final int deleted;
 
   Order({
-    required this.id,
+     this.id,
     required this.totalPrice,
     required this.customer,
     required this.deliveryPrice,
@@ -24,10 +24,8 @@ class Order {
     this.deleted = 0,
   });
 
-  static Future<Order> fromMap(Map<String, dynamic> map, [Customer? customer]) async {
-  Map<String, dynamic> customerUnformatted = await getOneCustomer(map['customer_id']);
-  Customer customer = Customer.fromMap(customerUnformatted);
-
+  factory Order.fromMap(Map<String, dynamic> map, Customer customer)  {
+ 
   return Order(
     id: map['id'],
     totalPrice: (map['price'] ?? 0.0).toDouble(),

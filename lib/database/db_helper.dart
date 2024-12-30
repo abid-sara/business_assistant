@@ -46,9 +46,8 @@ class DBHelper {
         )
     ''');
 
-    await db.execute(
-      '''
-        CREATE TABLE "Customer" (
+    await db.execute('''
+        CREATE TABLE Customer (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         address TEXT NOT NULL,
@@ -58,8 +57,7 @@ class DBHelper {
         count INTEGER NOT NULL DEFAULT 0,
         deleted BOOLEAN NOT NULL DEFAULT 0
         )
-      ''',
-    );
+      ''');
 
     await db.execute('''
         CREATE TABLE Product (
@@ -89,7 +87,7 @@ class DBHelper {
         )
     ''');
 
-     await db.execute('''
+    await db.execute('''
         CREATE TABLE "Income" (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         order_id INTEGER,
