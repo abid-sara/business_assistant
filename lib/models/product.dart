@@ -71,6 +71,7 @@ class Product {
     String? supplierName,
     String? supplierPhoneNum,
     String? supplierAddress,
+    String? productImage,
   }) {
     return Product(
       id: id ?? this.id,
@@ -83,6 +84,7 @@ class Product {
       supplierAddress: supplierAddress ?? this.supplierAddress,
       productDescription: productDescription ?? this.productDescription,
       minimumQuantity: minimumQuantity ?? this.minimumQuantity,
+      productImage: productImage ?? this.productImage,
     );
   }
 }

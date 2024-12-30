@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:business_assistant/cubits/product/product_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/widget/sidebar.dart';
@@ -5,12 +7,39 @@ import 'package:flutter/material.dart';
 import 'package:business_assistant/style/text.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/models/product.dart';
-import 'package:image_input/image_input.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import '../../cubits/product/product_state.dart';
 import '../../cubits/product/validation_cubit.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:image_picker/image_picker.dart';
+
+Future<String> saveImageToLocalStorage(String sourcePath) async {
+  try {
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    final String imagesDir = path.join(appDir.path, 'product_images');
+
+    // Create images directory if it doesn't exist
+    final Directory imagesDirFile = Directory(imagesDir);
+    if (!await imagesDirFile.exists()) {
+      await imagesDirFile.create(recursive: true);
+    }
+
+    // Generate unique filename using timestamp
+    final String fileName =
+        'product_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+    final String destinationPath = path.join(imagesDir, fileName);
+
+    // Copy image file to app's local storage
+    await File(sourcePath).copy(destinationPath);
+
+    return destinationPath;
+  } catch (e) {
+    print('Error saving image: $e');
+    return ''; // Return empty string if save fails
+  }
+}
 
 class Inventory extends StatelessWidget {
   Inventory({super.key});
@@ -39,6 +68,35 @@ class Inventory extends StatelessWidget {
     _supplierAddressController.clear();
     _additionalInfoController.clear();
     _minController.clear();
+  }
+
+  Future<void> handleImagePicker(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+
+    if (pickedFile != null) {
+      try {
+        // Save image to local storage and get permanent path
+        final String savedImagePath =
+            await saveImageToLocalStorage(pickedFile.path);
+        if (savedImagePath.isNotEmpty) {
+          context.read<ValidationCubit>().updateImageInput(savedImagePath);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to save image')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error processing image: $e')),
+        );
+      }
+    }
   }
 
   void _showAddItemDialog(BuildContext context, ProductCubit cubit) {
@@ -72,78 +130,83 @@ class Inventory extends StatelessWidget {
                               : null,
                         ),
                         TextFormField(
-                            controller: _unitPriceController,
-                            decoration:
-                                const InputDecoration(labelText: 'Unit price'),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d*\.?\d*$')),
-                            ],
-                            onChanged: (value) =>
-                                BlocProvider.of<ValidationCubit>(context,
-                                        listen: false)
-                                    .validateUnitPrice(value),
-                            validator: (value) {
-                              final state = BlocProvider.of<ValidationCubit>(
-                                      context,
+                          controller: _unitPriceController,
+                          decoration:
+                              const InputDecoration(labelText: 'Unit price'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d*\.?\d*$')),
+                          ],
+                          onChanged: (value) =>
+                              BlocProvider.of<ValidationCubit>(context,
                                       listen: false)
-                                  .state;
-                              return state.unitPriceError.isEmpty
-                                  ? null
-                                  : state.unitPriceError;
-                            }),
+                                  .validateUnitPrice(value),
+                          validator: (value) {
+                            final state = BlocProvider.of<ValidationCubit>(
+                                    context,
+                                    listen: false)
+                                .state;
+                            return state.unitPriceError.isEmpty
+                                ? null
+                                : state.unitPriceError;
+                          },
+                        ),
                         const SizedBox(height: 30),
                         Center(
-                            child: Text("Inventory information",
-                                style: title_style)),
+                          child:
+                              Text("Inventory information", style: title_style),
+                        ),
                         TextFormField(
-                            controller: _quantityController,
-                            decoration: const InputDecoration(
-                                labelText: 'Current Quantity'),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            onChanged: (value) =>
-                                BlocProvider.of<ValidationCubit>(context,
-                                        listen: false)
-                                    .validateCurrentQuantity(value),
-                            validator: (value) {
-                              final state = BlocProvider.of<ValidationCubit>(
-                                      context,
+                          controller: _quantityController,
+                          decoration: const InputDecoration(
+                              labelText: 'Current Quantity'),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (value) =>
+                              BlocProvider.of<ValidationCubit>(context,
                                       listen: false)
-                                  .state;
-                              return state.currentQuantityError.isEmpty
-                                  ? null
-                                  : state.currentQuantityError;
-                            }),
+                                  .validateCurrentQuantity(value),
+                          validator: (value) {
+                            final state = BlocProvider.of<ValidationCubit>(
+                                    context,
+                                    listen: false)
+                                .state;
+                            return state.currentQuantityError.isEmpty
+                                ? null
+                                : state.currentQuantityError;
+                          },
+                        ),
                         TextFormField(
-                            controller: _minController,
-                            decoration: const InputDecoration(
-                                labelText: 'Minimum quantity threshold'),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            onChanged: (value) =>
-                                BlocProvider.of<ValidationCubit>(context,
-                                        listen: false)
-                                    .validateMinThreshold(value),
-                            validator: (value) {
-                              final state = BlocProvider.of<ValidationCubit>(
-                                      context,
+                          controller: _minController,
+                          decoration: const InputDecoration(
+                              labelText: 'Minimum quantity threshold'),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (value) =>
+                              BlocProvider.of<ValidationCubit>(context,
                                       listen: false)
-                                  .state;
-                              return state.minThresholdError.isEmpty
-                                  ? null
-                                  : state.minThresholdError;
-                            }),
+                                  .validateMinThreshold(value),
+                          validator: (value) {
+                            final state = BlocProvider.of<ValidationCubit>(
+                                    context,
+                                    listen: false)
+                                .state;
+                            return state.minThresholdError.isEmpty
+                                ? null
+                                : state.minThresholdError;
+                          },
+                        ),
                         const SizedBox(height: 30),
                         Center(
-                            child: Text("Supplier information",
-                                style: title_style)),
+                          child:
+                              Text("Supplier information", style: title_style),
+                        ),
                         TextFormField(
                           controller: _supplierNameController,
                           decoration:
@@ -153,26 +216,27 @@ class Inventory extends StatelessWidget {
                               : null,
                         ),
                         TextFormField(
-                            controller: _supplierPhoneController,
-                            decoration: const InputDecoration(
-                                labelText: 'Supplier phone number'),
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            onChanged: (value) =>
-                                BlocProvider.of<ValidationCubit>(context,
-                                        listen: false)
-                                    .validateSupplierPhoneNumber(value),
-                            validator: (value) {
-                              final state = BlocProvider.of<ValidationCubit>(
-                                      context,
+                          controller: _supplierPhoneController,
+                          decoration: const InputDecoration(
+                              labelText: 'Supplier phone number'),
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (value) =>
+                              BlocProvider.of<ValidationCubit>(context,
                                       listen: false)
-                                  .state;
-                              return state.supplierPhoneError.isEmpty
-                                  ? null
-                                  : state.supplierPhoneError;
-                            }),
+                                  .validateSupplierPhoneNumber(value),
+                          validator: (value) {
+                            final state = BlocProvider.of<ValidationCubit>(
+                                    context,
+                                    listen: false)
+                                .state;
+                            return state.supplierPhoneError.isEmpty
+                                ? null
+                                : state.supplierPhoneError;
+                          },
+                        ),
                         TextFormField(
                           controller: _supplierAddressController,
                           decoration: const InputDecoration(
@@ -187,36 +251,63 @@ class Inventory extends StatelessWidget {
                               labelText: 'Additional info'),
                         ),
                         const SizedBox(height: 30),
-                        Text("Product's image", style: title_style),
-                        Center(
-                          child: Column(
-                            children: [
-                              if (state is ValidationState &&
-                                  state.imagePath.isNotEmpty)
-                                Image.file(
-                                  File(state.imagePath),
-                                  width: 100,
-                                  height: 100,
+                        BlocBuilder<ValidationCubit, ValidationState>(
+                          builder: (context, state) {
+                            return Column(
+                              children: [
+                                const Text("Product's image",
+                                    style: TextStyle(fontSize: 16)),
+                                const SizedBox(height: 10),
+                                Container(
+                                  width: 150,
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: state.imagePath.isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          child: Image.file(
+                                            File(state.imagePath),
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return const Center(
+                                                child: Icon(
+                                                    Icons.image_not_supported,
+                                                    size: 40),
+                                              );
+                                            },
+                                          ),
+                                        )
+                                      : const Center(
+                                          child: Icon(Icons.add_photo_alternate,
+                                              size: 40),
+                                        ),
                                 ),
-                              ImageInput(
-                                images: state is ValidationState
-                                    ? state.imageInputImages
-                                    : [],
-                                allowEdit: true,
-                                allowMaxImage: 1,
-                                getPreferredCameraDevice: () async =>
-                                    await getPrefferedCameraDevice(context),
-                                getImageSource: () async =>
-                                    await getImageSource(context),
-                                onImageSelected: (image) =>
-                                    BlocProvider.of<ValidationCubit>(context,
-                                            listen: false)
-                                        .updateImageInput(image),
-                                loadingBuilder: (context, progress) =>
-                                    const CircularProgressIndicator(),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(height: 10),
+                                ElevatedButton.icon(
+                                  onPressed: () => handleImagePicker(context),
+                                  icon: const Icon(
+                                    Icons.photo_library,
+                                    color: Colors.white,
+                                  ),
+                                  label: Text(
+                                    state.imagePath.isEmpty
+                                        ? 'Select Image'
+                                        : 'Change Image',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  style: const ButtonStyle(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                        AppColors.darkGreen),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -230,18 +321,23 @@ class Inventory extends StatelessWidget {
                     _clearForm();
                     context.read<ValidationCubit>().clearForm();
                   },
-                  child: const Text('Cancel'),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.darkGreen),
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
                       final newProduct = Product(
-                        // id: DateTime.now().millisecondsSinceEpoch,
                         name: _nameController.text,
                         quantity: int.parse(_quantityController.text),
-                        productImage: state is ValidationState &&
-                                state.imagePath.isNotEmpty
-                            ? state.imagePath
+                        productImage: context
+                                .read<ValidationCubit>()
+                                .state
+                                .imagePath
+                                .isNotEmpty
+                            ? context.read<ValidationCubit>().state.imagePath
                             : "assets/images/default.png",
                         unitPrice: double.parse(_unitPriceController.text),
                         productDescription: _additionalInfoController.text,
@@ -258,7 +354,10 @@ class Inventory extends StatelessWidget {
                       Navigator.of(context).pop();
                     }
                   },
-                  child: const Text('Add'),
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(color: AppColors.darkGreen),
+                  ),
                 ),
               ],
             );
@@ -451,12 +550,27 @@ class ItemLine extends StatelessWidget {
               height: 100,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.cover,
-                  width: 100,
-                  height: 100,
-                ),
+                child: image.startsWith('assets/')
+                    ? Image.asset(
+                        image,
+                        fit: BoxFit.cover,
+                        width: 100,
+                        height: 100,
+                      )
+                    : Image.file(
+                        File(image),
+                        fit: BoxFit.cover,
+                        width: 100,
+                        height: 100,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/images/default.png',
+                            fit: BoxFit.cover,
+                            width: 100,
+                            height: 100,
+                          );
+                        },
+                      ),
               ),
             ),
             trailing: Row(
@@ -476,64 +590,3 @@ class ItemLine extends StatelessWidget {
     );
   }
 }
-
-var getImageSource = (BuildContext context) {
-  return showDialog<ImageSource>(
-    context: context,
-    builder: (context) {
-      return SimpleDialog(
-        children: [
-          SimpleDialogOption(
-            child: const Text("Camera"),
-            onPressed: () {
-              Navigator.of(context).pop(ImageSource.camera);
-            },
-          ),
-          SimpleDialogOption(
-              child: const Text("Gallery"),
-              onPressed: () {
-                Navigator.of(context).pop(ImageSource.gallery);
-              }),
-        ],
-      );
-    },
-  ).then((value) {
-    return value ?? ImageSource.gallery;
-  });
-};
-
-var getPrefferedCameraDevice = (BuildContext context) async {
-  var status = await Permission.camera.request();
-  if (status.isDenied) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Allow Camera Permission"),
-      ),
-    );
-    return null;
-  }
-  return showDialog<CameraDevice>(
-    context: context,
-    builder: (context) {
-      return SimpleDialog(
-        children: [
-          SimpleDialogOption(
-            child: const Text("Rear"),
-            onPressed: () {
-              Navigator.of(context).pop(CameraDevice.rear);
-            },
-          ),
-          SimpleDialogOption(
-              child: const Text("Front"),
-              onPressed: () {
-                Navigator.of(context).pop(CameraDevice.front);
-              }),
-        ],
-      );
-    },
-  ).then(
-    (value) {
-      return value ?? CameraDevice.rear;
-    },
-  );
-};
