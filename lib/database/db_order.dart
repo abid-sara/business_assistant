@@ -1,9 +1,12 @@
+// ignore_for_file: avoid_print
+
 import 'package:business_assistant/database/db_helper.dart';
 import 'package:business_assistant/database/db_utility.dart';
 import 'package:business_assistant/database/db_product.dart';
 import 'package:sqflite/sqlite_api.dart';
 import 'package:business_assistant/models/order.dart';
 import 'package:business_assistant/models/customer.dart';
+
 Future<List<Map<String, dynamic>>> showOrders() async {
   final database = await DBHelper.getDatabase();
   try {
@@ -18,18 +21,33 @@ Future<List<Map<String, dynamic>>> showOrders() async {
   }
 }
 
+Future<String> getOrderStatus(int orderId) async {
+  final database = await DBHelper.getDatabase();
+  try {
+    final queryResult = await database.rawQuery(
+      "SELECT status from 'Order' WHERE id = ?",
+      [orderId],
+    );
+    final result = queryResult.first["status"] as String;
+
+    print("result in db_order: " + result);
+    return result;
+  } catch (e) {
+    print("Error selecting from Order: $e");
+    return "";
+  }
+}
 
 Future<bool> deleteOrder(int orderId, int customerId) async {
   final database = await DBHelper.getDatabase();
   try {
-    // Soft delete the order
     await database.update(
       'Order',
       {'deleted': 1},
       where: 'id = ?',
       whereArgs: [orderId],
     );
-
+    print("updated the delete ");
     // Decrement customer order count
     await decrementCustomerCount(customerId);
 
@@ -71,21 +89,23 @@ Future<bool> decrementCustomerCount(int customerId) async {
   }
 }
 
-Future<Map<String, dynamic>> getOneCustomer(int customerId) async {
+Future<Map<String, dynamic>> getOneCustomer(int? customerId) async {
   final database = await DBHelper.getDatabase();
   try {
     final result = await database.query(
       'Customer',
-      where: 'id = ?',
-      whereArgs: [customerId],
+      where: 'id = ? AND deleted = ?',
+      whereArgs: [customerId, 0],
     );
-    return result.isNotEmpty ? result.first : {};
+    if (result.isEmpty) {
+      throw Exception('Customer not found');
+    }
+    return result.first;
   } catch (e) {
     print("Error selecting customer: $e");
     return {};
   }
 }
-
 
 Future<int> addOrder({
   required Map<String, dynamic> order,
@@ -116,23 +136,24 @@ Future<int> addOrder({
     print('Order added with ID: $orderId.');
 
     // Link products to the order
-   for (final product in products) {
-  final productId = product['product']?.id; // Ensure the product ID is extracted
-  final quantity = product['quantity'];
+    for (final product in products) {
+      final productId =
+          product['product']?.id; // Ensure the product ID is extracted
+      final quantity = product['quantity'];
 
-  if (productId == null || quantity == null) {
-    print('Invalid product data: $product');
-    continue; // Skip invalid products
-  }
+      if (productId == null || quantity == null) {
+        print('Invalid product data: $product');
+        continue; // Skip invalid products
+      }
 
-  print('Linking product_id: $productId with quantity: $quantity to order_id: $orderId');
-  await database.insert('OrderProduct', {
-    'order_id': orderId,
-    'product_id': productId,
-    'quantity': quantity,
-  });
-}
-
+      print(
+          'Linking product_id: $productId with quantity: $quantity to order_id: $orderId');
+      await database.insert('OrderProduct', {
+        'order_id': orderId,
+        'product_id': productId,
+        'quantity': quantity,
+      });
+    }
 
     return orderId;
   } catch (e) {
@@ -140,9 +161,6 @@ Future<int> addOrder({
     return -99;
   }
 }
-
-
-
 
 Future<double> _validateAndCalculateTotalPrice(
     List<Map<String, dynamic>> products) async {
@@ -174,26 +192,85 @@ Future<double> _validateAndCalculateTotalPrice(
   return totalPrice;
 }
 
+Future<List<Map<String, dynamic>>> displayCustomerOrders(int? customerId) async {
+  final db = await DBHelper.getDatabase();
+
+  final List<Map<String, dynamic>> orders = await db.rawQuery('''
+      SELECT 
+        o.*,
+        c.id as customer_id,
+        c.name as customer_name,
+        c.address as customer_address,
+        c.phone_num as customer_phone_num,
+        c.email as customer_email,
+        c.note as customer_note,
+        c.deleted as customer_deleted
+      FROM "Order" o
+      INNER JOIN "Customer" c ON o.customer_id = c.id
+      WHERE o.customer_id = ? 
+      AND o.deleted = 0
+      ORDER BY o.order_date DESC
+    ''', [customerId]);
+
+  // Transform the flat query result into nested objects
+  return orders.map((order) {
+    // Extract customer data
+    final customerData = {
+      'id': order['customer_id'],
+      'name': order['customer_name'],
+      'address': order['customer_address'],
+      'phone_num': order['customer_phone_num'],
+      'email': order['customer_email'],
+      'note': order['customer_note'],
+      'deleted': order['customer_deleted'],
+    };
+
+    // Remove customer fields from the main order object
+    final orderData = Map<String, dynamic>.from(order)
+      ..removeWhere((key, value) => key.startsWith('customer_'));
+
+    // Add the customer object back
+    orderData['customer'] = customerData;
+
+    return orderData;
+  }).toList();
+}
+
 Future<List<Order>> displayOrder() async {
   final database = await DBHelper.getDatabase();
   try {
-    final List<Map<String, dynamic>> orderData = await database.query('Order');
+    final List<Map<String, dynamic>> orderData = await database.query(
+      'Order',
+      where: 'deleted = ?',
+      whereArgs: [0], // Fetch only non-deleted customers
+    );
     print("Fetched orders from DB: $orderData"); // Add this print statement
 
     List<Order> orders = [];
     for (var map in orderData) {
-      final customerId = map['customer_id'];
-      final customerData = await database.query('Customer', where: 'id = ?', whereArgs: [customerId]);
-      final customer = Customer.fromMap(customerData.first);
-      orders.add(Order.fromMap(map, customer) as Order);
-    }
+      final int customerId = map['customer_id'];
 
+      final Map<String, dynamic> customerData =
+          await getOneCustomer(customerId);
+
+      if (customerData.isEmpty) {
+        print("Warning: Customer not found for order ${map['id']}");
+        continue;
+      }
+
+      final customer = Customer.fromMap(customerData);
+
+      final order = Order.fromMap(map, customer);
+      orders.add(order);
+    }
+    print("Successfully processed ${orders.length} orders");
     return orders;
   } catch (e) {
     print("Error fetching orders: $e");
     return [];
   }
 }
+
 Future<int> _insertOrder(
     Database database, Map<String, dynamic> order, double totalPrice) async {
   return await database.insert('Order', {
@@ -208,7 +285,6 @@ Future<int> _insertOrder(
   });
 }
 
-
 Future<void> _linkProductsToOrder(
     Database database, int orderId, List<Map<String, dynamic>> products) async {
   for (var productInfo in products) {
@@ -219,7 +295,6 @@ Future<void> _linkProductsToOrder(
     });
   }
 }
-
 
 Future<void> _updateProductQuantities(
     Database database, List<Map<String, dynamic>> products) async {
@@ -249,7 +324,7 @@ Future<void> _updateProductQuantities(
 }
 
 Future<void> incrementCustomerOrderCount(
-    Database database, int customerId) async {
+    Database database, int? customerId) async {
   final customer = await database.query(
     'Customer',
     where: 'id = ?',
@@ -268,8 +343,9 @@ Future<void> incrementCustomerOrderCount(
     );
   }
 }
- // function to get he customer name
-Future<String> getCustomerName(int customerId) async {
+
+// function to get he customer name
+Future<String> getCustomerName(int? customerId) async {
   final database = await DBHelper.getDatabase();
   try {
     final result = await database.query(
@@ -283,6 +359,7 @@ Future<String> getCustomerName(int customerId) async {
     return '';
   }
 }
+
 //update the order satatus
 Future<bool> updateOrderStatus(int orderId, String status) async {
   final database = await DBHelper.getDatabase();
@@ -299,6 +376,7 @@ Future<bool> updateOrderStatus(int orderId, String status) async {
     return false;
   }
 }
+
 //get total with delivery
 Future<double> getTotalWithDelivery(int orderId) async {
   final database = await DBHelper.getDatabase();
@@ -308,9 +386,9 @@ Future<double> getTotalWithDelivery(int orderId) async {
       where: 'id = ?',
       whereArgs: [orderId],
     );
+
     if (result.isNotEmpty) {
-      return (result.first['price'] as double) +
-          (result.first['delivery_price'] as double);
+      return (result.first['price'] + result.first['delivery_price']);
     }
     return 0.0;
   } catch (e) {
@@ -318,15 +396,21 @@ Future<double> getTotalWithDelivery(int orderId) async {
     return 0.0;
   }
 }
+
 //get products for order
 Future<List<Map<String, dynamic>>> getProductsForOrder(int orderId) async {
   final database = await DBHelper.getDatabase();
   try {
-    return await database.query(
-      'OrderProduct',
-      where: 'order_id = ?',
-      whereArgs: [orderId],
-    );
+    final result = await database.rawQuery('''
+    SELECT p.id, p.name, p.unit_price, op.quantity
+    FROM 'OrderProduct' op
+    JOIN 'Product' p ON op.product_id = p.id
+    WHERE op.order_id = ?
+    ''', [orderId]);
+
+    print(result);
+
+    return result;
   } catch (e) {
     print("Error selecting products for order: $e");
     return [];

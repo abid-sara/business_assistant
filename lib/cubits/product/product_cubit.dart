@@ -32,7 +32,7 @@ class ProductCubit extends Cubit<ProductState> {
     }
   }
 
-  void deleteProduct(int id) async {
+  void deleteProduct(int? id) async {
     try {
       await repository.deleteProductRepo(id);
       products.removeWhere((product) => product.id == id);
@@ -42,12 +42,45 @@ class ProductCubit extends Cubit<ProductState> {
     }
   }
 
-  void updateProduct(int id, Product updatedProduct) async {
+  void updateProduct(int? id, Product updatedProduct) async {
     try {
       await repository.updateProductRepo(id, updatedProduct);
 
       final index = products.indexWhere((product) => product.id == id);
-      print("index: " + index.toString());
+
+      if (index != -1) {
+        products[index] = updatedProduct;
+        emit(ProductUpdated(updatedProduct));
+        emit(ProductLoaded(List<Product>.from(products)));
+      } else {
+        emit(ProductError('Product with ID $id not found.'));
+      }
+    } catch (e) {
+      emit(ProductError('Failed to update product: $e'));
+    }
+  }
+
+  void decrementProductQuantity(int? id, int quantity) async {
+    try {
+      Product currentProduct = await repository.getProductByIdRepo(id!);
+
+      Product updatedProduct = Product(
+          id: currentProduct.id,
+          name: currentProduct.name,
+          unitPrice: currentProduct.unitPrice,
+          quantity: currentProduct.quantity - quantity,
+          minimumQuantity: currentProduct.minimumQuantity,
+          deleted: currentProduct.deleted,
+          supplierName: currentProduct.supplierName,
+          supplierAddress: currentProduct.supplierAddress,
+          supplierPhoneNum: currentProduct.supplierPhoneNum,
+          productDescription: currentProduct.productDescription,
+          productImage: currentProduct.productImage);
+
+      await repository.updateProductRepo(id, updatedProduct);
+
+      final index = products.indexWhere((product) => product.id == id);
+
       if (index != -1) {
         products[index] = updatedProduct;
         emit(ProductUpdated(updatedProduct));

@@ -1,579 +1,611 @@
-import 'package:business_assistant/database/db_customer.dart';
-import 'package:business_assistant/database/db_order.dart';
-import 'package:business_assistant/database/db_product.dart';
+import 'package:business_assistant/cubits/customer/customer_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/models/order.dart';
 import 'package:business_assistant/models/customer.dart';
+import 'package:business_assistant/models/product.dart';
+import 'package:business_assistant/cubits/product/product_repository.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:business_assistant/widget/orderLine.dart';
-import 'package:flutter/material.dart';
-import 'package:business_assistant/models/product.dart';
+import 'package:intl/intl.dart';
+import '../../cubits/customer/customer_repository.dart';
+import '../../cubits/product/product_cubit.dart';
+import '/cubits/order/order_cubit.dart';
+import '/cubits/order/order_state.dart';
+import 'package:business_assistant/cubits/order/order_repository.dart';
 
-class OrdersPage extends StatefulWidget {
+class OrdersPage extends StatelessWidget {
   const OrdersPage({super.key});
 
   @override
-  _OrdersPageState createState() => _OrdersPageState();
-}
-
-class _OrdersPageState extends State<OrdersPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  List<Order> filteredOrders = [];
-  List<Order> ordersCenter = [];
-  List<Customer> customers = [];
-  List<Product> products = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(_updateFilteredOrders);
-    _initializeData();
-  }
-
-     
-   Future<void> _fetchAndUpdateOrders() async {
-  try {
-    // Fetch orders and map customers
-    List<Order> ordersUnformatted = await displayOrder();
-    print("Orders fetched: ${ordersUnformatted.length}");
-
-    setState(() {
-      ordersCenter = ordersUnformatted;
-      print("Orders mapped: ${ordersCenter.length}");
-    });
-
-    // Initially filter all orders
-    filteredOrders = await _filterOrders('All');
-    print("Orders filtered: ${filteredOrders.length}");
-  } catch (e) {
-    print("Error fetching and updating orders: $e");
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading orders: $e')));
-  }
-}
-
-Future<void> _initializeData() async {
-  try {
-    // Fetch customers
-    customers = await displayCustomer();
-    print("Fetched customers: $customers");
-    customers.forEach((customer) => print("Customer: $customer"));
-
-    print("Customers fetched: ${customers.length}");
-
-    // Fetch products
-    products = await displayProduct();
-    print("Products fetched: ${products.length}");
-
-    // Extract product names
-    List<String> productNames = products.map((product) => product.name).toList();
-    print("Product names extracted: ${productNames.length}");
-
-    // Fetch orders
-    List<Map<String, dynamic>> ordersUnformatted = await showOrders();
-    print("Orders fetched: ${ordersUnformatted.length}");
-
-    // Resolve all orders
-   final futures = ordersUnformatted.map((map) async {
-  try {
-    final customerId = map['customer_id'];
-    if (customerId == null) {
-      print("Error: customer_id is null.");
-      return null; // Skip invalid orders
-    }
-
-    final customer = customers.firstWhere(
-      (c) => c.id == customerId,
-      orElse: () => Customer(
-        id: 0,
-        name: '',
-        address: '',
-        phoneNum: '',
-        email: '',
-        note: '',
-        deleted: 0,
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: BlocProvider(
+        create: (context) =>
+            OrderCubit(repository: OrderRepository())..loadOrders(),
+        child: const OrdersView(),
       ),
     );
-
-    if (customer.id == 0) {
-      print("Warning: Placeholder customer used for order with customer_id: $customerId");
-    }
-
-    await _fetchAndUpdateOrders();
-  } catch (e) {
-    print("Error mapping order: $e");
-    return null; // Handle invalid order gracefully
-  }
-});
-
-// Filter out null futures and wait for the remaining ones
-ordersCenter = await Future.wait(futures.whereType<Future<Order>>());
-print("Orders mapped: ${ordersCenter.length}");
-
-
-    // Remove null entries
-    ordersCenter.removeWhere((order) => order == null);
-    print("Orders mapped: ${ordersCenter.length}");
-
-    // Filter all orders
-    filteredOrders = await _filterOrders('All');
-    print("Orders filtered: ${filteredOrders.length}");
-  } catch (e) {
-    print("Error initializing data: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error loading data: $e')),
-    );
-  } finally {
-    setState(() {
-  filteredOrders = ordersCenter;
-});
-
   }
 }
 
+class OrdersView extends StatelessWidget {
+  const OrdersView({super.key});
 
-
-  Future<List<Order>> _filterOrders(String filter) async {
-    List<Order> filtered = ordersCenter;
-
-    if (filter != 'All') {
-      filtered = ordersCenter.where((order) => order.status == filter.toLowerCase()).toList();
-    }
-
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((order) {
-        final customerName = order.customer.name.toLowerCase();
-        return order.id.toString().contains(_searchQuery) ||
-            customerName.contains(_searchQuery.toLowerCase());
-      }).toList();
-    }
-
-    return filtered;
-  }
-
-  Future<void> _updateFilteredOrders() async {
-    final filter = _tabController.index == 0
-        ? 'All'
-        : _tabController.index == 1
-            ? 'Delivered'
-            : 'Pending';
-    filteredOrders = await _filterOrders(filter);
-    setState(() {});
-  }
-
-  void _showAddOrderDialog() async {
-  final TextEditingController deliveryPriceController = TextEditingController();
-  final TextEditingController deliveryDateController = TextEditingController();
-  final TextEditingController deliveryAddressController = TextEditingController();
-  final TextEditingController orderDateController = TextEditingController();
-  List<Map<String, dynamic>> selectedProducts = [];
-  Customer? selectedCustomer;
-
-  // Ensure products are loaded before showing the dialog
-  List<Product> products = await displayProduct();
-
-  void addProductField(StateSetter setState) {
-    setState(() {
-      selectedProducts.add({'product': null, 'quantity': 1});
-    });
-  }
-
-  void removeProductField(int index, StateSetter setState) {
-    setState(() {
-      selectedProducts.removeAt(index);
-    });
-  }
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Add Order'),
-            content: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Product selection
-                  ...selectedProducts.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    Map<String, dynamic> productData = entry.value;
-                    return Column(
-                      children: [
-                        DropdownButtonFormField<Product>(
-                          decoration: const InputDecoration(labelText: 'Product'),
-                          items: products.map((Product product) {
-                            return DropdownMenuItem<Product>(
-                              value: product,
-                              child: Text(product.name),
-                            );
-                          }).toList(),
-                          onChanged: (Product? newValue) {
-                            setState(() {
-                              productData['product'] = newValue;
-                            });
-                          },
-                          value: productData['product'],
-                        ),
-                        TextField(
-                          decoration: const InputDecoration(labelText: 'Quantity'),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            setState(() {
-                              productData['quantity'] = int.tryParse(value) ?? 1;
-                            });
-                          },
-                          controller: TextEditingController(text: productData['quantity'].toString()),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle),
-                          onPressed: () {
-                            removeProductField(index, setState);
-                          },
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                  TextButton(
-                    onPressed: () => addProductField(setState),
-                    child: const Text('Add Product'),
-                  ),
-                  // Customer selection
-                  DropdownButtonFormField<Customer>(
-  decoration: const InputDecoration(labelText: 'Customer'),
-  items: customers.map((Customer customer) {
-    return DropdownMenuItem<Customer>(
-      value: customer,
-      child: Text(customer.name),
-    );
-  }).toList(),
-  onChanged: (Customer? newValue) {
-    setState(() {
-      selectedCustomer = newValue;
-    });
-    print("Customer selected: ${newValue?.name}, ID: ${newValue?.id}");
-  },
-  value: selectedCustomer,
-),
-
-                  TextField(
-                    controller: orderDateController,
-                    decoration: const InputDecoration(labelText: 'Order Date'),
-                    keyboardType: TextInputType.datetime,
-                  ),
-                  TextField(
-                    controller: deliveryDateController,
-                    decoration: const InputDecoration(labelText: 'Delivery Date'),
-                    keyboardType: TextInputType.datetime,
-                  ),
-                  TextField(
-                    controller: deliveryPriceController,
-                    decoration: const InputDecoration(labelText: 'Delivery Price'),
-                    keyboardType: TextInputType.number,
-                  ),
-                  TextField(
-                    controller: deliveryAddressController,
-                    decoration: const InputDecoration(labelText: 'Delivery Address'),
-                  ),
-                ],
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<OrderCubit, OrderState>(
+      listener: (context, state) {
+        if (state is OrderError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          drawer: const Sidebar(),
+          appBar: AppBar(
+            title: const Text('Orders Center'),
+            backgroundColor: Colors.white,
+            bottom: TabBar(
+              onTap: (index) {
+                final status = index == 0
+                    ? 'All'
+                    : index == 1
+                        ? 'Delivered'
+                        : 'Pending';
+                context.read<OrderCubit>().filterOrders(status: status);
+              },
+              tabs: const [
+                Tab(text: 'All'),
+                Tab(text: 'Delivered'),
+                Tab(text: 'Pending'),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel'),
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SearchBar(
+                  onChanged: (query) => context
+                      .read<OrderCubit>()
+                      .filterOrders(searchQuery: query),
+                ),
               ),
-              TextButton(
-  onPressed: () async {
-    if (selectedCustomer == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a customer.')),
-      );
-      return;
-    }
-
-    // Validate `customer_id`
-    print("Adding order for Customer ID: ${selectedCustomer!.id}");
-
-    Map<String, dynamic> orderData = {
-  'price': selectedProducts.fold(0.0, (sum, item) =>
-      sum + (item['product']?.unitPrice ?? 0.0) * (item['quantity'] ?? 1)),
-  'delivery_price': double.tryParse(deliveryPriceController.text) ?? 0.0,
-  'delivery_date': deliveryDateController.text.isEmpty ? null : deliveryDateController.text,
-  'delivery_address': deliveryAddressController.text.isEmpty ? '' : deliveryAddressController.text,
-  'order_date': orderDateController.text.isEmpty ? null : orderDateController.text,
-  'status': 'pending',
-  'deleted': 0,
-  'customer_id': selectedCustomer!.id,
-};
-
-
-    try {
-  int orderId = await addOrder(order: orderData, products: selectedProducts);
-  if (orderId > 0) {
-    setState(() {
-      ordersCenter.add(Order(
-        id: orderId,
-        totalPrice: orderData['price'],
-        deliveryPrice: orderData['delivery_price'],
-        deliveryDate: orderData['delivery_date'] ?? '',
-        deliveryAddress: orderData['delivery_address'] ?? '',
-        orderDate: orderData['order_date'] ?? '',
-        status: orderData['status'],
-        deleted: orderData['deleted'],
-        customer: selectedCustomer!,
-      ));
-    });
-
-    filteredOrders = await _filterOrders('All');
-    Navigator.of(context).pop();
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Failed to add order.')),
+              if (state is OrderLoading)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (state is OrderLoaded)
+                Expanded(
+                  child: TabBarView(
+                    children: List.generate(
+                      3,
+                      (index) => OrderListView(orders: state.filteredOrders),
+                    ),
+                  ),
+                )
+              else if (state is OrderError)
+                Expanded(
+                  child: Center(child: Text(state.message)),
+                ),
+              const AddOrderButton(),
+            ],
+          ),
+        );
+      },
     );
   }
-} catch (e) {
-  print("Error adding order: $e");
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Error adding order: $e')),
-  );
 }
-  },
-  child: const Text('Add Order'),
-),
 
-            ],
+// SearchBar
+class SearchBar extends StatelessWidget {
+  final Function(String) onChanged;
+
+  const SearchBar({super.key, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      decoration: InputDecoration(
+        labelText: 'Search orders...',
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onChanged: onChanged,
+    );
+  }
+}
+
+// Order ListView
+class OrderListView extends StatelessWidget {
+  final List<Order> orders;
+
+  const OrderListView({super.key, required this.orders});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<OrderCubit, OrderState>(builder: (context, state) {
+      if (orders.isEmpty) {
+        return const Center(
+          child: Text('No orders found'),
+        );
+      }
+      return ListView.builder(
+        itemCount: orders.length,
+        itemBuilder: (context, index) {
+          final order = orders[index];
+          return Orderline(
+            order: order,
+            markOrderAsDelivered: (o) async {
+              await context.read<OrderCubit>().markOrderAsDelivered(o);
+              return true;
+            },
+            deleteOrder: (order, customer) {
+              context.read<OrderCubit>().deleteOrder(order);
+            },
           );
         },
       );
-    },
-  );
+    });
+  }
 }
 
-
-
-
-  void _deleteOrder(Order order, Customer customer) async {
-    try {
-      bool success = await deleteOrder(order.id, customer.id);
-      if (success) {
-        setState(() {
-          ordersCenter.remove(order);
-          filteredOrders.remove(order);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Order deleted successfully.')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting order: $e')),
-      );
-    }
-  }
+// Add Order Button
+class AddOrderButton extends StatelessWidget {
+  const AddOrderButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: const Sidebar(),
-      appBar: AppBar(
-        title: const Text('Orders Center'),
-        backgroundColor: Colors.white,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'All'),
-            Tab(text: 'Delivered'),
-            Tab(text: 'Pending'),
-          ],
-        ),
-      ),
-      body: 
-           Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      labelText: 'Search orders...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onChanged: (query) {
-                      _searchQuery = query;
-                      _updateFilteredOrders();
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildOrderList('All'),
-                      _buildOrderList('Delivered'),
-                      _buildOrderList('Pending'),
-                    ],
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _showAddOrderDialog,
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.darkGreen),
-                  child: const Text('Add Order'),
-                ),
-              ],
-            ),
+    return BlocBuilder<OrderCubit, OrderState>(
+      builder: (context, state) {
+        return ElevatedButton(
+          onPressed: () => _showAddOrderDialog(context),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.darkGreen),
+          child: const Text(
+            'Add Order',
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildOrderList(String filter) {
-  return ListView.builder(
-    itemCount: filteredOrders.length,
-    itemBuilder: (context, index) {
-      final order = filteredOrders[index];
-      return Orderline(
-        order: order,
-        markOrderAsDelivered: (o) async => await _markOrderAsDelivered(o),
-        deleteOrder: (order, customer) => _deleteOrder(order, customer),
-      );
-    },
-  );
-}
+  void _showAddOrderDialog(BuildContext context) async {
+    final TextEditingController deliveryPriceController =
+        TextEditingController();
+    final TextEditingController deliveryAddressController =
+        TextEditingController();
 
+    DateTime? orderDate;
+    DateTime? deliveryDate;
 
-  Future<bool> _markOrderAsDelivered(Order order) async {
-    try {
-      bool success = await updateOrderStatus(order.id, 'delivered');
-      if (success) {
-        await _updateFilteredOrders();
-        return true;
+    List<Product> products = await ProductRepository().getProductsRepo();
+    List<Customer> customers = await CustomerRepository().getCustomersRepo();
+    List<Map<String, dynamic>> selectedProducts = [];
+    Customer? selectedCustomer;
+
+    double calculateTotalOrderPrice() {
+      double total = 0.0;
+      for (var productData in selectedProducts) {
+        Product? product = productData['product'];
+        int quantity = productData['quantity'];
+        if (product != null) {
+          total += product.unitPrice * quantity;
+        }
       }
-      return false;
-    } catch (e) {
-      print("Error marking order as delivered: $e");
-      return false;
+      return total;
+    }
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return BlocListener<OrderCubit, OrderState>(
+          listener: (context, state) {
+            if (state is OrderLoaded) {
+              Navigator.of(dialogContext).pop();
+            } else if (state is OrderError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            }
+          },
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text('Add Order'),
+                content: SingleChildScrollView(
+                  child: AddOrderForm(
+                    deliveryPriceController: deliveryPriceController,
+                    deliveryAddressController: deliveryAddressController,
+                    products: products,
+                    customers: customers,
+                    selectedProducts: selectedProducts,
+                    selectedCustomer: selectedCustomer,
+                    onCustomerChanged: (Customer? customer) {
+                      setState(() => selectedCustomer = customer);
+                    },
+                    onAddProduct: () {
+                      setState(() {
+                        selectedProducts.add({'product': null, 'quantity': 1});
+                      });
+                    },
+                    onRemoveProduct: (int index) {
+                      setState(() {
+                        selectedProducts.removeAt(index);
+                      });
+                    },
+                    onProductChanged: (int index, Product? product) {
+                      setState(() {
+                        selectedProducts[index]['product'] = product;
+                      });
+                    },
+                    onQuantityChanged: (int index, int quantity) {
+                      setState(() {
+                        selectedProducts[index]['quantity'] = quantity;
+                      });
+                    },
+                    onOrderDateSelected: (date) {
+                      setState(() => orderDate = date);
+                    },
+                    onDeliveryDateSelected: (date) {
+                      setState(() => deliveryDate = date);
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: AppColors.darkGreen),
+                    ),
+                  ),
+                  BlocBuilder<OrderCubit, OrderState>(
+                    builder: (context, state) {
+                      return TextButton(
+                        onPressed: () async {
+                          if (orderDate == null ||
+                              deliveryDate == null ||
+                              deliveryDate!.isBefore(orderDate!)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Invalid date selection!'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (selectedCustomer == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please select a customer'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (selectedProducts.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Please add at least one product'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          final Order order = Order(
+                            totalPrice: calculateTotalOrderPrice(),
+                            orderDate:
+                                DateFormat('yyyy-MM-dd').format(orderDate!),
+                            deliveryDate:
+                                DateFormat('yyyy-MM-dd').format(deliveryDate!),
+                            deliveryPrice:
+                                double.tryParse(deliveryPriceController.text) ??
+                                    0.0,
+                            deliveryAddress: deliveryAddressController.text,
+                            customer: selectedCustomer!,
+                            status: 'pending',
+                            deleted: 0,
+                          );
+
+                          await BlocProvider.of<OrderCubit>(context)
+                              .addOrder(order.toMap(), selectedProducts);
+
+                          BlocProvider.of<CustomerCubit>(context)
+                              .incrementCustomerOrderCounts(
+                                  selectedCustomer?.id);
+
+                          // In AddOrderButton class, modify the order addition logic:
+                          for (var productData in selectedProducts) {
+                            final product = productData['product'] as Product?;
+                            final quantity = productData['quantity'] as int;
+                            if (product != null) {
+                              BlocProvider.of<ProductCubit>(context)
+                                  .decrementProductQuantity(
+                                      product.id, quantity);
+                            }
+                          }
+                        },
+                        child: state is OrderLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Add Order',
+                                style: TextStyle(color: AppColors.darkGreen),
+                              ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+
+    // After dialog is closed, refresh the orders
+    if (context.mounted) {
+      context.read<OrderCubit>().loadOrders();
     }
   }
 }
 
-class DetailsBox extends StatefulWidget {
-  final Order order;
+class AddOrderForm extends StatelessWidget {
+  final TextEditingController deliveryPriceController;
+  final TextEditingController deliveryAddressController;
+  final List<Product> products;
+  final List<Customer> customers;
+  final List<Map<String, dynamic>> selectedProducts;
+  final Customer? selectedCustomer;
+  final void Function(Customer?) onCustomerChanged;
+  final void Function() onAddProduct;
+  final void Function(int) onRemoveProduct;
+  final void Function(int, Product?) onProductChanged;
+  final void Function(int, int) onQuantityChanged;
+  final void Function(DateTime) onOrderDateSelected;
+  final void Function(DateTime) onDeliveryDateSelected;
 
-  const DetailsBox({super.key, required this.order});
+  const AddOrderForm({
+    super.key,
+    required this.deliveryPriceController,
+    required this.deliveryAddressController,
+    required this.products,
+    required this.customers,
+    required this.selectedProducts,
+    required this.selectedCustomer,
+    required this.onCustomerChanged,
+    required this.onAddProduct,
+    required this.onRemoveProduct,
+    required this.onProductChanged,
+    required this.onQuantityChanged,
+    required this.onOrderDateSelected,
+    required this.onDeliveryDateSelected,
+  });
 
-  @override
-  State<DetailsBox> createState() => _DetailsBoxState();
-}
-
-class _DetailsBoxState extends State<DetailsBox> {
-  late List<Map<String, dynamic>> products = [];
-  double totalPriceOfProduct = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _initialize(widget.order);
+  Future<void> _selectDate(
+      BuildContext context, void Function(DateTime) onDateSelected) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      onDateSelected(picked);
+    }
   }
 
-  Future<void> _initialize(Order order) async {
-  try {
-    // Fetch the products for this order
-    List<Map<String, dynamic>> rawProducts = await getProductsForOrder(order.id);
+  String calculateProductOrderPrice(Product? product, int quantity) {
+    if (product == null || quantity <= 0) return '0.00';
+    return (product.unitPrice * quantity).toStringAsFixed(2);
+  }
 
-    // Check if rawProducts is null or empty
-    if (rawProducts == null || rawProducts.isEmpty) {
-      products = []; // Assign an empty list if no products are found
-    } else {
-      products = rawProducts.map((entry) {
-        // Ensure unitPrice and quantity are not null, default to 0.0 and 0 respectively
-        double unitPrice = (entry['unitPrice'] ?? 0.0).toDouble(); // Make sure it's a valid double
-        int quantity = (entry['quantity'] ?? 0);      // Default to 0 if null
+  double calculateTotalOrderPrice() {
+    double total = 0.0;
 
-        // Check that unitPrice and quantity are valid numbers before multiplying
-        double total = unitPrice * quantity; // Only multiply when values are non-null
+    for (var productData in selectedProducts) {
+      final product = productData['product'] as Product?;
+      final quantity = productData['quantity'] ?? 0;
 
-        return {
-          'name': entry['name'],
-          'unitPrice': unitPrice,
-          'quantity': quantity,
-          'total': total, // Corrected the total field
-          'supplierName': entry['supplierName'],
-          'supplierPhoneNum': entry['supplierPhoneNum'],
-          'supplierAddress': entry['supplierAddress'],
-          'productDescription': entry['productDescription'],
-          'minimumQuantity': entry['minimumQuantity'],
-          'additionalInfo': entry['additionalInfo'],
-          'productImage': entry['productImage'],
-        };
-      }).toList();
+      if (product != null && quantity > 0) {
+        total += product.unitPrice * quantity;
+      }
     }
 
-    // Get the total price including delivery
-    totalPriceOfProduct = await getTotalWithDelivery(order.id);
+    final deliveryPrice = double.tryParse(deliveryPriceController.text) ?? 0.0;
+    total += deliveryPrice;
 
-    // After initialization, update the UI
-    setState(() {});
-  } catch (e) {
-    print("Error initializing details: $e");
+    return total;
   }
-}
-
-
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Order Details'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Order ID: ${widget.order.id}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text('Customer: ${widget.order.customer.name}'),
-            const SizedBox(height: 10),
-            Text('Delivery Address: ${widget.order.deliveryAddress}'),
-            const SizedBox(height: 10),
-            Text('Order Date: ${widget.order.orderDate}'),
-            const SizedBox(height: 10),
-            Text('Delivery Date: ${widget.order.deliveryDate}'),
-            const SizedBox(height: 10),
-            Text(
-              'Total Price: \$${totalPriceOfProduct.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            const Text('Products:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Expanded(
-              child: ListView.builder(
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return ListTile(
-                    title: Text(product['name']),
-                    subtitle: Text(
-                      'Unit Price: \$${product['unitPrice']}, Quantity: ${product['quantity']}}',
-                    ),
-                  );
-                },
+    final totalOrderPrice = calculateTotalOrderPrice().toStringAsFixed(2);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Customer Dropdown
+        DropdownButtonFormField<Customer>(
+          value: selectedCustomer,
+          hint: const Text('Select Customer'),
+          onChanged: onCustomerChanged,
+          items: customers.map((customer) {
+            return DropdownMenuItem(
+              value: customer,
+              child: Text(customer.name),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 10),
+
+        // Order Date Picker
+        ElevatedButton(
+          onPressed: () => _selectDate(context, onOrderDateSelected),
+          style: const ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(AppColors.yellowGreen),
+          ),
+          child: const Text(
+            'Select Order Date',
+            style: TextStyle(color: AppColors.darkGreen),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Delivery Date Picker
+        ElevatedButton(
+          onPressed: () => _selectDate(context, onDeliveryDateSelected),
+          style: const ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(AppColors.yellowGreen),
+          ),
+          child: const Text(
+            'Select Delivery Date',
+            style: TextStyle(color: AppColors.darkGreen),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Delivery Price Field
+        TextField(
+          controller: deliveryPriceController,
+          decoration: const InputDecoration(labelText: 'Delivery Price'),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            // Trigger a rebuild to update total price when delivery price changes
+            (context as Element).markNeedsBuild();
+          },
+        ),
+        const SizedBox(height: 10),
+
+        // Delivery Address Field
+        TextField(
+          controller: deliveryAddressController,
+          decoration: const InputDecoration(labelText: 'Delivery Address'),
+        ),
+        const SizedBox(height: 20),
+
+        // Product Selection
+        const Text('Products:', style: TextStyle(fontWeight: FontWeight.bold)),
+        ...selectedProducts.asMap().entries.map((entry) {
+          final index = entry.key;
+          final productData = entry.value;
+          final product = productData['product'] as Product?;
+          final quantity = productData['quantity'] ?? 0;
+          final orderPrice = calculateProductOrderPrice(product, quantity);
+
+          return Column(
+            children: [
+              Column(
+                children: [
+                  // Product Dropdown
+                  DropdownButton<Product>(
+                    value: product,
+                    hint: const Text('Select Product'),
+                    onChanged: (product) => onProductChanged(index, product),
+                    items: products.map((product) {
+                      return DropdownMenuItem(
+                        value: product,
+                        child: Text(product.name),
+                      );
+                    }).toList(),
+                  ),
+
+                  // Quantity Input
+                  TextField(
+                    decoration: const InputDecoration(labelText: 'Quantity'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final quantity = int.tryParse(value) ?? 0;
+                      if (product != null && quantity > product.quantity) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Only ${product.quantity} available in inventory'),
+                          ),
+                        );
+                      } else {
+                        onQuantityChanged(index, quantity);
+                      }
+                      (context as Element).markNeedsBuild();
+                    },
+                  ),
+                ],
               ),
+              const SizedBox(height: 5),
+
+              // Order Price Display
+              Row(
+                children: [
+                  const Text(
+                    'Order Price:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '$orderPrice DZD',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              // Remove Product Button
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  onPressed: () => onRemoveProduct(index),
+                ),
+              ),
+            ],
+          );
+        }),
+        const SizedBox(height: 10),
+
+        // Add Product Button
+        ElevatedButton.icon(
+          onPressed: onAddProduct,
+          style: const ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(AppColors.yellowGreen),
+          ),
+          icon: const Icon(Icons.add, color: AppColors.darkGreen),
+          label: const Text('Add Product',
+              style: TextStyle(color: AppColors.darkGreen)),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Total Order Price Display
+        Row(
+          children: [
+            const Text(
+              'Total Order Price:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "$totalOrderPrice DZD",
+              style: const TextStyle(fontSize: 18, color: AppColors.green),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

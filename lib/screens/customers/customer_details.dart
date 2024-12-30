@@ -1,145 +1,189 @@
+import 'package:business_assistant/cubits/customer/customer_cubit.dart';
+import 'package:business_assistant/cubits/customer/customer_state.dart';
+import 'package:business_assistant/cubits/order/order_cubit.dart';
+import 'package:business_assistant/cubits/order/order_state.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/colors.dart';
-import 'package:business_assistant/widget/button.dart';
 import 'package:business_assistant/models/customer.dart';
-import 'package:business_assistant/models/order.dart';
-import 'package:business_assistant/database/db_order.dart';
-import 'package:business_assistant/database/db_customer.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CustomerDetails extends StatefulWidget {
-  const CustomerDetails({super.key});
+class CustomerDetails extends StatelessWidget {
+  CustomerDetails({super.key});
 
-  @override
-  _CustomerDetailsState createState() => _CustomerDetailsState();
-}
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
 
-class _CustomerDetailsState extends State<CustomerDetails> {
-  Customer? _customer;
-  List<Order> _orders = [];
-  late int customerId;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      customerId = ModalRoute.of(context)!.settings.arguments as int;
-      _fetchCustomerDetails();
-    });
+  void _populateFields(Customer customer) {
+    _nameController.text = customer.name;
+    _addressController.text = customer.address;
+    _phoneController.text = customer.phoneNum;
+    _emailController.text = customer.email;
+    _noteController.text = customer.note;
   }
-  Future<void> _showEditCustomerDialog(Customer? customer) async {
-  final nameController = TextEditingController(text: customer!.name);
-  final addressController = TextEditingController(text: customer.address);
-  final phoneController = TextEditingController(text: customer.phoneNum);
-  final emailController = TextEditingController(text: customer.email);
-  final noteController = TextEditingController(text: customer.note);
 
-  await showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Edit Customer'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              TextField(
-                controller: addressController,
-                decoration: const InputDecoration(labelText: 'Address'),
-              ),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
-              ),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-              TextField(
-                controller: noteController,
-                decoration: const InputDecoration(labelText: 'Notes'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              // Create an updated customer object
-              final updatedCustomer = Customer(
-                id: customer.id,
-                name: nameController.text,
-                address: addressController.text,
-                phoneNum: phoneController.text,
-                email: emailController.text,
-                note: noteController.text,
-                deleted: customer.deleted,
-              );
+  Future<void> _showEditCustomerDialog(
+      BuildContext context, Customer customer) async {
+    _populateFields(customer);
 
-              // Update in the database
-              await updateCustomer(updatedCustomer);
-
-              // Refresh the customer details
-              setState(() {
-                _customer = updatedCustomer;
-              });
-
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BlocConsumer<CustomerCubit, CustomerState>(
+          listener: (context, state) {
+            if (state is CustomerUpdated) {
               Navigator.of(context).pop();
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      );
-    },
-  );
-}
+              context.read<OrderCubit>().loadOrders();
 
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Customer Updated Successfuly")));
+            } else if (state is CustomerError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Failed to update customer")));
+            }
+          },
+          builder: (context, state) {
+            return AlertDialog(
+              title: const Text('Edit Customer'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: 'Name'),
+                    ),
+                    TextField(
+                      controller: _addressController,
+                      decoration: const InputDecoration(labelText: 'Address'),
+                    ),
+                    TextField(
+                      controller: _phoneController,
+                      decoration:
+                          const InputDecoration(labelText: 'Phone Number'),
+                    ),
+                    TextField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                    ),
+                    TextField(
+                      controller: _noteController,
+                      decoration: const InputDecoration(labelText: 'Notes'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    context.read<OrderCubit>().loadOrders();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final id = customer.id;
+                    final updatedCustomer = Customer(
+                      id: customer.id,
+                      name: _nameController.text,
+                      address: _addressController.text,
+                      phoneNum: _phoneController.text,
+                      email: _emailController.text,
+                      note: _noteController.text,
+                      deleted: customer.deleted,
+                    );
 
-  Future<void> _fetchCustomerDetails() async {
-    try {
-     
-      final customerMap = await getCustomerById(customerId);
-      final Customer customer = Customer.fromMap(customerMap);
-      final List orders = await getOrdersForCustomer(customerId);
-      //add a debugging print statement
-      print('customer_id' +customerId.toString());
-      setState(() {
-        _customer = customer;
-        _orders = orders.cast<Order>();
-      });
-    } catch (e) {
-      print("Error fetching customer details: $e");
-    }
+                    context
+                        .read<CustomerCubit>()
+                        .updateCustomer(id, updatedCustomer);
+                    Navigator.of(context).pop();
+                    context.read<OrderCubit>().loadOrders();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text(_customer?.name ?? "Loading..."),
-      
-    ),
-    body: Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage("assets/background.png"), 
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _customer == null
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<CustomerCubit, CustomerState>(
+      listener: (context, state) {
+        if (state is CustomerDeleted) {
+          context.read<CustomerCubit>().fetchCustomers();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Customer deleted successfully')),
+          );
+        } else if (state is CustomerError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to delete customer')),
+          );
+        }
+      },
+      builder: (context, state) {
+        final originalCustomer =
+            ModalRoute.of(context)!.settings.arguments as Customer;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<OrderCubit>()
+            ..setCurrentCustomer(originalCustomer)
+            ..loadCustomerOrders();
+        });
+
+        Customer displayCustomer = originalCustomer;
+
+        if (state is CustomerLoaded) {
+          displayCustomer = state.customers.firstWhere(
+            (p) => p.id == originalCustomer.id,
+            orElse: () => originalCustomer,
+          );
+        } else if (state is CustomerUpdated &&
+            state.updatedCustomer.id == originalCustomer.id) {
+          displayCustomer = state.updatedCustomer;
+        } else {
+          // Default to the original customer if no updates are found
+          displayCustomer = originalCustomer;
+        }
+
+        return _buildScaffold(context, displayCustomer);
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, Customer customer) {
+    return BlocBuilder<CustomerCubit, CustomerState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(customer.name),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.read<OrderCubit>().loadOrders();
+              },
+            ),
+          ),
+          body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/background.png"),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Personal Information Card
                   Card(
                     elevation: 4,
                     margin: const EdgeInsets.only(bottom: 16.0),
@@ -158,23 +202,63 @@ Widget build(BuildContext context) {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                               IconButton(
+                              IconButton(
                                 icon: const Icon(Icons.edit),
                                 onPressed: () {
-                                  _showEditCustomerDialog( _customer);
+                                  _showEditCustomerDialog(context, customer);
+                                },
+                              ),
+                              GestureDetector(
+                                child: Icon(
+                                  Icons.delete,
+                                  color: Colors.grey[800],
+                                ),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Delete Customer'),
+                                      content: const Text(
+                                          'Are you sure you want to delete this customer?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            if (customer.id != null) {
+                                              context
+                                                  .read<CustomerCubit>()
+                                                  .deleteCustomer(customer.id);
+                                              Navigator.of(context).pop();
+                                              Navigator.of(context).pop();
+                                              context
+                                                  .read<OrderCubit>()
+                                                  .loadOrders();
+                                            }
+                                          },
+                                          child: const Text('Delete'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 },
                               ),
                             ],
                           ),
-                          Text("Name: ${_customer!.name}"),
-                          Text("Address: ${_customer!.address}"),
-                          Text("Phone number: ${_customer!.phoneNum}"),
-                          Text("Email: ${_customer!.email}"),
-                          Text("Note: ${_customer!.note}"),
+                          Text("Name: ${customer.name}"),
+                          Text("Address: ${customer.address}"),
+                          Text("Phone number: ${customer.phoneNum}"),
+                          Text("Email: ${customer.email}"),
+                          Text("Note: ${customer.note}"),
                         ],
                       ),
                     ),
                   ),
+
+                  // Orders Header Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -185,108 +269,98 @@ Widget build(BuildContext context) {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("Orders count: ${_orders.length}"),
+                      BlocBuilder<OrderCubit, OrderState>(
+                        builder: (context, state) {
+                          if (state is OrderLoaded) {
+                            return Text("Orders count: ${state.orders.length}");
+                          }
+                          return const Text("Orders count: 0");
+                        },
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
+
+                  // Orders List
                   Expanded(
-                    child: _orders.isEmpty
-                        ? const Center(
-                            child: Text(
-                              "No orders yet for the customer...",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _orders.length,
+                    child: BlocBuilder<OrderCubit, OrderState>(
+                      builder: (context, state) {
+                        if (state is OrderLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state is OrderLoaded) {
+                          final customerOrders = state.orders;
+
+                          if (customerOrders.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                "No orders yet for the customer...",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: customerOrders.length,
                             itemBuilder: (context, index) {
-                              final order = _orders[index];
+                              final order = customerOrders[index];
                               return Card(
                                 elevation: 2,
-                                margin: const EdgeInsets.symmetric(vertical: 8.0),
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
                                 child: ListTile(
                                   title: Text('Order ID: ${order.id}'),
-                                  subtitle: Text(
-                                    'Total Price: \$${order.totalPrice.toStringAsFixed(2)}',
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Total Price: ${order.totalPrice.toStringAsFixed(2)}  DZD',
+                                      ),
+                                      Text(
+                                        'Status: ${order.status}',
+                                        style: TextStyle(
+                                          color: order.status.toLowerCase() ==
+                                                  'delivered'
+                                              ? AppColors.darkGreen
+                                              : Colors.red,
+                                        ),
+                                      ),
+                                      Text('Order Date: ${order.orderDate}'),
+                                    ],
                                   ),
                                   onTap: () {
                                     Navigator.pushNamed(
                                       context,
-                                      '/orderDetails',
+                                      '/details',
                                       arguments: order,
                                     );
                                   },
                                 ),
                               );
                             },
-                          ),
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/addOrder',
-                          arguments: _customer,
+                          );
+                        } else if (state is OrderError) {
+                          return Center(
+                            child: Text(
+                              'Error loading orders: ${state.message}',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+                        return const Center(
+                          child: Text("Loading orders..."),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.darkGreen,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12.0,
-                          horizontal: 24.0,
-                        ),
-                      ),
-                      child: const Text(
-                        "Add Order",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
                     ),
                   ),
                 ],
               ),
-      ),
-    ),
-  );
-}
-
-
-  Widget _buildPersonalInfoSection() {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Personal Information',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    _showEditCustomerDialog( _customer);
-                  },
-                ),
-
-
-              ],
             ),
-            Text('Name: ${_customer!.name}'),
-            Text('Address: ${_customer!.address}'),
-            Text('Phone number: ${_customer!.phoneNum}'),
-            Text('Email: ${_customer!.email}'),
-            Text('Note: ${_customer!.note}'),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
-
 }

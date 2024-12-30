@@ -127,7 +127,7 @@ class ItemDetails extends StatelessWidget {
 
                     context
                         .read<ProductCubit>()
-                        .updateProduct(id!, updatedProduct);
+                        .updateProduct(id, updatedProduct);
                     Navigator.of(context).pop();
                   },
                   child: const Text('Save'),

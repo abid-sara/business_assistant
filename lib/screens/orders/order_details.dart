@@ -1,93 +1,107 @@
-//this what will be shown after clicking on the order line
-
-import 'package:business_assistant/database/db_order.dart';
+// order_details.dart
+import 'package:business_assistant/cubits/order/orderDetails_cubit.dart';
+import 'package:business_assistant/cubits/order/order_repository.dart';
+import 'package:business_assistant/cubits/order/order_state.dart';
 import 'package:business_assistant/style/containers.dart';
-import 'dart:typed_data';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
-import 'package:business_assistant/widget/button.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/models/order.dart';
+import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/style/text.dart';
+import 'package:business_assistant/widget/button.dart';
+import 'package:printing/printing.dart';
+import 'package:provider/provider.dart';
 
-// ignore: camel_case_types
-class orderDetails extends StatelessWidget {
-  const orderDetails({super.key});
+class OrderDetails extends StatelessWidget {
+  const OrderDetails({super.key});
 
   @override
   Widget build(BuildContext context) {
     final Order order = ModalRoute.of(context)!.settings.arguments as Order;
-    //we can use now this order object to get the relevant information
+
+    return MultiBlocProvider(
+      providers: [
+        Provider<OrderRepository>(
+          create: (context) =>
+              OrderRepository(), // Initialize your repository here
+        ),
+        BlocProvider(
+          create: (context) => OrderDetailsCubit(
+            repository: context.read<OrderRepository>(),
+          )..loadOrderDetails(order.id!),
+        ),
+      ],
+      child: OrderDetailsView(order: order),
+    );
+  }
+}
+
+class OrderDetailsView extends StatelessWidget {
+  final Order order;
+
+  const OrderDetailsView({super.key, required this.order});
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Icon(Icons.arrow_back_ios_new_rounded)),
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
         title: const Text("Order details"),
         backgroundColor: Colors.white,
       ),
-      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    "assets/images/background.png"), // Path to your image
+                image: AssetImage("assets/images/background.png"),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          detailsBox(order: order),
+          BlocBuilder<OrderDetailsCubit, OrderState>(
+            builder: (context, state) {
+              if (state is OrderLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state is OrderError) {
+                return Center(child: Text(state.message));
+              }
+
+              if (state is OrderDetailsLoaded) {
+                return OrderDetailsContent(
+                  order: order,
+                  state: state,
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
     );
   }
 }
 
-class detailsBox extends StatefulWidget {
-  final Order order; // Make it immutable by marking it final
-  const detailsBox({super.key, required this.order});
+class OrderDetailsContent extends StatelessWidget {
+  final Order order;
+  final OrderDetailsLoaded state;
 
-  @override
-  State<detailsBox> createState() => _detailsBoxState();
-}
-
-class _detailsBoxState extends State<detailsBox> {
-  late List<Map<String, dynamic>> products;
-  late double totalPriceOfProduct;
-
-  Future<void> initialize(Order order) async {
-    products = await getProductsForOrder(order.id);
-
-    products = products
-        .map((entry) => {
-              'name': entry["name"],
-              'unitPrice': entry["unitPrice"],
-              'quantity': entry[
-                  "quantity"], //quantity of the product ordered (from the OrderProduct table)
-              'total': entry["unitPrice"] * entry["quantity"],
-            })
-        .toList();
-
-    totalPriceOfProduct = await getTotalWithDelivery(widget.order.id);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initialize(widget.order);
-  }
+  const OrderDetailsContent({
+    super.key,
+    required this.order,
+    required this.state,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Container(
@@ -106,130 +120,16 @@ class _detailsBoxState extends State<detailsBox> {
               borderRadius: BorderRadius.all(Radius.circular(40)),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Header section with title
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 3),
-                          Center(
-                            child: Text(
-                              "   Order",
-                              style: title_style,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(widget.order.id.toString(),
-                              style: const TextStyle(
-                                  fontSize: 15, color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                  ],
+                OrderHeader(order: order),
+                const ProductListHeader(),
+                ProductList(products: state.products),
+                OrderSummary(
+                  order: order,
+                  totalWithDelivery: state.totalWithDelivery,
                 ),
-                const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                  indent: 20,
-                  endIndent: 20,
-                ),
-                // Product list headers
-                const Padding(
-                  padding: EdgeInsets.all(13.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Item"),
-                      Text("Unit price"),
-                      Text("Quantity"),
-                      Text("Total"),
-                    ],
-                  ),
-                ),
-                // Dynamically display product details
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 10, right: 10),
-                    width: 380,
-                    decoration: BoxDecoration(
-                      borderRadius: roundedRadius,
-                      color: AppColors.lightGreen,
-                    ),
-                    child: Column(
-                      children: [
-                        for (var product in products)
-                          itemLine(
-                            itemName: product['name'],
-                            unitPrice: product['unitPrice'],
-                            quantity: product['quantity'],
-                            total: product['total'],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Total price section
-                Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: roundedRadius,
-                      color: AppColors.yellowGreen,
-                    ),
-                    child: TotalLine(total: widget.order.totalPrice),
-                  ),
-                ),
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/customerDetails',
-                          arguments: widget.order.customer);
-                    },
-                    child: CustomerLine(customer: widget.order.customer.name)),
-                OrderDate(
-                  orderDate: widget.order.orderDate,
-                  deliveryDate: widget.order.deliveryDate,
-                  deliveryAddress: widget.order.deliveryAddress,
-                  deliveryPrice: widget.order.deliveryPrice.toString(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: roundedRadius,
-                      color: AppColors.yellowGreen,
-                    ),
-                    child: TotalLine(total: totalPriceOfProduct),
-                  ),
-                ),
-                const SizedBox(height: 100),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: ElevatedButton(
-                    style: button,
-                    onPressed: () {
-                      _printOrderPdf(widget.order);
-                      print("Exporting PDF... ");
-                    },
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.picture_as_pdf, color: Colors.white),
-                        SizedBox(width: 10),
-                        Text(
-                          "Export PDF",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                PdfExportButton(order: order),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -239,139 +139,193 @@ class _detailsBoxState extends State<detailsBox> {
   }
 }
 
-// class detailsBox extends StatefulWidget {
-//   Order order;
-//   detailsBox({super.key, required this.order});
+class OrderHeader extends StatelessWidget {
+  final Order order;
 
-//   @override
-//   State<detailsBox> createState() => _detailsBoxState();
-// }
-
-// class _detailsBoxState extends State<detailsBox> {
-//   late String orderId;
-Future<Uint8List> _generateOrderPdf(Order order) async {
-  final pdf = pw.Document();
-  final totalPriceOfProduct = await getTotalWithDelivery(order.id);
-  final products = await getProductsForOrder(order.id);
-  final productData = products.map((entry) {
-    return [
-      entry["name"],
-      entry["unitPrice"].toString(),
-      entry["quantity"].toString(),
-      (entry["unitPrice"] * entry["quantity"]).toString(),
-    ];
-  }).toList();
-  pdf.addPage(
-    pw.Page(
-      build: (context) {
-        return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text('Order Details',
-                style:
-                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 20),
-            pw.Text('Order Code: ${order.id}',
-                style: const pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 10),
-            pw.Text('Customer: ${order.customer.name}',
-                style: const pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 10),
-            pw.Text('Order Date: ${order.orderDate}',
-                style: const pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 10),
-            pw.Text('Delivery Date: ${order.deliveryDate}',
-                style: const pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 10),
-            pw.Text('Delivery Address: ${order.deliveryAddress}',
-                style: const pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 10),
-            pw.Text('Delivery Price: ${order.deliveryPrice}',
-                style: const pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 20),
-            pw.Text('Items:',
-                style:
-                    pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Table.fromTextArray(
-              headers: ['Item', 'Unit Price', 'Quantity', 'Total'],
-              data: productData,
-            ),
-            pw.SizedBox(height: 20),
-            pw.Text('Total Price: ${order.totalPrice}',
-                style:
-                    pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Text('Total Price with Delivery: $totalPriceOfProduct}',
-                style:
-                    pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-            pw.Spacer(),
-            pw.Text("Generated on: ${DateTime.now()}"),
-            pw.Text("Thank you for the order "),
-            pw.Text(
-              "Business Assistant",
-              style: pw.TextStyle(
-                  fontSize: 15,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.green),
-            ),
-            // pw.Text("Here we print the title of the business")
-          ],
-        );
-      },
-    ),
-  );
-
-  return pdf.save();
-}
-
-void _printOrderPdf(Order order) async {
-  await Printing.layoutPdf(
-    onLayout: (PdfPageFormat format) async => _generateOrderPdf(order),
-  );
-}
-
-//item line
-// ignore: must_be_immutable
-class itemLine extends StatelessWidget {
-  //pass all the needed information to this widget
-  String itemName;
-  double unitPrice;
-  int quantity;
-  double total;
-  itemLine(
-      {super.key,
-      required this.itemName,
-      required this.unitPrice,
-      required this.quantity,
-      required this.total});
+  const OrderHeader({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
             children: [
-              Text(itemName),
-              Text(unitPrice.toString()),
-              Text(quantity.toString()),
-              Text(total.toString()),
+              const SizedBox(width: 3),
+              Text("Order", style: title_style),
+              const SizedBox(width: 8),
+              Text(
+                order.id.toString(),
+                style: const TextStyle(fontSize: 15, color: Colors.grey),
+              ),
             ],
           ),
-          //after each line we have a divider
+        ),
+        const Divider(
+          color: Colors.grey,
+          thickness: 1,
+          indent: 20,
+          endIndent: 20,
+        ),
+      ],
+    );
+  }
+}
+
+class ProductListHeader extends StatelessWidget {
+  const ProductListHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(13.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("Item"),
+          Text("Unit price"),
+          Text("Quantity"),
+          Text("Total"),
         ],
       ),
     );
   }
 }
 
-// ignore: must_be_immutable
+class ProductList extends StatelessWidget {
+  final List<Map<String, dynamic>> products;
+
+  const ProductList({super.key, required this.products});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        borderRadius: roundedRadius,
+        color: AppColors.lightGreen,
+      ),
+      child: Column(
+        children: products.map((product) {
+          return ProductListItem(
+            name: product['name'],
+            unitPrice: product['unitPrice'],
+            quantity: product['quantity'],
+            total: product['total'],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class ProductListItem extends StatelessWidget {
+  final String name;
+  final double unitPrice;
+  final int quantity;
+  final double total;
+
+  const ProductListItem({
+    super.key,
+    required this.name,
+    required this.unitPrice,
+    required this.quantity,
+    required this.total,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(name),
+          Text(unitPrice.toString()),
+          Text(quantity.toString()),
+          Text(total.toString()),
+        ],
+      ),
+    );
+  }
+}
+
+class OrderSummary extends StatelessWidget {
+  final Order order;
+  final double totalWithDelivery;
+
+  const OrderSummary({
+    super.key,
+    required this.order,
+    required this.totalWithDelivery,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        OrderInfoSection(
+          backgroundColor: AppColors.yellowGreen,
+          child: TotalLine(total: order.totalPrice),
+        ),
+        GestureDetector(
+          onTap: () => Navigator.pushNamed(
+            context,
+            '/customerDetails',
+            arguments: order.customer,
+          ),
+          child: OrderInfoSection(
+            backgroundColor: AppColors.lightGreen,
+            child: CustomerLine(customer: order.customer.name),
+          ),
+        ),
+        OrderInfoSection(
+          backgroundColor: AppColors.purpule,
+          child: OrderDateInfo(
+            orderDate: order.orderDate,
+            deliveryDate: order.deliveryDate,
+            deliveryAddress: order.deliveryAddress,
+            deliveryPrice: order.deliveryPrice.toString(),
+          ),
+        ),
+        OrderInfoSection(
+          backgroundColor: AppColors.yellowGreen,
+          child: TotalLine(total: totalWithDelivery),
+        ),
+      ],
+    );
+  }
+}
+
+class OrderInfoSection extends StatelessWidget {
+  final Widget child;
+  final Color backgroundColor;
+
+  const OrderInfoSection({
+    super.key,
+    required this.child,
+    required this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: roundedRadius,
+          color: backgroundColor,
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
 class TotalLine extends StatelessWidget {
-  double total;
-  TotalLine({super.key, required this.total});
+  final double total;
+  const TotalLine({super.key, required this.total});
 
   @override
   Widget build(BuildContext context) {
@@ -381,7 +335,7 @@ class TotalLine extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text("Total"),
-          Text(total.toString()),
+          Text("${total.toStringAsFixed(2)}  DZD"),
         ],
       ),
     );
@@ -389,8 +343,8 @@ class TotalLine extends StatelessWidget {
 }
 
 class CustomerLine extends StatelessWidget {
-  String customer;
-  CustomerLine({super.key, required this.customer});
+  final String customer;
+  const CustomerLine({super.key, required this.customer});
 
   @override
   Widget build(BuildContext context) {
@@ -406,7 +360,6 @@ class CustomerLine extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              //clicking on the customer can take us to the customer details
               const Text("Customer"),
               Text(customer),
             ],
@@ -417,84 +370,117 @@ class CustomerLine extends StatelessWidget {
   }
 }
 
-class OrderDate extends StatelessWidget {
-  String orderDate;
-  String deliveryDate;
-  String deliveryAddress;
-  String deliveryPrice;
+class PdfExportButton extends StatelessWidget {
+  final Order order;
 
-  OrderDate(
-      {super.key,
-      required this.orderDate,
-      required this.deliveryDate,
-      required this.deliveryAddress,
-      required this.deliveryPrice});
+  const PdfExportButton({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: roundedRadius,
-          color: AppColors.purpule,
-        ),
-        child: Column(
+      padding: const EdgeInsets.all(10.0),
+      child: ElevatedButton(
+        style: button,
+        onPressed: () async {
+          final cubit = context.read<OrderDetailsCubit>();
+          final pdfData = await cubit.generateOrderPdf(order);
+          await Printing.layoutPdf(
+            onLayout: (format) => Future.value(pdfData),
+          );
+        },
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Order date",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(orderDate),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Delivery date",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(deliveryDate),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Delivery address",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(deliveryAddress),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Delivery price",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(deliveryPrice),
-                ],
+            Icon(Icons.picture_as_pdf, color: Colors.white),
+            SizedBox(width: 10),
+            Text(
+              "Export PDF",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class OrderDateInfo extends StatelessWidget {
+  final String orderDate;
+  final String deliveryDate;
+  final String deliveryAddress;
+  final String deliveryPrice;
+
+  const OrderDateInfo({
+    super.key,
+    required this.orderDate,
+    required this.deliveryDate,
+    required this.deliveryAddress,
+    required this.deliveryPrice,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Order date:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                orderDate,
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Delivery date:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                deliveryDate,
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Delivery address:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Expanded(
+                child: Text(
+                  deliveryAddress,
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Delivery price:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text("$deliveryPrice  DZD"),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -9,7 +9,6 @@ import 'package:image_input/image_input.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
-import '../../cubits/product/product_repository.dart';
 import '../../cubits/product/product_state.dart';
 import '../../cubits/product/validation_cubit.dart';
 
@@ -76,18 +75,21 @@ class Inventory extends StatelessWidget {
                             controller: _unitPriceController,
                             decoration:
                                 const InputDecoration(labelText: 'Unit price'),
-                            keyboardType:
-                                TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(
                                   RegExp(r'^\d*\.?\d*$')),
                             ],
-                            onChanged: (value) => context
-                                .read<ValidationCubit>()
-                                .validateUnitPrice(value),
+                            onChanged: (value) =>
+                                BlocProvider.of<ValidationCubit>(context,
+                                        listen: false)
+                                    .validateUnitPrice(value),
                             validator: (value) {
-                              final state =
-                                  context.watch<ValidationCubit>().state;
+                              final state = BlocProvider.of<ValidationCubit>(
+                                      context,
+                                      listen: false)
+                                  .state;
                               return state.unitPriceError.isEmpty
                                   ? null
                                   : state.unitPriceError;
@@ -104,12 +106,15 @@ class Inventory extends StatelessWidget {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ],
-                            onChanged: (value) => context
-                                .read<ValidationCubit>()
-                                .validateCurrentQuantity(value),
+                            onChanged: (value) =>
+                                BlocProvider.of<ValidationCubit>(context,
+                                        listen: false)
+                                    .validateCurrentQuantity(value),
                             validator: (value) {
-                              final state =
-                                  context.watch<ValidationCubit>().state;
+                              final state = BlocProvider.of<ValidationCubit>(
+                                      context,
+                                      listen: false)
+                                  .state;
                               return state.currentQuantityError.isEmpty
                                   ? null
                                   : state.currentQuantityError;
@@ -122,12 +127,15 @@ class Inventory extends StatelessWidget {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ],
-                            onChanged: (value) => context
-                                .read<ValidationCubit>()
-                                .validateMinThreshold(value),
+                            onChanged: (value) =>
+                                BlocProvider.of<ValidationCubit>(context,
+                                        listen: false)
+                                    .validateMinThreshold(value),
                             validator: (value) {
-                              final state =
-                                  context.watch<ValidationCubit>().state;
+                              final state = BlocProvider.of<ValidationCubit>(
+                                      context,
+                                      listen: false)
+                                  .state;
                               return state.minThresholdError.isEmpty
                                   ? null
                                   : state.minThresholdError;
@@ -152,12 +160,15 @@ class Inventory extends StatelessWidget {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ],
-                            onChanged: (value) => context
-                                .read<ValidationCubit>()
-                                .validateSupplierPhoneNumber(value),
+                            onChanged: (value) =>
+                                BlocProvider.of<ValidationCubit>(context,
+                                        listen: false)
+                                    .validateSupplierPhoneNumber(value),
                             validator: (value) {
-                              final state =
-                                  context.watch<ValidationCubit>().state;
+                              final state = BlocProvider.of<ValidationCubit>(
+                                      context,
+                                      listen: false)
+                                  .state;
                               return state.supplierPhoneError.isEmpty
                                   ? null
                                   : state.supplierPhoneError;
@@ -197,9 +208,10 @@ class Inventory extends StatelessWidget {
                                     await getPrefferedCameraDevice(context),
                                 getImageSource: () async =>
                                     await getImageSource(context),
-                                onImageSelected: (image) => context
-                                    .read<ValidationCubit>()
-                                    .updateImageInput(image),
+                                onImageSelected: (image) =>
+                                    BlocProvider.of<ValidationCubit>(context,
+                                            listen: false)
+                                        .updateImageInput(image),
                                 loadingBuilder: (context, progress) =>
                                     const CircularProgressIndicator(),
                               ),
@@ -390,7 +402,7 @@ class Inventory extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = products[index];
         return ItemLine(
-          id: item.id!,
+          id: item.id,
           quantity: item.quantity,
           title: item.name,
           image: item.productImage ?? 'assets/images/default.png',
@@ -403,16 +415,16 @@ class Inventory extends StatelessWidget {
 }
 
 class ItemLine extends StatelessWidget {
-  final int id;
+  final int? id;
   final int quantity;
   final String title;
   final String image;
   final Product itemObj;
-  final Function(int) onDelete;
+  final Function(int?) onDelete;
 
   const ItemLine({
     super.key,
-    required this.id,
+    this.id,
     required this.quantity,
     required this.title,
     required this.image,
