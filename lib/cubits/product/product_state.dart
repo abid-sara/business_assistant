@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:image_input/image_input.dart';
 import '../../models/product.dart';
@@ -52,7 +54,6 @@ class ValidationState extends ProductState {
   final String unitPriceError;
   final String currentQuantityError;
   final String supplierPhoneError;
-  final List<XFile> imageInputImages;
   final String imagePath;
 
   ValidationState({
@@ -60,7 +61,6 @@ class ValidationState extends ProductState {
     this.unitPriceError = '',
     this.currentQuantityError = '',
     this.supplierPhoneError = '',
-    this.imageInputImages = const [],
     this.imagePath = '',
   });
 
@@ -69,7 +69,6 @@ class ValidationState extends ProductState {
     String? unitPriceError,
     String? currentQuantityError,
     String? supplierPhoneError,
-    List<XFile>? imageInputImages,
     String? imagePath,
   }) {
     return ValidationState(
@@ -77,7 +76,6 @@ class ValidationState extends ProductState {
       unitPriceError: unitPriceError ?? this.unitPriceError,
       currentQuantityError: currentQuantityError ?? this.currentQuantityError,
       supplierPhoneError: supplierPhoneError ?? this.supplierPhoneError,
-      imageInputImages: imageInputImages ?? this.imageInputImages,
       imagePath: imagePath ?? this.imagePath,
     );
   }

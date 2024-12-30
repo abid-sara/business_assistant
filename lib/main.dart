@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Poppins',
         ),
         routes: routes,
-        home: OrdersPage(),
+        home: Inventory(),
         debugShowCheckedModeBanner: false,
       ),
     );

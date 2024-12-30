@@ -2,7 +2,6 @@ import 'package:business_assistant/cubits/product/product_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_input/image_input.dart';
 
-
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit() : super(ValidationState());
 
@@ -46,10 +45,9 @@ class ValidationCubit extends Cubit<ValidationState> {
     emit(state.copyWith(supplierPhoneError: error));
   }
 
-  void updateImageInput(XFile image) {
+  void updateImageInput(String path) {
     emit(state.copyWith(
-      imageInputImages: [image],
-      imagePath: image.path,
+      imagePath: path,
     ));
   }
 

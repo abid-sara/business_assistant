@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:business_assistant/cubits/product/product_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -123,6 +125,7 @@ class ItemDetails extends StatelessWidget {
                       supplierName: _supplierNameController.text,
                       supplierPhoneNum: _supplierPhoneController.text,
                       supplierAddress: _supplierAddressController.text,
+                      productImage: product.productImage,
                     );
 
                     context
@@ -192,13 +195,26 @@ class ItemDetails extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
+                      child: // Replace the existing image widget in _buildScaffold method with this:
+                          ClipRRect(
                         borderRadius: BorderRadius.circular(30),
                         child: SizedBox(
                           width: 150,
                           height: 140,
-                          child: Image.asset(product.productImage ??
-                              'assets/images/default.png'),
+                          child: product.productImage?.startsWith('assets/') ??
+                                  true
+                              ? Image.asset(product.productImage ??
+                                  'assets/images/default.png')
+                              : Image.file(
+                                  File(product.productImage ?? ''),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      'assets/images/default.png',
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
                         ),
                       ),
                     ),
