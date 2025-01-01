@@ -1,7 +1,8 @@
+import 'package:business_assistant/screens/Analysis/analysis_week.dart';
 import 'package:flutter/material.dart';
-import 'analysis_week.dart';
+import 'analysis_week.dart' as week;
 import 'package:business_assistant/data/transactiondata.dart';
-import 'package:business_assistant/widget/bar_chart.dart';
+import 'package:business_assistant/widget/bar_chart.dart' as widget;
 import 'package:business_assistant/widget/sidebar.dart';
 
 class AnalysisMonth extends StatefulWidget {
@@ -76,7 +77,7 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                       index: 1,
                       selectedIndex: selectedIndex,
                       onPressed: () {
-                        handleButtonPress(1, '/analysis');
+                        handleButtonPress(1, '/analysisweek');
                       },
                     ),
                     SelectedButton(
@@ -84,7 +85,7 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                       index: 2,
                       selectedIndex: selectedIndex,
                       onPressed: () {
-                        handleButtonPress(2, '/analysisweek');
+                        handleButtonPress(2, '/analysismonth');
                       },
                     ),
                     SelectedButton(
@@ -92,7 +93,7 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                       index: 3,
                       selectedIndex: selectedIndex,
                       onPressed: () {
-                        handleButtonPress(3, '/analysisweek');
+                        handleButtonPress(3, '/analysisyear');
                       },
                     ),
                   ],
@@ -113,7 +114,7 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                     borderRadius: BorderRadius.circular(0),
                     color: Colors.white,
                   ),
-                  child: const CustomBarChart(isExpense: true ,viewType: "monthly",),
+                  child: const widget.CustomBarChart(isExpense: true ,viewType: "monthly",),
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
                 Column(

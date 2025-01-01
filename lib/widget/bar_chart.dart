@@ -1,58 +1,64 @@
+import 'package:business_assistant/cubits/Expense/expense_cubit.dart';
+import 'package:business_assistant/cubits/Expense/expense_state.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:business_assistant/database/db_helper.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/models/expense.dart';
 import 'package:intl/intl.dart';
-import '../style/colors.dart';
-
 
 class CustomBarChart extends StatefulWidget {
   final bool isExpense;
-  final String viewType; 
+  final String viewType;
 
-  const CustomBarChart({super.key, required this.isExpense, required this.viewType});
+  const CustomBarChart({
+    super.key,
+    required this.isExpense,
+    required this.viewType,
+  });
 
   @override
-  State<CustomBarChart> createState() => _CustomBarChartState();
+  _CustomBarChartState createState() => _CustomBarChartState();
 }
 
 class _CustomBarChartState extends State<CustomBarChart> {
-  List<Map<String, dynamic>> entries = []; 
-
   @override
   void initState() {
     super.initState();
-    fetchEntries();
-  }
-
-  Future<void> fetchEntries() async {
-    try {
-      final database = await DBHelper.getDatabase();
-      String tableName = widget.isExpense ? 'Expense' : 'Income';
-      List<Map<String, dynamic>> data = await database.query(tableName);
-
-      setState(() {
-        entries = data.map((item) {
-          return {
-            'amount': item['amount'] as double,
-            'date': item['date'] as String,
-          };
-        }).toList();
-      });
-    } catch (e) {
-      print('Error fetching entries: $e');
+    if (widget.isExpense) {
+      context.read<ExpenseCubit>().loadExpenses();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    Map<int, double> amountsByPeriod = aggregateAmountsByPeriod(entries, widget.viewType);
+    return BlocBuilder<ExpenseCubit, ExpenseState>(
+      builder: (context, state) {
+        if (state is ExpenseLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is ExpenseLoaded) {
+          if (state.expenses.isEmpty) {
+            return const Center(child: Text('No expenses found'));
+          }
+          return _buildBarChart(state.expenses);
+        } else if (state is ExpenseError) {
+          return Center(child: Text(state.error));
+        }
+        return const Center(child: Text('No data available'));
+      },
+    );
+  }
 
+  Widget _buildBarChart(List<Expense> expenses) {
+    List<Map<String, dynamic>> entries = expenses
+        .map((e) => {'amount': e.amount, 'date': e.date})
+        .toList();
+
+    Map<int, double> amountsByPeriod = aggregateAmountsByPeriod(entries);
     List<BarChartGroupData> barChartData = prepareBarChartData(amountsByPeriod);
 
     double maxY = amountsByPeriod.values.isNotEmpty
         ? amountsByPeriod.values.reduce((a, b) => a > b ? a : b)
         : 100.0;
-    double minY = 0;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -60,7 +66,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
           ? const Center(child: Text('No data available for the selected period.'))
           : BarChart(
               BarChartData(
-                minY: minY,
+                minY: 0,
                 maxY: maxY,
                 borderData: FlBorderData(show: false),
                 gridData: FlGridData(
@@ -87,7 +93,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (double value, TitleMeta meta) {
-                        return getBottomTitles(value.toInt(), widget.viewType);
+                        return getBottomTitles(value.toInt());
                       },
                     ),
                   ),
@@ -109,65 +115,64 @@ class _CustomBarChartState extends State<CustomBarChart> {
     );
   }
 
-  Map<int, double> aggregateAmountsByPeriod(List<Map<String, dynamic>> entries, String viewType) {
+  Map<int, double> aggregateAmountsByPeriod(List<Map<String, dynamic>> entries) {
     Map<int, double> amountsByPeriod = {};
     DateTime now = DateTime.now();
 
     for (var entry in entries) {
-      DateTime date = DateTime.parse(entry['date']);
+      DateTime date = entry['date'];
       double amount = entry['amount'];
       int periodKey;
 
-      if (viewType == 'weekly') {
-        DateTime startOfWeek = now.subtract(Duration(days: now.weekday % 7));
-        int daysDifference = date.difference(startOfWeek).inDays;
-        periodKey = (daysDifference >= 0 && daysDifference < 7) ? daysDifference : -1;
-      } else if (viewType == 'monthly') {
-        DateTime startOfMonth = DateTime(now.year, now.month, 1);
-        int weekOfMonth = ((date.day - 1) ~/ 7) + 1;
-        periodKey = weekOfMonth;
-      } else if (viewType == 'yearly') {
+      // Handle weekly aggregation
+      if (widget.viewType == 'weekly') {
+        // Get the start of the week (Monday)
+        DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        int weekKey = ((date.difference(startOfWeek).inDays) ~/ 7) + 1;
+        periodKey = weekKey;
+      } 
+      // Handle monthly aggregation
+      else if (widget.viewType == 'monthly') {
         periodKey = date.month;
-      } else {
+      } 
+      // Handle yearly aggregation
+      else if (widget.viewType == 'yearly') {
+        periodKey = date.year;
+      } 
+      else {
         throw Exception('Invalid view type');
       }
 
-      if (periodKey >= 0) {
-        amountsByPeriod[periodKey] = (amountsByPeriod[periodKey] ?? 0) + amount;
-      }
+      amountsByPeriod[periodKey] = (amountsByPeriod[periodKey] ?? 0) + amount;
     }
 
     return amountsByPeriod;
   }
 
   List<BarChartGroupData> prepareBarChartData(Map<int, double> amountsByPeriod) {
-    return amountsByPeriod.entries.map((entry) {
-      int period = entry.key;
-      double amount = entry.value;
-      return BarChartGroupData(
-        x: period,
-        barRods: [
-          BarChartRodData(
-            toY: amount,
-            width: 20,
-            color: AppColors.darkGreen,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ],
-      );
-    }).toList();
+    return amountsByPeriod.entries
+        .map((e) => BarChartGroupData(
+              x: e.key,
+              barRods: [
+                BarChartRodData(
+                  toY: e.value,
+                  color: widget.isExpense ? Colors.red : Colors.green,
+                ),
+              ],
+            ))
+        .toList();
   }
 
-  Widget getBottomTitles(int value, String viewType) {
-    if (viewType == 'weekly') {
-      List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      return Text(days[value % 7], style: const TextStyle(fontSize: 10));
-    } else if (viewType == 'monthly') {
-      return Text('Week $value', style: const TextStyle(fontSize: 10));
-    } else if (viewType == 'yearly') {
-      return Text(DateFormat.MMM().format(DateTime(0, value)), style: const TextStyle(fontSize: 10));
-    } else {
-      return const Text('', style: TextStyle(fontSize: 10));
+  Widget getBottomTitles(int period) {
+    if (widget.viewType == 'weekly') {
+      DateTime firstDayOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
+      DateTime weekStartDate = firstDayOfWeek.add(Duration(days: (period - 1) * 7));
+      return Text('Week $period\n${DateFormat('MM/dd').format(weekStartDate)}', style: const TextStyle(fontSize: 10));
+    } else if (widget.viewType == 'monthly') {
+      return Text('Month $period', style: const TextStyle(fontSize: 10));
+    } else if (widget.viewType == 'yearly') {
+      return Text(DateFormat('MMM').format(DateTime(0, period)), style: const TextStyle(fontSize: 10));
     }
+    return Container();
   }
 }

@@ -1,6 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
+
 import 'package:business_assistant/cubits/product/product_cubit.dart';
+import 'package:business_assistant/models/expense.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,9 @@ import '../../cubits/product/validation_cubit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
+import 'package:business_assistant/cubits/expense/expense_cubit.dart';  
+
+
 
 Future<String> saveImageToLocalStorage(String sourcePath) async {
   try {
@@ -314,51 +319,76 @@ class Inventory extends StatelessWidget {
                   ),
                 ),
               ),
+
               actions: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _clearForm();
-                    context.read<ValidationCubit>().clearForm();
-                  },
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: AppColors.darkGreen),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      final newProduct = Product(
-                        name: _nameController.text,
-                        quantity: int.parse(_quantityController.text),
-                        productImage: context
-                                .read<ValidationCubit>()
-                                .state
-                                .imagePath
-                                .isNotEmpty
-                            ? context.read<ValidationCubit>().state.imagePath
-                            : "assets/images/default.png",
-                        unitPrice: double.parse(_unitPriceController.text),
-                        productDescription: _additionalInfoController.text,
-                        minimumQuantity: int.parse(_minController.text),
-                        deleted: false,
-                        supplierName: _supplierNameController.text,
-                        supplierPhoneNum: _supplierPhoneController.text,
-                        supplierAddress: _supplierAddressController.text,
-                      );
+  onPressed: () {
+    Navigator.of(context).pop();
+    _clearForm();
+    context.read<ValidationCubit>().clearForm();
+  },
+  child: const Text(
+    'Cancel',
+    style: TextStyle(color: AppColors.darkGreen),
+  ),
+),
 
-                      cubit.addProduct(newProduct);
-                      _clearForm();
-                      context.read<ValidationCubit>().clearForm();
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: const Text(
-                    'Add',
-                    style: TextStyle(color: AppColors.darkGreen),
-                  ),
-                ),
+TextButton(
+  onPressed: () {
+    if (formKey.currentState!.validate()) {
+      final newProduct = Product(
+        name: _nameController.text,
+        quantity: int.parse(_quantityController.text),
+        productImage: context
+                .read<ValidationCubit>()
+                .state
+                .imagePath
+                .isNotEmpty
+            ? context.read<ValidationCubit>().state.imagePath
+            : "assets/images/default.png",
+        unitPrice: double.parse(_unitPriceController.text),
+        productDescription: _additionalInfoController.text,
+        minimumQuantity: int.parse(_minController.text),
+        deleted: false,
+        supplierName: _supplierNameController.text,
+        supplierPhoneNum: _supplierPhoneController.text,
+        supplierAddress: _supplierAddressController.text,
+      );
+
+      // Print the product details being added
+      print('Adding product: ${newProduct.toString()}');
+      
+      try {
+        cubit.addProduct(newProduct);
+
+        final newExpense = Expense(
+          date: DateTime.now(),
+          amount: newProduct.unitPrice * newProduct.quantity,
+        );
+
+        // Print the expense details being added
+        print('Adding expense: Date: ${newExpense.date}, Amount: ${newExpense.amount}');
+
+        final expenseCubit = context.read<ExpenseCubit>();
+        expenseCubit.addExpense(newExpense);
+        print('Product and expense added successfully');
+
+        Navigator.of(context).pop();
+        _clearForm();
+        context.read<ValidationCubit>().clearForm();
+      } catch (e) {
+        print('Error: $e');
+      }
+    }
+  },
+  child: const Text(
+    'Add',
+    style: TextStyle(color: AppColors.darkGreen),
+  ),
+),
+
+
+
               ],
             );
           },

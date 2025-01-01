@@ -34,7 +34,7 @@ class Task {
       'status': status,
       'reminder': reminder,
       'repeatFrequency': repeatFrequency,
-      'deleted': deleted ? 1 : 0,
+      'deleted': deleted,
     };
   }
 
@@ -49,7 +49,7 @@ class Task {
       status: map['status'],
       reminder: map['reminder'],  // Parse reminder from map
       repeatFrequency: map['repeatFrequency'],  // Parse repeatFrequency from map
-      deleted: map['deleted'] == 1,  // Parse deleted status
+      deleted: map['deleted'],  // Parse deleted status
     );
   }
 }

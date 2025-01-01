@@ -1,29 +1,36 @@
 class Expense {
-  final int id;
-  final DateTime date; 
-  final double amount; 
+  final int? id;
+  final DateTime date;
+  final double amount;
+  final bool deleted; 
 
   Expense({
-    required this.id,
+    this.id,
     required this.date,
     required this.amount,
+    this.deleted = false,
   });
 
-  // Factory constructor to create an Expense from a Map
   factory Expense.fromMap(Map<String, dynamic> map) {
-    return Expense(
-      id: map['id'],
-      date: DateTime.now(), 
-      amount: map['amount'],
-    );
+    try {
+      return Expense(
+        id: map['id'] as int?,
+        amount: map['amount'] as double,
+        date: DateTime.parse(map['date'] as String),
+        deleted: map['deleted'] == 1,
+      );
+    } catch (e) {
+      print('Error parsing Expense: $e');
+      rethrow;
+    }
   }
 
-  // Convert an Expense to a Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'date': date.toIso8601String(),
       'amount': amount,
+      'deleted': deleted ? 1 : 0,
     };
   }
 }
