@@ -22,20 +22,22 @@ class TaskDB {
   }
 
   Future _createDB(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        description TEXT,
-        date TEXT,
-        startTime TEXT,
-        endTime TEXT,
-        status TEXT
-      
-        
-      )
-    ''');
-  }
+  await db.execute('''
+    CREATE TABLE tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      description TEXT,
+      date TEXT,
+      startTime TEXT,
+      endTime TEXT,
+      status TEXT,
+      reminder TEXT,              
+      repeatFrequency TEXT,       
+      deleted INTEGER             
+    )
+  ''');
+}
+
 
   Future<List<Task>> fetchTasks() async {
     final db = await instance.database;
@@ -43,10 +45,13 @@ class TaskDB {
     return result.map((json) => Task.fromMap(json)).toList();
   }
 
+
   Future<int> insertTask(Task task) async {
-    final db = await instance.database;
-    return await db.insert('tasks', task.toMap());
-  }
+  final db = await instance.database;
+  print('Inserting task: ${task.toMap()}');
+  return await db.insert('tasks', task.toMap());
+}
+
 
   Future<int> updateTask(Task task) async {
   final db = await instance.database;

@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:image_input/image_input.dart';

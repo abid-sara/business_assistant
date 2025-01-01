@@ -72,15 +72,11 @@ Future<List<Goal>> fetchGoals() async {
 
   Future<void> deleteGoal(int goalId) async {
   final db = await database; // Get your database instance
-  if (goalId != null) {
-    await db.delete(
-      'goals', // The table name
-      where: 'id = ?', 
-      whereArgs: [goalId], // Delete the goal with the given id
-    );
-  } else {
-    print('Goal ID is null, cannot delete.');
-  }
+  await db.delete(
+    'goals', // The table name
+    where: 'id = ?', 
+    whereArgs: [goalId], // Delete the goal with the given id
+  );
 }
 
   }

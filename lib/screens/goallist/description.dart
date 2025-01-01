@@ -54,11 +54,9 @@ class DataField extends StatelessWidget {
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
-                        if (selectedDate != null) {
-                          controller.text =
-                              DateFormat('dd/MM/yyyy').format(selectedDate);
-                        }
-                      }
+                        controller.text =
+                            DateFormat('dd/MM/yyyy').format(selectedDate!);
+                                            }
                     : null,
                 decoration: InputDecoration(
                   filled: true,
@@ -85,11 +83,9 @@ class DataField extends StatelessWidget {
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
-                  if (selectedDate != null) {
-                    controller.text =
-                        DateFormat('dd/MM/yyyy').format(selectedDate);
-                  }
-                },
+                  controller.text =
+                      DateFormat('dd/MM/yyyy').format(selectedDate!);
+                                },
               ),
           ],
         ),

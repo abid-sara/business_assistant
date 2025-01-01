@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/customindicator.dart';
 import 'package:business_assistant/style/colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/tasks/task_cubit.dart';
+import 'package:business_assistant/cubits/tasks/task_state.dart';
 
 class Tasks extends StatefulWidget {
   const Tasks({super.key});
@@ -122,109 +125,143 @@ void _deleteTask(Task task) async {
     );
   }
 
-  // Build the task list with filtering
   Widget _buildTaskList({String? filterStatus}) {
-    final filteredTasks = _getTasksForSelectedDate(filterStatus: filterStatus);
+  return BlocBuilder<TaskCubit, TaskState>(
+    builder: (context, state) {
+      if (state is TaskLoading) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      } else if (state is TaskLoaded) {
+        // Filter tasks based on the selected date and optional filter status
+        final filteredTasks = state.tasks.where((task) {
+          final isOnSelectedDate = task.date.year == _selectedDate.year &&
+              task.date.month == _selectedDate.month &&
+              task.date.day == _selectedDate.day;
+          final matchesFilter = filterStatus == null || task.status == filterStatus;
+          return isOnSelectedDate && matchesFilter;
+        }).toList();
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      itemCount: filteredTasks.length,
-      itemBuilder: (context, index) {
-        final task = filteredTasks[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: task.status == "Completed"
-                ? Colors.green[50]
-                : task.status == "Missed"
-                    ? Colors.red[50]
-                    : Colors.orange[50],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () => _markTaskAsCompleted(task),
-                child: CircleAvatar(
-                  backgroundColor: task.status == "Completed"
-                      ? Colors.green
-                      : task.status == "Missed"
-                          ? Colors.red
-                          : Colors.orange,
-                  child: Icon(
-                    task.status == "Completed"
-                        ? Icons.check
-                        : task.status == "Missed"
-                            ? Icons.error_outline
-                            : Icons.hourglass_top,
-                    color: Colors.white,
-                  ),
-                ),
+        // If no tasks match, show a placeholder message
+        if (filteredTasks.isEmpty) {
+          return const Center(
+            child: Text('No tasks found for the selected criteria.'),
+          );
+        }
+
+        // Build the list of tasks
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          itemCount: filteredTasks.length,
+          itemBuilder: (context, index) {
+            final task = filteredTasks[index];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: task.status == "Completed"
+                    ? Colors.green[50]
+                    : task.status == "Missed"
+                        ? Colors.red[50]
+                        : Colors.orange[50],
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: task.status == "Missed" ? Colors.red : Colors.grey[800],
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () => context.read<TaskCubit>().updateTask(
+                          task..status = "Completed",
+                        ),
+                    child: CircleAvatar(
+                      backgroundColor: task.status == "Completed"
+                          ? Colors.green
+                          : task.status == "Missed"
+                              ? Colors.red
+                              : Colors.orange,
+                      child: Icon(
+                        task.status == "Completed"
+                            ? Icons.check
+                            : task.status == "Missed"
+                                ? Icons.error_outline
+                                : Icons.hourglass_top,
+                        color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      task.description.isNotEmpty
-                          ? task.description
-                          : "No description provided",
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
                         Text(
-                          "${DateFormat('h:mm a').format(task.startTime)} - ${DateFormat('h:mm a').format(task.endTime)}",
+                          task.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: task.status == "Missed" ? Colors.red : Colors.grey[800],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          task.description.isNotEmpty
+                              ? task.description
+                              : "No description provided",
                           style: const TextStyle(fontSize: 14, color: Colors.grey),
                         ),
-                      ],
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        final taskToReschedule = _tasks[index];
-                         Navigator.push(
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              "${DateFormat('h:mm a').format(task.startTime)} - ${DateFormat('h:mm a').format(task.endTime)}",
+                              style: const TextStyle(fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => RescheduleTaskPage(
-                                  task: taskToReschedule,
-                                  onUpdateTask: _updateTaskInParent,  // Pass the update method
+                                  task: task,
+                                onUpdateTask: (updatedTask) {
+                                  context.read<TaskCubit>().updateTask(updatedTask); // Update task using Cubit
+                                },
                                 ),
                               ),
                             );
-                      },
-                      child: const Text(
-                        'Reschedule',
-                        style: TextStyle(color: AppColors.green, fontSize: 15),
-                      ),
+                          },
+                          child: const Text(
+                            'Reschedule',
+                            style: TextStyle(color: AppColors.green, fontSize: 15),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => context.read<TaskCubit>().deleteTask(task.id!),
+                  ),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _deleteTask(task),
-              ),
-            ],
-          ),
+            );
+          },
         );
-      },
-    );
-  }
+      } else if (state is TaskError) {
+        return Center(
+          child: Text(state.message),
+        );
+      }
+      return const Center(
+        child: Text('Unexpected state encountered.'),
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -268,12 +305,9 @@ void _deleteTask(Task task) async {
             context,
             MaterialPageRoute(
               builder: (context) => AddTaskPage(
-                onAddTask: (newTask) {
-                  setState(() {
-                    _tasks.add(newTask); // Add new task to the list
-                  });
-                  TaskDB.instance.insertTask(newTask); // Save new task to the database
-                },
+                 onAddTask: (newTask) {
+                context.read<TaskCubit>().addTask(newTask); // Use TaskCubit to add the task
+              },
               ),
             ),
           );
