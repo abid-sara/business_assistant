@@ -27,3 +27,17 @@ class IncomeLoadFailure extends IncomeState {
 }
 
 class IncomeEmpty extends IncomeState {}
+class IncomeError extends IncomeState {
+
+  final String message;
+
+
+
+  IncomeError(this.message);
+
+}
+class IncomeGroupedByDateLoaded extends IncomeState {
+  final Map<String, double> income;
+
+  IncomeGroupedByDateLoaded({required this.income});
+}

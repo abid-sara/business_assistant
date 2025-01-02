@@ -1,9 +1,10 @@
 import 'package:business_assistant/cubits/Expense/expense_cubit.dart';
 import 'package:business_assistant/cubits/Expense/expense_state.dart';
+import 'package:business_assistant/cubits/Income/income_cubit.dart';
+import 'package:business_assistant/cubits/Income/income_state.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:business_assistant/models/expense.dart';
 import 'package:intl/intl.dart';
 
 class CustomBarChart extends StatefulWidget {
@@ -24,33 +25,46 @@ class _CustomBarChartState extends State<CustomBarChart> {
   @override
   void initState() {
     super.initState();
+    // Trigger the cubit to load data for expenses or income
     if (widget.isExpense) {
-      context.read<ExpenseCubit>().loadExpenses();
+      context.read<ExpenseCubit>().loadExpensesGroupedByDate();
+    } else {
+      context.read<IncomeCubit>().loadIncomeGroupedByDate();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ExpenseCubit, ExpenseState>(
-      builder: (context, state) {
-        if (state is ExpenseLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is ExpenseLoaded) {
-          if (state.expenses.isEmpty) {
-            return const Center(child: Text('No expenses found'));
-          }
-          return _buildBarChart(state.expenses);
-        } else if (state is ExpenseError) {
-          return Center(child: Text(state.error));
-        }
-        return const Center(child: Text('No data available'));
-      },
-    );
+    return widget.isExpense
+        ? BlocBuilder<ExpenseCubit, ExpenseState>(
+            builder: (context, state) {
+              if (state is ExpenseLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is ExpenseGroupedByDateLoaded) {
+                return _buildBarChart(state.expenses);
+              } else if (state is ExpenseError) {
+                return Center(child: Text(state.message));
+              }
+              return _buildBarChart({});
+            },
+          )
+        : BlocBuilder<IncomeCubit, IncomeState>(
+            builder: (context, state) {
+              if (state is IncomeLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is IncomeGroupedByDateLoaded) {
+                return _buildBarChart(state.income);
+              } else if (state is IncomeError) {
+                return Center(child: Text(state.message));
+              }
+              return _buildBarChart({});
+            },
+          );
   }
 
-  Widget _buildBarChart(List<Expense> expenses) {
-    List<Map<String, dynamic>> entries = expenses
-        .map((e) => {'amount': e.amount, 'date': e.date})
+  Widget _buildBarChart(Map<String, double> data) {
+    List<Map<String, dynamic>> entries = data.entries
+        .map((e) => {'amount': e.value, 'date': DateTime.parse(e.key)})
         .toList();
 
     Map<int, double> amountsByPeriod = aggregateAmountsByPeriod(entries);
@@ -122,27 +136,35 @@ class _CustomBarChartState extends State<CustomBarChart> {
     for (var entry in entries) {
       DateTime date = entry['date'];
       double amount = entry['amount'];
-      int periodKey;
+      int periodKey = 0;
 
       // Handle weekly aggregation
       if (widget.viewType == 'weekly') {
-        // Get the start of the week (Monday)
         DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         int weekKey = ((date.difference(startOfWeek).inDays) ~/ 7) + 1;
         periodKey = weekKey;
       } 
-      // Handle monthly aggregation
+      // Handle monthly aggregation: Aggregate by week within current month
       else if (widget.viewType == 'monthly') {
-        periodKey = date.month;
+        DateTime startOfMonth = DateTime(now.year, now.month, 1); // First day of current month
+        int weekOfMonth = ((date.difference(startOfMonth).inDays) ~/ 7) + 1;
+        if (date.month == now.month) {
+          periodKey = weekOfMonth; // Aggregate by week of current month
+        }
       } 
-      // Handle yearly aggregation
+      // Handle yearly aggregation: Aggregate by week within the current year
       else if (widget.viewType == 'yearly') {
-        periodKey = date.year;
+        DateTime startOfYear = DateTime(now.year, 1, 1); // First day of current year
+        int weekOfYear = ((date.difference(startOfYear).inDays) ~/ 7) + 1;
+        if (date.year == now.year) {
+          periodKey = weekOfYear; // Aggregate by week of the current year
+        }
       } 
       else {
         throw Exception('Invalid view type');
       }
 
+      // Add the amount to the corresponding period
       amountsByPeriod[periodKey] = (amountsByPeriod[periodKey] ?? 0) + amount;
     }
 
@@ -165,13 +187,22 @@ class _CustomBarChartState extends State<CustomBarChart> {
 
   Widget getBottomTitles(int period) {
     if (widget.viewType == 'weekly') {
-      DateTime firstDayOfWeek = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
-      DateTime weekStartDate = firstDayOfWeek.add(Duration(days: (period - 1) * 7));
-      return Text('Week $period\n${DateFormat('MM/dd').format(weekStartDate)}', style: const TextStyle(fontSize: 10));
+      // Show the start of the week (Monday) to end (Sunday)
+      DateTime now = DateTime.now();
+      DateTime firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));  // Monday of this week
+      DateTime weekStartDate = firstDayOfWeek.add(Duration(days: (period - 1) * 7)); // Start of the desired week
+      DateTime weekEndDate = weekStartDate.add(Duration(days: 6));  // Sunday of the desired week
+
+      return Text(
+        'Mon ${DateFormat('MM/dd').format(weekStartDate)}\nSun ${DateFormat('MM/dd').format(weekEndDate)}',
+        style: const TextStyle(fontSize: 10),
+      );
     } else if (widget.viewType == 'monthly') {
-      return Text('Month $period', style: const TextStyle(fontSize: 10));
+      // Show weeks within the current month (Week 1, Week 2, etc.)
+      return Text('Week $period', style: const TextStyle(fontSize: 10));
     } else if (widget.viewType == 'yearly') {
-      return Text(DateFormat('MMM').format(DateTime(0, period)), style: const TextStyle(fontSize: 10));
+      // Show weeks of the current year (Week 1, Week 2, etc.)
+      return Text('Week $period', style: const TextStyle(fontSize: 10));
     }
     return Container();
   }

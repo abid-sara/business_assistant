@@ -1,6 +1,8 @@
 import 'package:business_assistant/models/expense.dart';
 
-abstract class ExpenseState {}
+abstract class ExpenseState {
+ 
+}
 
 class ExpenseInitial extends ExpenseState {}
 
@@ -9,11 +11,16 @@ class ExpenseLoading extends ExpenseState {}
 class ExpenseLoaded extends ExpenseState {
   final List<Expense> expenses;
 
-  ExpenseLoaded(List<Map<String, dynamic>> expensesData, {required this.expenses});
+  ExpenseLoaded({required this.expenses});
 }
 
 class ExpenseError extends ExpenseState {
-  final String error;
+  final String message;
 
-  ExpenseError(this.error);
+  ExpenseError(this.message);
+}
+class ExpenseGroupedByDateLoaded extends ExpenseState {
+  final Map<String, double> expenses;
+
+  ExpenseGroupedByDateLoaded({required this.expenses});
 }

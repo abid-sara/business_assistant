@@ -1,5 +1,6 @@
 import 'package:business_assistant/database/db_helper.dart';
 import 'package:business_assistant/models/expense.dart';
+import 'package:business_assistant/models/product.dart';
 import 'package:sqflite/sqflite.dart';
 
 Future<List<Expense>> showExpense() async {
@@ -12,66 +13,51 @@ Future<List<Expense>> showExpense() async {
       whereArgs: [0], // Fetch only non-deleted expenses
     );
 
-    return result.map((map) => Expense.fromMap(map)).toList(); // Convert to Expense objects
+    List<Expense> expenseList = [];
+    for (var map in result) {
+      // Fetch the corresponding Product object
+      final productData = await database.query(
+        'Product',
+        where: 'id = ?',
+        whereArgs: [map['product_id']],
+      );
+
+      if (productData.isNotEmpty) {
+        final product = Product.fromMap(productData.first);
+        expenseList.add(Expense.fromMap(map, product));
+      }
+    }
+
+    return expenseList; // Return the list of Expense objects
   } catch (e) {
     print("Error selecting from Expense: $e");
     return [];
   }
 }
+
 Future<bool> deleteExpense(int expenseId) async {
   try {
     final database = await DBHelper.getDatabase();
     final result = await database.update(
       'Expense',
-      {'deleted': 1}, // Mark as deleted instead of actually deleting
+      {'deleted': 1},
       where: 'id = ?',
       whereArgs: [expenseId],
     );
-
-    if (result > 0) {
-      return true; // Return true if deletion was successful
-    } else {
-      print("Expense not found for ID: $expenseId");
-      return false;
-    }
+    return result > 0;
   } catch (e) {
     print("Error deleting the expense: $e");
     return false;
   }
 }
-Future<Expense> insertExpense(Map<String, dynamic> data) async {
-  final database = await DBHelper.getDatabase();
 
+Future<bool> insertExpense(Expense expense) async {
   try {
-    // Fetch the product details and calculate amount
-    final product = await database.query(
-      'Product',
-      where: 'id = ?',
-      whereArgs: [data['product_id']],
-      limit: 1,
-    );
-
-    if (product.isNotEmpty) {
-      final productData = product.first;
-      double unitPrice = productData['unit_price'];
-      int quantity = data['quantity'];
-
-      double amount = unitPrice * quantity;
-      data['amount'] = amount;
-
-      // Insert the expense into the database
-      int result = await database.insert('Expense', data);
-      if (result > 0) {
-        return Expense.fromMap(data); // Return inserted expense
-      } else {
-        throw Exception("Failed to insert expense");
-      }
-    } else {
-      throw Exception("Product not found");
-    }
+    final database = await DBHelper.getDatabase();
+    final result = await database.insert('Expense', expense.toMap());
+    return result > 0;
   } catch (e) {
-    print("Error inserting the Expense: $e");
-    throw e; // Re-throw the error
+    print("Error inserting the expense: $e");
+    return false;
   }
 }
-

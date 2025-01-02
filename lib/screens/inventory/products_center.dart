@@ -355,29 +355,43 @@ TextButton(
         supplierAddress: _supplierAddressController.text,
       );
 
-      // Print the product details being added
-      print('Adding product: ${newProduct.toString()}');
+      // Print the instances of the product(the product object)
+      print('Product instance: ${newProduct.toMap()}');
       
       try {
+        // Add the new product
         cubit.addProduct(newProduct);
+        print('Product added: ${newProduct.toString()}');
 
+        // Create a new expense based on the product
         final newExpense = Expense(
           date: DateTime.now(),
           amount: newProduct.unitPrice * newProduct.quantity,
+          product: newProduct,
         );
 
         // Print the expense details being added
-        print('Adding expense: Date: ${newExpense.date}, Amount: ${newExpense.amount}');
+        print('Adding expense: ${newExpense.toMap()}');
 
+        // Add the new expense
         final expenseCubit = context.read<ExpenseCubit>();
         expenseCubit.addExpense(newExpense);
-        print('Product and expense added successfully');
-
+   
+        // Navigate back to the previous screen
         Navigator.of(context).pop();
+
+        // Clear the form and reset the validation state
         _clearForm();
         context.read<ValidationCubit>().clearForm();
+
+        
       } catch (e) {
         print('Error: $e');
+
+        // Show an error Snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error adding product or expense')),
+        );
       }
     }
   },
@@ -386,7 +400,6 @@ TextButton(
     style: TextStyle(color: AppColors.darkGreen),
   ),
 ),
-
 
 
               ],

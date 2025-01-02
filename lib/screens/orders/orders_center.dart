@@ -323,21 +323,8 @@ class AddOrderButton extends StatelessWidget {
           await BlocProvider.of<OrderCubit>(context)
               .addOrder(order.toMap(), selectedProducts);
 
-          // Insert income directly after adding the order
-          final income = Income(
-            id: 0, // We do not set the ID manually, database will auto-generate it
-            date: DateTime.now(),
-            amount: order.totalPrice,
-            orderId: order.id ?? 0, // Ensure that the order ID is set after insert
-            order: order, // Pass the order object to the income
-            deleted: 0,
-          );
-
-          // Insert income using the repository's insert method
-          final incomeRepository = IncomeRepository(); // Make sure this is initialized properly
-          await incomeRepository.insertIncome(income);
-   
-          print('Income inserted: ${income.toMap()}');
+          
+          
           // Increment customer order count
           BlocProvider.of<CustomerCubit>(context)
               .incrementCustomerOrderCounts(selectedCustomer?.id);
@@ -350,7 +337,22 @@ class AddOrderButton extends StatelessWidget {
               BlocProvider.of<ProductCubit>(context)
                   .decrementProductQuantity(product.id, quantity);
             }
-          }
+          } 
+           print('HELLO FROM HERE :' + order.toMap().toString());
+          // Insert income directly after adding the order
+          final income = Income(
+            date: DateFormat('yyyy-MM-dd').parse(order.deliveryDate),
+            amount: order.totalPrice,
+            order: order, 
+            deleted: 0,
+          );
+
+          // Insert income using the repository's insert method
+          final incomeRepository = IncomeRepository(); // Make sure this is initialized properly
+          await incomeRepository.insertIncome(income);
+         
+        print('HELLO FROM HERE TOOOOOO Income Data: ${income.toMap()}');
+       
         },
         child: state is OrderLoading
             ? const SizedBox(
@@ -364,10 +366,10 @@ class AddOrderButton extends StatelessWidget {
                 'Add Order',
                 style: TextStyle(color: AppColors.darkGreen),
               ),
-      );
-    },
-  ),
-],
+                    );
+                  },
+                ),
+              ],
 
               );
             },
@@ -380,7 +382,9 @@ class AddOrderButton extends StatelessWidget {
     if (context.mounted) {
       context.read<OrderCubit>().loadOrders();
     }
+    
   }
+  
 }
 
 class AddOrderForm extends StatelessWidget {

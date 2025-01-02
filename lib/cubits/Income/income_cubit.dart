@@ -1,40 +1,45 @@
-import 'package:business_assistant/cubits/Income/income_repository.dart';
-import 'package:business_assistant/cubits/Income/income_state.dart';
-import 'package:business_assistant/models/income.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'income_state.dart';
+import 'income_repository.dart';
+import 'package:business_assistant/models/income.dart';
+import 'package:business_assistant/cubits/Income/income_state.dart';
 
 class IncomeCubit extends Cubit<IncomeState> {
-  final IncomeRepository _incomeRepository;
+  final IncomeRepository repository;
 
-  IncomeCubit(this._incomeRepository) : super(IncomeInitial());
+  IncomeCubit({required this.repository}) : super(IncomeInitial());
 
-  // Method to insert income data
-  Future<void> insertIncome(Income income) async {
+  Future<void> loadIncome() async {
     try {
       emit(IncomeLoading());
-      int? isInserted = await _incomeRepository.insertIncome(income);
-      if (isInserted != null) {
-        emit(IncomeInsertedSuccess());
-      } else {
-        emit(IncomeInsertFailure(error: 'Failed to insert income.'));
-      }
+      final income = await repository.getIncome();
+      print('Income loaded: ${income.length}'); // Debugging line
+      emit(IncomeLoaded(incomeList: income));
     } catch (e) {
-      emit(IncomeInsertFailure(error: e.toString()));
+      print('Error loading income: $e'); // Debugging line
+      emit(IncomeError(e.toString()));
     }
   }
 
-  // Method to fetch all income records
-  Future<void> fetchIncome() async {
+  Future<void> addIncome(Income income) async {
     try {
       emit(IncomeLoading());
-      List<Income> incomeList = await _incomeRepository.getIncome();
-      if (incomeList.isNotEmpty) {
-        emit(IncomeLoaded(incomeList: incomeList));
-      } else {
-        emit(IncomeEmpty());
-      }
+      await repository.insertIncome(income);
+      await loadIncome();  // Refresh the list after adding
     } catch (e) {
-      emit(IncomeLoadFailure(error: e.toString()));
+      emit(IncomeError(e.toString()));
     }
   }
+  Future<void> loadIncomeGroupedByDate() async {
+    try {
+      emit(IncomeLoading());
+      final income = await repository.getIncomeGroupedByDate();
+      print('Income grouped by date: $income'); // Debugging line
+      emit(IncomeGroupedByDateLoaded(income: income));
+    } catch (e) {
+      print('Error loading income: $e'); // Debugging line
+      emit(IncomeError(e.toString()));
+    }
+  }
+
 }

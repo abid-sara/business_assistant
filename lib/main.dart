@@ -93,7 +93,7 @@ class MyApp extends StatelessWidget {
           create: (context) => ExpenseCubit(repository: ExpenseRepository()),
            
         ),
-        BlocProvider(create:  (context) => IncomeCubit( IncomeRepository())),
+        BlocProvider(create:  (context) => IncomeCubit(repository:  IncomeRepository())),
       ],
       child: GetMaterialApp(
         title: 'Business Assistant',
@@ -107,3 +107,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
