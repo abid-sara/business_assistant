@@ -17,7 +17,6 @@ class CustomBarChart extends StatefulWidget {
     required this.viewType,
   });
 
-  @override
   _CustomBarChartState createState() => _CustomBarChartState();
 }
 
@@ -25,7 +24,6 @@ class _CustomBarChartState extends State<CustomBarChart> {
   @override
   void initState() {
     super.initState();
-    // Trigger the cubit to load data for expenses or income
     if (widget.isExpense) {
       context.read<ExpenseCubit>().loadExpensesGroupedByDate();
     } else {
@@ -136,35 +134,24 @@ class _CustomBarChartState extends State<CustomBarChart> {
     for (var entry in entries) {
       DateTime date = entry['date'];
       double amount = entry['amount'];
-      int periodKey = 0;
+      int periodKey;
 
       // Handle weekly aggregation
       if (widget.viewType == 'weekly') {
-        DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        int weekKey = ((date.difference(startOfWeek).inDays) ~/ 7) + 1;
-        periodKey = weekKey;
+        periodKey = date.weekday; // Monday = 1, ..., Sunday = 7
       } 
-      // Handle monthly aggregation: Aggregate by week within current month
+      // Handle monthly aggregation
       else if (widget.viewType == 'monthly') {
-        DateTime startOfMonth = DateTime(now.year, now.month, 1); // First day of current month
-        int weekOfMonth = ((date.difference(startOfMonth).inDays) ~/ 7) + 1;
-        if (date.month == now.month) {
-          periodKey = weekOfMonth; // Aggregate by week of current month
-        }
+        periodKey = ((date.day - 1) ~/ 7) + 1; // Week 1, Week 2, etc.
       } 
-      // Handle yearly aggregation: Aggregate by week within the current year
+      // Handle yearly aggregation
       else if (widget.viewType == 'yearly') {
-        DateTime startOfYear = DateTime(now.year, 1, 1); // First day of current year
-        int weekOfYear = ((date.difference(startOfYear).inDays) ~/ 7) + 1;
-        if (date.year == now.year) {
-          periodKey = weekOfYear; // Aggregate by week of the current year
-        }
+        periodKey = date.month; // January = 1, ..., December = 12
       } 
       else {
         throw Exception('Invalid view type');
       }
 
-      // Add the amount to the corresponding period
       amountsByPeriod[periodKey] = (amountsByPeriod[periodKey] ?? 0) + amount;
     }
 
@@ -172,37 +159,40 @@ class _CustomBarChartState extends State<CustomBarChart> {
   }
 
   List<BarChartGroupData> prepareBarChartData(Map<int, double> amountsByPeriod) {
-    return amountsByPeriod.entries
-        .map((e) => BarChartGroupData(
-              x: e.key,
-              barRods: [
-                BarChartRodData(
-                  toY: e.value,
-                  color: widget.isExpense ? Colors.red : Colors.green,
-                ),
-              ],
-            ))
-        .toList();
+    List<int> periods;
+    if (widget.viewType == 'weekly') {
+      periods = List.generate(7, (index) => index + 1); // Monday to Sunday
+    } else if (widget.viewType == 'monthly') {
+      periods = List.generate(4, (index) => index + 1); // Week 1 to Week 4
+    } else if (widget.viewType == 'yearly') {
+      periods = List.generate(12, (index) => index + 1); // January to December
+    } else {
+      throw Exception('Invalid view type');
+    }
+
+    return periods.map((period) {
+      double amount = amountsByPeriod[period] ?? 0;
+      return BarChartGroupData(
+        x: period,
+        barRods: [
+          BarChartRodData(
+            toY: amount,
+            color: widget.isExpense ? Colors.red : Colors.green,
+          ),
+        ],
+      );
+    }).toList();
   }
 
   Widget getBottomTitles(int period) {
     if (widget.viewType == 'weekly') {
-      // Show the start of the week (Monday) to end (Sunday)
-      DateTime now = DateTime.now();
-      DateTime firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));  // Monday of this week
-      DateTime weekStartDate = firstDayOfWeek.add(Duration(days: (period - 1) * 7)); // Start of the desired week
-      DateTime weekEndDate = weekStartDate.add(Duration(days: 6));  // Sunday of the desired week
-
-      return Text(
-        'Mon ${DateFormat('MM/dd').format(weekStartDate)}\nSun ${DateFormat('MM/dd').format(weekEndDate)}',
-        style: const TextStyle(fontSize: 10),
-      );
+      List<String> daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      return Text(daysOfWeek[period - 1], style: const TextStyle(fontSize: 10));
     } else if (widget.viewType == 'monthly') {
-      // Show weeks within the current month (Week 1, Week 2, etc.)
       return Text('Week $period', style: const TextStyle(fontSize: 10));
     } else if (widget.viewType == 'yearly') {
-      // Show weeks of the current year (Week 1, Week 2, etc.)
-      return Text('Week $period', style: const TextStyle(fontSize: 10));
+      List<String> monthsOfYear = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return Text(monthsOfYear[period - 1], style: const TextStyle(fontSize: 10));
     }
     return Container();
   }
