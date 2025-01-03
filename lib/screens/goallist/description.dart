@@ -54,11 +54,9 @@ class DataField extends StatelessWidget {
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
-                        if (selectedDate != null) {
-                          controller.text =
-                              DateFormat('dd/MM/yyyy').format(selectedDate);
-                        }
-                      }
+                        controller.text =
+                            DateFormat('dd/MM/yyyy').format(selectedDate!);
+                                            }
                     : null,
                 decoration: InputDecoration(
                   filled: true,
@@ -85,11 +83,9 @@ class DataField extends StatelessWidget {
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
-                  if (selectedDate != null) {
-                    controller.text =
-                        DateFormat('dd/MM/yyyy').format(selectedDate);
-                  }
-                },
+                  controller.text =
+                      DateFormat('dd/MM/yyyy').format(selectedDate!);
+                                },
               ),
           ],
         ),
@@ -116,56 +112,53 @@ class _AddGoalPageState extends State<AddGoalPage> {
   String? _startDateError;
   String? _limitDateError;
 
-  void _validateAndSubmit() async {
-    setState(() {
-      _titleError = _titleController.text.isEmpty ? 'Title is required' : null;
-      _startDateError = _startDateController.text.isEmpty
-          ? 'Start date is required'
-          : null;
-      _limitDateError = _limitDateController.text.isEmpty
-          ? 'Limit date is required'
-          : null;
+ void _validateAndSubmit() async {
+  setState(() {
+    _titleError = _titleController.text.isEmpty ? 'Title is required' : null;
+    _startDateError = _startDateController.text.isEmpty
+        ? 'Start date is required'
+        : null;
+    _limitDateError = _limitDateController.text.isEmpty
+        ? 'Limit date is required'
+        : null;
 
-      if (_startDateController.text.isNotEmpty &&
-          DateFormat('dd/MM/yyyy')
-              .parse(_startDateController.text)
-              .isBefore(DateTime.now())) {
-        _startDateError = 'Start date cannot be in the past';
-      }
-      if (_limitDateController.text.isNotEmpty &&
-          DateFormat('dd/MM/yyyy')
-              .parse(_limitDateController.text)
-              .isBefore(DateTime.now())) {
-        _limitDateError = 'Limit date cannot be in the past';
-      }
-      if (_startDateController.text.isNotEmpty &&
-          _limitDateController.text.isNotEmpty &&
-          DateFormat('dd/MM/yyyy')
-              .parse(_startDateController.text)
-              .isAfter(DateFormat('dd/MM/yyyy')
-                  .parse(_limitDateController.text))) {
-        _limitDateError = 'Start date cannot be after limit date';
-      }
-    });
-
-          if (_titleError == null &&
-          _startDateError == null &&
-          _limitDateError == null) {
-        final newGoal = Goal(
-          title: _titleController.text,
-          description: _descriptionController.text,
-          startDate: DateFormat('dd/MM/yyyy').parse(_startDateController.text),
-          limitDate: DateFormat('dd/MM/yyyy').parse(_limitDateController.text),
-          status: 'In Progress',
-        );
-
-        // Save the new goal to the database
-        await GoalDB.instance.insertGoal(newGoal);
-
-        // Return the new goal to the parent widget
-        Navigator.pop(context, newGoal);
+    if (_startDateController.text.isNotEmpty &&
+        DateFormat('dd/MM/yyyy')
+            .parse(_startDateController.text)
+            .isBefore(DateTime.now())) {
+      _startDateError = 'Start date cannot be in the past';
     }
+    if (_limitDateController.text.isNotEmpty &&
+        DateFormat('dd/MM/yyyy')
+            .parse(_limitDateController.text)
+            .isBefore(DateTime.now())) {
+      _limitDateError = 'Limit date cannot be in the past';
+    }
+    if (_startDateController.text.isNotEmpty &&
+        _limitDateController.text.isNotEmpty &&
+        DateFormat('dd/MM/yyyy')
+            .parse(_startDateController.text)
+            .isAfter(DateFormat('dd/MM/yyyy')
+                .parse(_limitDateController.text))) {
+      _limitDateError = 'Start date cannot be after limit date';
+    }
+  });
+
+  if (_titleError == null &&
+      _startDateError == null &&
+      _limitDateError == null) {
+    final newGoal = Goal(
+      title: _titleController.text,
+      description: _descriptionController.text,
+      startDate: DateFormat('dd/MM/yyyy').parse(_startDateController.text),
+      limitDate: DateFormat('dd/MM/yyyy').parse(_limitDateController.text),
+      status: 'In Progress',
+    );
+
+    // Return the new goal to the parent widget
+    Navigator.pop(context, newGoal);
   }
+}
 
   @override
   Widget build(BuildContext context) {

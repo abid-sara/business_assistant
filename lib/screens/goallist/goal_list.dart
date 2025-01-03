@@ -1,13 +1,16 @@
-import 'dart:core';
-
-import 'package:business_assistant/style/colors.dart';
+import 'package:business_assistant/cubits/goals/goal_cubit.dart';
+import 'package:business_assistant/cubits/goals/goal_repository.dart';
+import 'package:business_assistant/cubits/goals/goal_state.dart';
+import 'package:business_assistant/screens/goallist/description.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/goal_card.dart';
 import 'package:business_assistant/data/goaldata.dart';
 import 'package:business_assistant/widget/past_due_goal.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/sidebar.dart';
-import 'package:business_assistant/database/goal_db.dart';
+
 
 class GoalList extends StatefulWidget {
   const GoalList({super.key});
@@ -18,106 +21,179 @@ class GoalList extends StatefulWidget {
 
 class _GoalListState extends State<GoalList> {
   String _selectedDate = 'November 2024'; // Initial date to display
-  List<Goal> goals = [];
-  final GoalDB _goalDB = GoalDB.instance;
 
   @override
-  void initState() {
-    super.initState();
-    _loadGoals();
-  }
-
-  Future<void> _loadGoals() async {
-  // Fetch only non-deleted goals from the database
-  final loadedGoals = await _goalDB.fetchGoals();
-  setState(() {
-    goals = loadedGoals;
-  });
-}
-
-
-  Future<void> _addGoal(Goal goal) async {
-    await _goalDB.insertGoal(goal);
-    _loadGoals();
-  }
-
-  void _deleteGoal(Goal goal) async {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Delete goal'),
-        content: const Text('Are you sure you want to delete this goal?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => GoalCubit(GoalRepository())..fetchGoals(),
+      child: Scaffold(
+        drawer: const Sidebar(),
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text(
+            'Goals List',
+            style: TextStyle(fontSize: 20),
           ),
-          TextButton(
-            onPressed: () async {
-              // Ensure the goal id is not null before deleting
-              if (goal.id != null) {
-                await _goalDB.deleteGoal(goal.id!);  // Use the null check operator here
-                setState(() {
-                  goals.remove(goal);
-                });
-              } else {
-                // Handle the case where goal.id is null
-                print('Goal ID is null, cannot delete.');
-              }
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/background.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: BlocBuilder<GoalCubit, GoalState>(
+              builder: (context, state) {
+                if (state is GoalLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is GoalLoaded) {
+                  final goals = state.goals;
+                  final pastDueGoals = _checkPastDueGoals(goals);
 
-              Navigator.of(context).pop();
-            },
-            child: const Text('Delete'),
+                  return Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios),
+                            onPressed: _navigateToPreviousMonth,
+                          ),
+                          Text(
+                            _selectedDate,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_forward_ios),
+                                onPressed: _navigateToNextMonth,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.calendar_today),
+                                onPressed: _selectDate,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            ...goals.map((goal) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 15),
+                                child: GoalCard(
+                                      goal: goal,
+                                      title: goal.title,
+                                      date:
+                                          '${DateFormat('dd/MM/yyyy').format(goal.startDate)} - ${DateFormat('dd/MM/yyyy').format(goal.limitDate)}',
+                                      status: goal.status,
+                                      statusColor: goal.status == 'Completed' ? AppColors.green : AppColors.lightGreen,
+                                      backgroundColor: Colors.white,
+                                      onDelete: () {
+                                        context.read<GoalCubit>().deleteGoal(goal.id!);
+                                      },
+                                      onUpdate: (updatedGoal) {
+                                        context.read<GoalCubit>().updateGoal(updatedGoal);
+                                      },
+                                      onStatusChange: (newStatus) {
+                                        final updatedGoal = Goal(
+                                          id: goal.id,
+                                          title: goal.title,
+                                          description: goal.description,
+                                          startDate: goal.startDate,
+                                          limitDate: goal.limitDate,
+                                          status: newStatus,
+                                          deleted: goal.deleted,
+                                        );
+                                        context.read<GoalCubit>().updateGoal(updatedGoal);
+                                      },
+                                )
+                              );
+                            }).toList(),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              child: Text(
+                                'Past Due Goals',
+                                style: TextStyle(
+                                    fontSize: 25, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            ...pastDueGoals,
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.add_circle,
+                          color: AppColors.green,
+                          size: 40,
+                        ),
+                        onPressed: () async {
+                        final newGoal = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AddGoalPage()),
+                        );
+                        if (newGoal != null) {
+                          // Add the goal via GoalCubit
+                          context.read<GoalCubit>().addGoal(newGoal as Goal);
+                        }
+                      },
+
+
+                      ),
+                    ],
+                  );
+                } else if (state is GoalError) {
+                  return Center(child: Text(state.message));
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ),
-        ],
-      );
-    },
-  );
-}
-
-
-
-
-  Future<void> _updateGoal(Goal goal) async {
-    await _goalDB.updateGoal(goal);
-    _loadGoals();
-  }
-  Future<void> _updateGoalStatus(Goal goal, String newStatus) async {
-  final updatedGoal = Goal(
-    id: goal.id,
-    title: goal.title,
-    description: goal.description,
-    startDate: goal.startDate,
-    limitDate: goal.limitDate,
-    status: newStatus,
-  );
-
-  await _goalDB.updateGoal(updatedGoal); // Update the status in the database
-  await _loadGoals(); // Reload goals to refresh the UI
-} 
-
-  // Change the status according to the limit date
-  String _getStatus(Goal goal) {
-    if (goal.limitDate.isBefore(DateTime.now()) &&
-        goal.status == 'In progress') return 'Missed';
-    if (goal.status == 'Completed') return 'Completed';
-    return goal.status;
+        ),
+      ),
+    );
   }
 
-  // Function to determine status background color based on the getStatus function
-  Color _getStatusColor(String status) {
-    if (status == 'In progress') return AppColors.lightGreen;
-    return AppColors.green;
+  void _navigateToPreviousMonth() {
+    setState(() {
+      DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
+      DateTime previousMonth =
+          DateTime(currentDate.year, currentDate.month - 1);
+      _selectedDate = DateFormat('MMMM yyyy').format(previousMonth);
+    });
   }
 
-  // Function to determine status text color
-  Color _getStatusTextColor(String status) {
-    if (status == 'Missed' || status == 'In Progress') return AppColors.purpule;
-    return AppColors.lightGreen;
+  void _navigateToNextMonth() {
+    setState(() {
+      DateTime currentDate = DateFormat('MMMM yyyy').parse(_selectedDate);
+      DateTime nextMonth = DateTime(currentDate.year, currentDate.month + 1);
+      _selectedDate = DateFormat('MMMM yyyy').format(nextMonth);
+    });
   }
 
-  List<PastDueGoalRow> _checkPastDueGoals() {
+  void _selectDate() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    ).then((pickedDate) {
+      setState(() {
+        if (pickedDate != null) {
+          final formattedDate = DateFormat('MMMM yyyy').format(pickedDate);
+          _selectedDate = formattedDate;
+        }
+      });
+    });
+  }
+
+  List<PastDueGoalRow> _checkPastDueGoals(List<Goal> goals) {
     return goals
         .where((goal) => goal.limitDate.isBefore(DateTime.now()))
         .map((goal) {
@@ -131,159 +207,5 @@ class _GoalListState extends State<GoalList> {
             (goal.status == 'Completed') ? AppColors.darkGreen : Colors.red,
       );
     }).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<PastDueGoalRow> pastDueGoals = _checkPastDueGoals();
-
-    return Scaffold(
-      drawer: const Sidebar(),
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Goals list',
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/background.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () {
-                      setState(() {
-                        DateTime currentDate =
-                            DateFormat('MMMM yyyy').parse(_selectedDate);
-                        DateTime previousMonth =
-                            DateTime(currentDate.year, currentDate.month - 1);
-                        _selectedDate =
-                            DateFormat('MMMM yyyy').format(previousMonth);
-                      });
-                    },
-                  ),
-                  Text(
-                    _selectedDate,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          setState(() {
-                            DateTime currentDate =
-                                DateFormat('MMMM yyyy').parse(_selectedDate);
-                            DateTime nextMonth =
-                                DateTime(currentDate.year, currentDate.month + 1);
-                            _selectedDate =
-                                DateFormat('MMMM yyyy').format(nextMonth);
-                          });
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.calendar_today),
-                        onPressed: () {
-                          showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                          ).then((pickedDate) {
-                            setState(() {
-                              if (pickedDate != null) {
-                                final formattedDate =
-                                    DateFormat('MMMM yyyy').format(pickedDate);
-                                _selectedDate = formattedDate;
-                              }
-                            });
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Expanded(
-                child: ListView(
-                  children: [
-                    ...goals.map(
-                      (goal) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: GoalCard(
-                            goal: goal,
-                            title: goal.title,
-                            date:
-                                '${DateFormat('dd/MM/yyyy').format(goal.startDate)} - ${DateFormat('dd/MM/yyyy').format(goal.limitDate)}',
-                            status: _getStatus(goal),
-                            statusColor: _getStatusTextColor(goal.status),
-                            backgroundColor: _getStatusColor(goal.status),
-                            onMarkAsCompleted: () => _updateGoalStatus(goal, 'Completed'),
-                            onDelete: () => _deleteGoal(goal),
-                            onStatusChange: (newStatus) => _updateGoalStatus(goal, newStatus),
-                            onUpdate: (updatedGoal) {
-                              // Update the goal in the list and refresh UI
-                              setState(() {
-                                final index = goals.indexWhere((g) => g.id == updatedGoal.id);
-                                if (index != -1) {
-                                  goals[index] = updatedGoal;
-                                }
-                              });
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        'Past due goals',
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    ...pastDueGoals.map((pastDueGoal) {
-                      return pastDueGoal;
-                    }),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.add_circle,
-                  color: AppColors.green,
-                  size: 40,
-                ),
-                onPressed: () async {
-                  // Navigate to the AddGoalPage and wait for the result
-                  final newGoal = await Navigator.pushNamed(
-                    context,
-                    '/description',
-                  );
-
-                  // Reload goals from the database to avoid duplicate entries
-                  if (newGoal != null) {
-                    await _loadGoals();
-                  }
-                },
-              ),
-
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

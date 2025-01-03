@@ -1,10 +1,14 @@
 import 'package:business_assistant/cubits/Income/income_repository.dart';
 import 'package:business_assistant/cubits/Income/income_cubit.dart';
 import 'package:business_assistant/cubits/customer/customer_cubit.dart';
+import 'package:business_assistant/cubits/goals/goal_cubit.dart';
+import 'package:business_assistant/cubits/goals/goal_repository.dart';
 import 'package:business_assistant/cubits/order/order_cubit.dart';
 import 'package:business_assistant/cubits/order/order_repository.dart';
 import 'package:business_assistant/cubits/product/product_cubit.dart';
 import 'package:business_assistant/cubits/product/product_repository.dart';
+import 'package:business_assistant/cubits/tasks/task_cubit.dart';
+import 'package:business_assistant/cubits/tasks/task_repository.dart';
 import 'package:business_assistant/models/customer.dart';
 import 'package:business_assistant/screens/customers/customers_center.dart';
 import 'package:business_assistant/screens/dashboard.dart';
@@ -94,6 +98,8 @@ class MyApp extends StatelessWidget {
            
         ),
         BlocProvider(create:  (context) => IncomeCubit(repository:  IncomeRepository())),
+        BlocProvider(create: (context) => TaskCubit(TaskRepository())), // Added TaskCubit
+        BlocProvider(create: (context) => GoalCubit(GoalRepository())),
       ],
       child: GetMaterialApp(
         title: 'Business Assistant',

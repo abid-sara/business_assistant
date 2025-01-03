@@ -99,40 +99,41 @@ class GoalCard extends StatelessWidget {
                   color: statusColor,
                 ),
                 child: PopupMenuButton<String>(
-                  child: Text(
-                    status,
-                    style: const TextStyle(fontSize: 16, color: Colors.black),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onSelected: (String newStatus) {
-                    if (onStatusChange != null) {
-                      onStatusChange!(newStatus);
-                    }
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem<String>(
-                        value: 'Completed',
-                        child: Text(
-                          'Completed',
-                          style: TextStyle(color: AppColors.green),
-                        ),
-                      ),
-                      PopupMenuItem<String>(
-                        value: 'In progress',
-                        child: Text(
-                          'In Progress',
-                          style: TextStyle(color: AppColors.lightGreen),
-                        ),
-                      ),
-                    ];
-                  },
+  child: Text(
+    status,
+    style: const TextStyle(fontSize: 16, color: Colors.black),
+    overflow: TextOverflow.ellipsis,
+  ),
+  onSelected: (String newStatus) {
+    if (onStatusChange != null) {
+      onStatusChange!(newStatus); // Trigger the callback with the new status
+    }
+  },
+  itemBuilder: (BuildContext context) {
+    return [
+      PopupMenuItem<String>(
+        value: 'Completed',
+        child: Text(
+          'Completed',
+          style: TextStyle(color: AppColors.green),
+        ),
+      ),
+      PopupMenuItem<String>(
+        value: 'In progress',
+        child: Text(
+          'In Progress',
+          style: TextStyle(color: AppColors.lightGreen),
+        ),
+      ),
+    ];
+  },
+),
+
                 ),
-              ),
+        ]
+        ),
             ],
           ),
-        ],
-      ),
     );
   }
 }
