@@ -1,7 +1,13 @@
 import 'package:business_assistant/controllers/DrawerController.dart';
+import 'package:business_assistant/cubits/customer/customer_cubit.dart';
+import 'package:business_assistant/cubits/order/order_cubit.dart';
+import 'package:business_assistant/cubits/order/order_state.dart';
+import 'package:business_assistant/cubits/product/product_cubit.dart';
+import 'package:business_assistant/cubits/product/product_state.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 class Dashboard extends StatefulWidget {
@@ -14,19 +20,23 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   @override
+  void initState() {
+    super.initState();
+    context.read<ProductCubit>().fetchLowStockProducts();
+    context.read<OrderCubit>().fetchOrdersDue();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
     final controller = Get.put(DrawerControl());
 
     var listTasks = ["Update status of client", "Pack orders", "Buy material"];
 
-    var lowStockList = ["Pink pen"];
     return SafeArea(
       child: Scaffold(
         drawer: const Sidebar(),
         appBar: AppBar(
-          // backgroundColor: AppColors.purpule,
           leading: Builder(
             builder: (context) {
               return Padding(
@@ -132,40 +142,50 @@ class _DashboardState extends State<Dashboard> {
                         color: const Color.fromARGB(212, 255, 252, 212),
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Next Delivery Due",
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 4),
-                              const Text(
-                                "2 deliveries",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 118, 117, 117),
-                                    fontSize: 18),
-                              ),
-                              const SizedBox(height: 9),
-                              ElevatedButton(
-                                onPressed: () {
-                                  controller.selectedMenuItem("Orders");
-                                  Get.toNamed('/orders');
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      const Color.fromARGB(255, 228, 239, 223),
-                                  elevation: 0,
-                                ),
-                                child: const Text(
-                                  "View Details",
-                                  style: TextStyle(
-                                      color: AppColors.darkGreen,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ],
+                          child: BlocBuilder<OrderCubit, OrderState>(
+                            builder: (context, state) {
+                              if (state is OrdersDue) {
+                                final ordersDue = state.orders;
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text("Delivery Due Today",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "${ordersDue.length} deliveries",
+                                      style: const TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 118, 117, 117),
+                                          fontSize: 18),
+                                    ),
+                                    const SizedBox(height: 9),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        controller.selectedMenuItem("Orders");
+                                        Get.toNamed('/orders');
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 228, 239, 223),
+                                        elevation: 0,
+                                      ),
+                                      child: const Text(
+                                        "View Details",
+                                        style: TextStyle(
+                                            color: AppColors.darkGreen,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return const Text("No orders due for delivery");
+                              }
+                            },
                           ),
                         ),
                       ),
@@ -179,52 +199,66 @@ class _DashboardState extends State<Dashboard> {
                         color: AppColors.lightGreen,
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (var element in lowStockList)
-                                showElements(element),
-                              const SizedBox(height: 23),
-                              const Text(
-                                "Low Stock Items",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 20),
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "${lowStockList.length} items",
-                                    style: const TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 118, 117, 117),
-                                        fontSize: 18),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      controller.selectedMenuItem("Inventory");
-                                      Get.toNamed('/inventory');
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(
-                                          255, 228, 239, 223),
-                                      elevation: 0,
-                                    ),
-                                    child: const Text(
-                                      "View Details",
+                          child: BlocBuilder<ProductCubit, ProductState>(
+                            builder: (context, state) {
+                              if (state is ProductFiltered) {
+                                final lowStockProducts = state.filteredProducts;
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    for (var element in lowStockProducts)
+                                      showElements(element.name),
+                                    const SizedBox(height: 23),
+                                    const Text(
+                                      "Low Stock Items",
                                       style: TextStyle(
-                                          color: AppColors.darkGreen,
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                          fontSize: 20),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "${lowStockProducts.length} items",
+                                          style: const TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 118, 117, 117),
+                                              fontSize: 18),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            controller
+                                                .selectedMenuItem("Inventory");
+                                            Get.toNamed('/inventory');
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                const Color.fromARGB(
+                                                    255, 228, 239, 223),
+                                            elevation: 0,
+                                          ),
+                                          child: const Text(
+                                            "View Details",
+                                            style: TextStyle(
+                                                color: AppColors.darkGreen,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return const Text(
+                                  "No low stock items",
+                                  style: TextStyle(color: AppColors.darkGreen),
+                                );
+                              }
+                            },
                           ),
                         ),
                       ),
@@ -365,7 +399,7 @@ class _DashboardState extends State<Dashboard> {
 Widget showElements(var element) {
   return Row(
     children: [
-      const Icon(Icons.circle_outlined, size: 20),
+      const Icon(Icons.circle, size: 10),
       const SizedBox(width: 5),
       Text(
         element,

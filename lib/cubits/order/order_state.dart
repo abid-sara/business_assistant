@@ -79,3 +79,10 @@ class OrdersCountLoaded extends OrderState {
   @override
   List<Object> get props => [count];
 }
+
+class OrdersDue extends OrderState {
+  final List<Order> orders;
+  const OrdersDue({required this.orders});
+  @override
+  List<Object> get props => [orders];
+}

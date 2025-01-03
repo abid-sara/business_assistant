@@ -115,4 +115,17 @@ class ProductCubit extends Cubit<ProductState> {
 
     emit(ProductFiltered(filtered));
   }
+
+  Future<void> fetchLowStockProducts() async {
+    List<Product> filtered = products;
+
+    try {
+      filtered = filtered
+          .where((product) => product.quantity <= product.minimumQuantity)
+          .toList();
+      emit(ProductFiltered(filtered));
+    } catch (e) {
+      emit(ProductError('Failed to fetch low stock products: $e'));
+    }
+  }
 }

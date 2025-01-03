@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/models/order.dart';
-import '../../database/db_order.dart';
+import 'package:path/path.dart';
 import '../../models/customer.dart';
 import './order_state.dart';
 import './order_repository.dart';
+import 'package:intl/intl.dart';
 
 class OrderCubit extends Cubit<OrderState> {
   final OrderRepository repository;
@@ -210,5 +211,25 @@ class OrderCubit extends Cubit<OrderState> {
           .length;
     }
     return 0; // Default to 0 if orders are not loaded
+  }
+
+  Future<void> fetchOrdersDue() async {
+    List<Order> orders = await repository.fetchOrders();
+    List<Order> ordersDue = [];
+    try {
+      DateTime now = DateTime.now();
+      String dateNow = DateFormat('yyyy-MM-dd').format(now);
+
+      for (var order in orders) {
+        if (order.deliveryDate == dateNow && order.status == "pending") {
+          ordersDue.add(order);
+        }
+      }
+      emit(OrdersDue(
+        orders: ordersDue,
+      ));
+    } catch (e) {
+      emit(OrderError(e.toString()));
+    }
   }
 }
