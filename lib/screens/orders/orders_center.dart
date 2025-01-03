@@ -1,4 +1,6 @@
+import 'package:business_assistant/cubits/Income/income_repository.dart';
 import 'package:business_assistant/cubits/customer/customer_cubit.dart';
+import 'package:business_assistant/models/income.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/models/order.dart';
@@ -261,96 +263,114 @@ class AddOrderButton extends StatelessWidget {
                   ),
                 ),
                 actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: AppColors.darkGreen),
-                    ),
-                  ),
-                  BlocBuilder<OrderCubit, OrderState>(
-                    builder: (context, state) {
-                      return TextButton(
-                        onPressed: () async {
-                          if (orderDate == null ||
-                              deliveryDate == null ||
-                              deliveryDate!.isBefore(orderDate!)) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Invalid date selection!'),
-                              ),
-                            );
-                            return;
-                          }
+  TextButton(
+    onPressed: () => Navigator.of(dialogContext).pop(),
+    child: const Text(
+      'Cancel',
+      style: TextStyle(color: AppColors.darkGreen),
+    ),
+  ),
+  BlocBuilder<OrderCubit, OrderState>(
+    builder: (context, state) {
+      return TextButton(
+        onPressed: () async {
+          // Date validation
+          if (orderDate == null ||
+              deliveryDate == null ||
+              deliveryDate!.isBefore(orderDate!)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Invalid date selection!'),
+              ),
+            );
+            return;
+          }
 
-                          if (selectedCustomer == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please select a customer'),
-                              ),
-                            );
-                            return;
-                          }
+          // Customer validation
+          if (selectedCustomer == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please select a customer'),
+              ),
+            );
+            return;
+          }
 
-                          if (selectedProducts.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Please add at least one product'),
-                              ),
-                            );
-                            return;
-                          }
+          // Product validation
+          if (selectedProducts.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please add at least one product'),
+              ),
+            );
+            return;
+          }
 
-                          final Order order = Order(
-                            totalPrice: calculateTotalOrderPrice(),
-                            orderDate:
-                                DateFormat('yyyy-MM-dd').format(orderDate!),
-                            deliveryDate:
-                                DateFormat('yyyy-MM-dd').format(deliveryDate!),
-                            deliveryPrice:
-                                double.tryParse(deliveryPriceController.text) ??
-                                    0.0,
-                            deliveryAddress: deliveryAddressController.text,
-                            customer: selectedCustomer!,
-                            status: 'pending',
-                            deleted: 0,
-                          );
+          // Create Order object
+          final Order order = Order(
+            totalPrice: calculateTotalOrderPrice(),
+            orderDate: DateFormat('yyyy-MM-dd').format(orderDate!),
+            deliveryDate: DateFormat('yyyy-MM-dd').format(deliveryDate!),
+            deliveryPrice:
+                double.tryParse(deliveryPriceController.text) ?? 0.0,
+            deliveryAddress: deliveryAddressController.text,
+            customer: selectedCustomer!,
+            status: 'pending',
+            deleted: 0,
+          );
 
-                          await BlocProvider.of<OrderCubit>(context)
-                              .addOrder(order.toMap(), selectedProducts);
+          // Add order to the database via the cubit
+          await BlocProvider.of<OrderCubit>(context)
+              .addOrder(order.toMap(), selectedProducts);
 
-                          BlocProvider.of<CustomerCubit>(context)
-                              .incrementCustomerOrderCounts(
-                                  selectedCustomer?.id);
+          
+          
+          // Increment customer order count
+          BlocProvider.of<CustomerCubit>(context)
+              .incrementCustomerOrderCounts(selectedCustomer?.id);
 
-                          // In AddOrderButton class, modify the order addition logic:
-                          for (var productData in selectedProducts) {
-                            final product = productData['product'] as Product?;
-                            final quantity = productData['quantity'] as int;
-                            if (product != null) {
-                              BlocProvider.of<ProductCubit>(context)
-                                  .decrementProductQuantity(
-                                      product.id, quantity);
-                            }
-                          }
-                        },
-                        child: state is OrderLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Add Order',
-                                style: TextStyle(color: AppColors.darkGreen),
-                              ),
-                      );
-                    },
-                  ),
-                ],
+          // Decrease product quantity based on selected products
+          for (var productData in selectedProducts) {
+            final product = productData['product'] as Product?;
+            final quantity = productData['quantity'] as int;
+            if (product != null) {
+              BlocProvider.of<ProductCubit>(context)
+                  .decrementProductQuantity(product.id, quantity);
+            }
+          } 
+           print('HELLO FROM HERE :' + order.toMap().toString());
+          // Insert income directly after adding the order
+          final income = Income(
+            date: DateFormat('yyyy-MM-dd').parse(order.deliveryDate),
+            amount: order.totalPrice,
+            order: order, 
+            deleted: 0,
+          );
+
+          // Insert income using the repository's insert method
+          final incomeRepository = IncomeRepository(); // Make sure this is initialized properly
+          await incomeRepository.insertIncome(income);
+         
+        print('HELLO FROM HERE TOOOOOO Income Data: ${income.toMap()}');
+       
+        },
+        child: state is OrderLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
+              )
+            : const Text(
+                'Add Order',
+                style: TextStyle(color: AppColors.darkGreen),
+              ),
+                    );
+                  },
+                ),
+              ],
+
               );
             },
           ),
@@ -362,7 +382,9 @@ class AddOrderButton extends StatelessWidget {
     if (context.mounted) {
       context.read<OrderCubit>().loadOrders();
     }
+    
   }
+  
 }
 
 class AddOrderForm extends StatelessWidget {

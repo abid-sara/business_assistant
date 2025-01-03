@@ -1,10 +1,13 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../style/colors.dart';
 import 'package:business_assistant/data/transactiondata.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/widget/sidebar.dart';
-
+import 'package:business_assistant/cubits/Expense/expense_cubit.dart';
+import 'package:business_assistant/cubits/Income/income_cubit.dart';
+import 'package:business_assistant/models/expense.dart';
+import 'package:business_assistant/models/income.dart';
 
 class CustomRow extends StatelessWidget {
   final Icon? icon; 
@@ -18,17 +21,15 @@ class CustomRow extends StatelessWidget {
     required this.subtitle,
     required this.value,
     this.icon,
-    
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      
       children: [
         Row(
           children: [
-            if ( icon != null) ...[
+            if (icon != null) ...[
               icon!,
               const SizedBox(width: 10),
             ],
@@ -55,6 +56,7 @@ class CustomRow extends StatelessWidget {
     );
   }
 }
+
 class Transaction extends StatefulWidget {
   const Transaction({super.key});
 
@@ -65,23 +67,61 @@ class Transaction extends StatefulWidget {
 class _TransactionState extends State<Transaction> {
   bool isBalanceVisible = false;
   double totalBalance = 0.0;
-  List<TransactionData> transactions=[];
+  List<TransactionData> transactions = [];
 
   @override
   void initState() {
     super.initState();
     _initializeTransaction();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        totalBalance = _getTotalBalance();
-        
-      });
-    });
+    _calculateBalance();
+    _fetchLatestTransactions();
   }
-  void _initializeTransaction(){
+
+  void _initializeTransaction() {
     transactions = List.from(Transactionlist);
   }
-  
+
+  Future<void> _calculateBalance() async {
+    final expenseCubit = context.read<ExpenseCubit>();
+    final incomeCubit = context.read<IncomeCubit>();
+
+    final totalExpenses = await expenseCubit.repository.calculateTotalExpenses();
+    final totalIncome = await incomeCubit.repository.calculateTotalIncome();
+
+    setState(() {
+      totalBalance = totalIncome - totalExpenses;
+    });
+  }
+
+  Future<void> _fetchLatestTransactions() async {
+    final expenseCubit = context.read<ExpenseCubit>();
+    final incomeCubit = context.read<IncomeCubit>();
+
+    final latestExpenses = await expenseCubit.repository.getLatestExpenses(5);
+    final latestIncome = await incomeCubit.repository.getLatestIncome(5);
+
+    setState(() {
+      transactions = [
+        ...latestExpenses.map((e) => TransactionData(
+          source: 'Expense',
+          date: e.date,
+          amount: e.amount,
+          type: 'expense',
+        )),
+        ...latestIncome.map((i) => TransactionData(
+          source: 'Income',
+          date: i.date,
+          amount: i.amount,
+          type: 'income',
+        )),
+      ];
+      transactions.sort((a, b) => b.date.compareTo(a.date));
+      if (transactions.length > 5) {
+        transactions = transactions.sublist(0, 5);
+      }
+    });
+  }
+
   List<Widget> buildTransactionRows() {
     return transactions.map((transaction) {
       return CustomRow(
@@ -97,30 +137,6 @@ class _TransactionState extends State<Transaction> {
     }).toList();
   }
 
-  double _getTotalIncome() {
-    double totalIncome = 0.0;
-    for (var transaction in  transactions) {
-      if (transaction.type == 'income') {
-        totalIncome += transaction.amount;
-      }
-    }
-    return totalIncome;
-  }
-
-  double _getTotalExpense() {
-    double totalExpense = 0.0;
-    for (var transaction in  transactions) {
-      if (transaction.type == 'expense') {
-        totalExpense += transaction.amount;
-      }
-    }
-    return totalExpense;
-  }
-
-  double _getTotalBalance() {
-    return _getTotalIncome() - _getTotalExpense();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,7 +150,6 @@ class _TransactionState extends State<Transaction> {
           ),
         ),
       ),
-        
       body: SingleChildScrollView(
         child: Container(
           decoration: const BoxDecoration(
@@ -226,8 +241,3 @@ class _TransactionState extends State<Transaction> {
     );
   }
 }
-
-
-
-
-              

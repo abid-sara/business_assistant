@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "BUSINESS_ASSISTANT.db";
-  static const _database_version = 1;
+  static const _database_version = 4;
   static var database;
 
   static Future getDatabase() async {
@@ -15,7 +15,7 @@ class DBHelper {
       join(await getDatabasesPath(), _database_name),
       onCreate: _onCreate,
       version: _database_version,
-      onUpgrade: (db, oldVersion, newVersion) {},
+      onUpgrade: _onUpgrade,
     );
     return database;
   }
@@ -88,23 +88,42 @@ class DBHelper {
     ''');
 
     await db.execute('''
-        CREATE TABLE "Income" (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        order_id INTEGER,
-        date TEXT NOT NULL,
-        amount DOUBLE NOT NULL,
-        FOREIGN KEY (order_id) REFERENCES "Order" (id) ON DELETE CASCADE
-        )
-    ''');
+  CREATE TABLE "Income" (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER,
+  date TEXT NOT NULL,
+  amount DOUBLE NOT NULL,
+  deleted INTEGER DEFAULT 0, -- 0 for not deleted, 1 for deleted
+  FOREIGN KEY (order_id) REFERENCES "Order" (id) ON DELETE CASCADE
+);
+''');
 
     await db.execute('''
-        CREATE TABLE "Expense" (
+  CREATE TABLE "Expense" (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER ,
+    date TEXT NOT NULL,
+    amount DOUBLE NOT NULL,
+    deleted INTEGER DEFAULT 0, -- 0 for not deleted, 1 for deleted
+    FOREIGN KEY (product_id) REFERENCES "Product" (id) ON DELETE CASCADE
+  )
+''');
+  }
+  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  if (oldVersion < 4) {
+    // Upgrade logic for version 4
+    await db.execute('DROP TABLE IF EXISTS "Expense"');
+    await db.execute(''' 
+      CREATE TABLE "Expense" (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER NOT NULL,
+        product_id INTEGER,
         date TEXT NOT NULL,
         amount DOUBLE NOT NULL,
+        deleted INTEGER DEFAULT 0, -- 0 for not deleted, 1 for deleted
         FOREIGN KEY (product_id) REFERENCES "Product" (id) ON DELETE CASCADE
-        )
+      )
     ''');
   }
+}
+
 }

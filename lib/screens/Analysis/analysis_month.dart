@@ -1,8 +1,42 @@
-import 'package:flutter/material.dart';
-import 'analysis_week.dart';
-import 'package:business_assistant/data/transactiondata.dart';
+import 'package:business_assistant/cubits/Expense/expense_cubit.dart';
+import 'package:business_assistant/cubits/Expense/expense_repository.dart';
+import 'package:business_assistant/cubits/Expense/expense_state.dart';
+import 'package:business_assistant/cubits/Income/income_cubit.dart';
+import 'package:business_assistant/cubits/Income/income_repository.dart';
+import 'package:business_assistant/cubits/Income/income_state.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
-import 'package:business_assistant/widget/sidebar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../style/colors.dart';
+
+class SelectedButton extends StatelessWidget {
+  final String label;
+  final int index;
+  final int selectedIndex;
+  final VoidCallback onPressed;
+
+  const SelectedButton({
+    super.key,
+    required this.label,
+    required this.index,
+    required this.selectedIndex,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    bool isSelected = selectedIndex == index;
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? Colors.white : AppColors.green,
+        foregroundColor: isSelected ? AppColors.green : Colors.white,
+        minimumSize: const Size(80, 40),
+      ),
+      child: Text(label),
+    );
+  }
+}
 
 class AnalysisMonth extends StatefulWidget {
   const AnalysisMonth({super.key});
@@ -12,60 +46,49 @@ class AnalysisMonth extends StatefulWidget {
 }
 
 class _AnalysisMonthState extends State<AnalysisMonth> {
-  List<TransactionData> transactions = [];
-
-  int selectedIndex = -1;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final int? index = ModalRoute.of(context)!.settings.arguments as int?;
-    if (index != null && selectedIndex != index) {
-      setState(() {
-        selectedIndex = index; // Ensure selectedIndex is updated from arguments
-      });
-    }
-  }
-
-  void handleButtonPress(int index, String routeName) {
-    setState(() {
-      selectedIndex =
-          index; 
-    });
-    Navigator.pushNamed(context, routeName,
-        arguments: index); 
-  }
+  int selectedIndex = 1;
 
   @override
   void initState() {
     super.initState();
-    _initializeTransaction();
   }
 
-  void _initializeTransaction() {
-    transactions = List.from(Transactionlist);
+  @override
+  void dispose() {
+    super.dispose();
   }
 
-  
+  void handleButtonPress(int index, String routeName) {
+    setState(() {
+      selectedIndex = index;
+    });
+
+    // Trigger the cubit to reload the expenses data
+    context.read<ExpenseCubit>().loadExpensesGroupedByDate();
+
+    Navigator.pushReplacementNamed(context, routeName, arguments: index);
+  }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      drawer: const Sidebar(),
       appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Analytics',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
+        title: Text('Weekly Analysis'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => ExpenseCubit(repository: ExpenseRepository())..loadExpensesGroupedByDate(),
+          ),
+          BlocProvider(
+            create: (context) => IncomeCubit(repository: IncomeRepository())..loadIncomeGroupedByDate(),
+          ),
+        ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(10),
             child: Column(
               children: [
                 Row(
@@ -76,7 +99,7 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                       index: 1,
                       selectedIndex: selectedIndex,
                       onPressed: () {
-                        handleButtonPress(1, '/analysis');
+                        handleButtonPress(1, '/analysisweek');
                       },
                     ),
                     SelectedButton(
@@ -84,7 +107,7 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                       index: 2,
                       selectedIndex: selectedIndex,
                       onPressed: () {
-                        handleButtonPress(2, '/analysisweek');
+                        handleButtonPress(2, '/analysismonth');
                       },
                     ),
                     SelectedButton(
@@ -92,7 +115,7 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                       index: 3,
                       selectedIndex: selectedIndex,
                       onPressed: () {
-                        handleButtonPress(3, '/analysisweek');
+                        handleButtonPress(3, '/analysisyear');
                       },
                     ),
                   ],
@@ -106,19 +129,51 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
-                Container(
-                  width: screenWidth * 0.9,
-                  height: 250,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(0),
-                    color: Colors.white,
-                  ),
-                  child: const CustomBarChart(isExpense: true ,viewType: "monthly",),
+                // Always render the CustomBarChart, even if the data is empty
+                BlocBuilder<ExpenseCubit, ExpenseState>(
+                  builder: (context, state) {
+                    if (state is ExpenseLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is ExpenseLoaded) {
+                      return Container(
+                        width: screenWidth * 0.9,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(0),
+                          color: Colors.white,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CustomBarChart(
+                            isExpense: true,
+                            viewType: 'monthly',
+                            
+                          ),
+                        ),
+                      );
+                    } else {
+                      // Display an empty chart when there is no data loaded yet
+                      return Container(
+                        width: screenWidth * 0.9,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(0),
+                          color: Colors.white,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CustomBarChart(
+                            isExpense: true,
+                            viewType: 'monthly',
+                     
+                          ),
+                        ),
+                      );
+                    }
+                  },
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
-                Column(
-                  children: [
-                    const Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Your Income',
@@ -126,18 +181,49 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(10)),
-                Container(
-                  width: screenWidth * 0.9,
-                  height: 250,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(0),
-                    color: Colors.white,
-                  ),
-                  child: const CustomBarChart(isExpense: false ,viewType: "monthly",),
+                // Always render the CustomBarChart for income, even if the data is empty
+                BlocBuilder<IncomeCubit, IncomeState>(
+                  builder: (context, state) {
+                    if (state is IncomeLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is IncomeLoaded) {
+                      return Container(
+                        width: screenWidth * 0.9,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(0),
+                          color: Colors.white,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CustomBarChart(
+                            isExpense: false,
+                            viewType: 'monthly',
+                           
+                          ),
+                        ),
+                      );
+                    } else {
+                      // Display an empty chart when there is no data loaded yet
+                      return Container(
+                        width: screenWidth * 0.9,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(0),
+                          color: Colors.white,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CustomBarChart(
+                            isExpense: false,
+                            viewType: 'monthly',
+                           
+                          ),
+                        ),
+                      );
+                    }
+                  },
                 ),
-                    
-                  ],
-                )
               ],
             ),
           ),
