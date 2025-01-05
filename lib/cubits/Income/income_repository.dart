@@ -59,39 +59,32 @@ class IncomeRepository {
     return result.first['total'] ?? 0.0;
   }
 
-  Future<List<Income>> getLatestIncome(int limit) async {
+  Future<double> calculateTotalIncomeInRange(DateTime start, DateTime end) async {
+    final database = await DBHelper.getDatabase();
+    final result = await database.rawQuery(
+      'SELECT SUM(amount) as total FROM Income WHERE date BETWEEN ? AND ?',
+      [start.toIso8601String(), end.toIso8601String()],
+    );
+    return result.first['total'] ?? 0.0;
+  }
+
+  Future<List<Map<String, dynamic>>> getLatestIncome(int limit) async {
     final database = await DBHelper.getDatabase();
     final List<Map<String, dynamic>> maps = await database.query(
       'Income',
+      columns: ['date', 'amount'], // Only select date and amount
       orderBy: 'date DESC',
       limit: limit,
     );
     print('Latest income: $maps'); // Debugging line
 
-    List<Income> incomeList = [];
+    List<Map<String, dynamic>> incomeList = [];
     for (var map in maps) {
-      // Fetch the corresponding Order object
-      List<Map<String, dynamic>> orderData = await database.query(
-        'Order',
-        where: 'id = ?',
-        whereArgs: [map['order_id']],
-      );
-
-      if (orderData.isNotEmpty) {
-        // Fetch the corresponding Customer object
-        List<Map<String, dynamic>> customerData = await database.query(
-          'Customer',
-          where: 'id = ?',
-          whereArgs: [orderData.first['customer_id']],
-        );
-
-        if (customerData.isNotEmpty) {
-          Customer customer = Customer.fromMap(customerData.first);
-          Order order = Order.fromMap(orderData.first, customer);
-          incomeList.add(Income.fromMap(map, order));
-          print('Income object: ${Income.fromMap(map, order)}'); // Debugging line
-        }
-      }
+      incomeList.add({
+        'date': map['date'],
+        'amount': map['amount'],
+        'type': 'income',
+      });
     }
 
     return incomeList;

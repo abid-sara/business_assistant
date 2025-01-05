@@ -45,33 +45,37 @@ class ExpenseRepository {
     return result.first['total'] ?? 0.0;
   }
 
-  Future<List<Expense>> getLatestExpenses(int limit) async {
+  Future<List<Map<String, dynamic>>> getLatestExpenses(int limit) async {
     final database = await DBHelper.getDatabase();
     final List<Map<String, dynamic>> maps = await database.query(
       'Expense',
+      columns: ['date', 'amount'], // Only select date and amount
       orderBy: 'date DESC',
       limit: limit,
     );
     print('Latest expenses: $maps'); // Debugging line
 
-    List<Expense> expenseList = [];
+    List<Map<String, dynamic>> expenseList = [];
     for (var map in maps) {
-      // Fetch the corresponding Product object
-      final productData = await database.query(
-        'Product',
-        where: 'id = ?',
-        whereArgs: [map['product_id']],
-      );
-
-      if (productData.isNotEmpty) {
-        final product = Product.fromMap(productData.first);
-        expenseList.add(Expense.fromMap(map, product));
-        print('Expense list: $expenseList'); // Debugging line
-      }
+      expenseList.add({
+        'date': map['date'],
+        'amount': map['amount'],
+        'type': 'expense',
+      });
     }
 
     return expenseList;
   }
+
+  Future<double> calculateTotalExpensesInRange(DateTime start, DateTime end) async {
+    final database = await DBHelper.getDatabase();
+    final result = await database.rawQuery(
+      'SELECT SUM(amount) as total FROM Expense WHERE date BETWEEN ? AND ?',
+      [start.toIso8601String(), end.toIso8601String()],
+    );
+    return result.first['total'] ?? 0.0;
+  }
+
 
   Future<Map<String, double>> getExpensesGroupedByDate() async {
     final database = await DBHelper.getDatabase();
