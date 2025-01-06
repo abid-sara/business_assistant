@@ -1,3 +1,4 @@
+import 'package:business_assistant/controllers/DrawerController.dart';
 import 'package:business_assistant/cubits/customer/customer_cubit.dart';
 import 'package:business_assistant/cubits/customer/customer_state.dart';
 import 'package:business_assistant/cubits/customer/validation_cubit.dart';
@@ -209,8 +210,12 @@ class CustomersPage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Customer", style: TextStyle(color: Colors.grey)),
-                        Text("Orders", style: TextStyle(color: Colors.grey)),
+                        Text("Customer",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 82, 81, 81))),
+                        Text("Orders",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 82, 81, 81))),
                       ],
                     ),
                   ),
@@ -287,20 +292,22 @@ class CustomerLine extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(3),
-        height: 50,
+        margin: const EdgeInsets.all(10),
+        height: 70,
         decoration: const BoxDecoration(
-          color: AppColors.darkGreen,
+          color: AppColors.lightGreen,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10),
+          padding: const EdgeInsets.only(left: 30, right: 30),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 customer.name,
                 style: const TextStyle(
-                  color: Colors.white,
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 58, 56, 56),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -311,7 +318,10 @@ class CustomerLine extends StatelessWidget {
                       .customerOrdersCount(customer.id);
                   return Text(
                     count.toString(),
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 58, 56, 56),
+                      fontSize: 16,
+                    ),
                   );
                 },
               ),

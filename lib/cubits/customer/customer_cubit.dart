@@ -63,8 +63,8 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (selectedSortOption == 'Customer name') {
       customers.sort((a, b) => a.name.compareTo(b.name));
       emit(CustomerSorted(customers, "Customer name"));
-    } else if (selectedSortOption == 'Orders count') {
-      customers.sort((a, b) => b.count.compareTo(a.count));
+    } else if (selectedSortOption == 'Order count') {
+      customers.sort((a, b) => a.count.compareTo(b.count));
       emit(CustomerSorted(customers, "Order count"));
     }
   }
@@ -88,7 +88,7 @@ class CustomerCubit extends Cubit<CustomerState> {
 
   void incrementCustomerOrderCounts(int? id) async {
     try {
-      Customer currentCustomer = await repository.getCustomerByIdRepo(id!);
+      Customer currentCustomer = await repository.getCustomerByIdRepo(id);
 
       Customer updatedCustomer = Customer(
           id: currentCustomer.id,
@@ -105,7 +105,10 @@ class CustomerCubit extends Cubit<CustomerState> {
       final index = customers.indexWhere((customer) => customer.id == id);
 
       if (index != -1) {
-        customers[index] = updatedCustomer;
+        // customers[index] = updatedCustomer;
+        customers.remove(customers[index]);
+        customers.insert(index, updatedCustomer);
+
         emit(CustomerUpdated(updatedCustomer));
         emit(CustomerLoaded(List<Customer>.from(customers)));
       } else {

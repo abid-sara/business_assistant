@@ -115,7 +115,7 @@ Future<bool> updateCustomer(Customer customer) async {
       'Customer',
       customer.toMap(),
       where: 'id = ?',
-      whereArgs: [customer.id!],
+      whereArgs: [customer.id],
     );
 
     return rowsAffected > 0;

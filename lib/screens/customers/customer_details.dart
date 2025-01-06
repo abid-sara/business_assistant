@@ -81,7 +81,9 @@ class CustomerDetails extends StatelessWidget {
                     Navigator.of(context).pop();
                     context.read<OrderCubit>().loadOrders();
                   },
-                  child: const Text('Cancel'),
+                  child: const Text('Cancel',
+                      style:
+                          TextStyle(color: AppColors.darkGreen, fontSize: 15)),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -102,7 +104,9 @@ class CustomerDetails extends StatelessWidget {
                     Navigator.of(context).pop();
                     context.read<OrderCubit>().loadOrders();
                   },
-                  child: const Text('Save'),
+                  child: const Text('Save',
+                      style:
+                          TextStyle(color: AppColors.darkGreen, fontSize: 15)),
                 ),
               ],
             );
@@ -185,6 +189,7 @@ class CustomerDetails extends StatelessWidget {
                 children: [
                   // Personal Information Card
                   Card(
+                    color: AppColors.lightGreen,
                     elevation: 4,
                     margin: const EdgeInsets.only(bottom: 16.0),
                     child: Padding(
@@ -259,8 +264,9 @@ class CustomerDetails extends StatelessWidget {
                   ),
 
                   // Orders Header Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Column(
+                    // mainAxisAlignment: MainAxisAlignment.end,
+                    // crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       const Text(
                         'Customer Orders',
@@ -272,7 +278,10 @@ class CustomerDetails extends StatelessWidget {
                       BlocBuilder<OrderCubit, OrderState>(
                         builder: (context, state) {
                           if (state is OrderLoaded) {
-                            return Text("Orders count: ${state.orders.length}");
+                            return Text(
+                              "Orders count: ${state.orders.length}",
+                              style: const TextStyle(fontSize: 16),
+                            );
                           }
                           return const Text("Orders count: 0");
                         },
@@ -306,6 +315,7 @@ class CustomerDetails extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final order = customerOrders[index];
                               return Card(
+                                color: const Color.fromARGB(232, 210, 210, 228),
                                 elevation: 2,
                                 margin:
                                     const EdgeInsets.symmetric(vertical: 8.0),
@@ -317,17 +327,23 @@ class CustomerDetails extends StatelessWidget {
                                     children: [
                                       Text(
                                         'Total Price: ${order.totalPrice.toStringAsFixed(2)}  DZD',
+                                        style: const TextStyle(
+                                            fontSize: 16, color: Colors.black),
                                       ),
                                       Text(
                                         'Status: ${order.status}',
                                         style: TextStyle(
+                                          fontSize: 16,
                                           color: order.status.toLowerCase() ==
                                                   'delivered'
                                               ? AppColors.darkGreen
                                               : Colors.red,
                                         ),
                                       ),
-                                      Text('Order Date: ${order.orderDate}'),
+                                      Text('Order Date: ${order.orderDate}',
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black)),
                                     ],
                                   ),
                                   onTap: () {

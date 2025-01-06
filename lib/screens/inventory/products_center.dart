@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-
 import 'package:business_assistant/cubits/product/product_cubit.dart';
 import 'package:business_assistant/models/expense.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,14 +15,12 @@ import '../../cubits/product/validation_cubit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
-import 'package:business_assistant/cubits/expense/expense_cubit.dart';  
-
-
+import 'package:business_assistant/cubits/expense/expense_cubit.dart';
 
 Future<String> saveImageToLocalStorage(String sourcePath) async {
   try {
     final Directory appDir = await getApplicationDocumentsDirectory();
-    final String imagesDir = path.join(appDir.path, 'product_images');
+    final String imagesDir = path.join(appDir.path, 'product_images/');
 
     // Create images directory if it doesn't exist
     final Directory imagesDirFile = Directory(imagesDir);
@@ -319,89 +316,77 @@ class Inventory extends StatelessWidget {
                   ),
                 ),
               ),
-
               actions: [
                 TextButton(
-  onPressed: () {
-    Navigator.of(context).pop();
-    _clearForm();
-    context.read<ValidationCubit>().clearForm();
-  },
-  child: const Text(
-    'Cancel',
-    style: TextStyle(color: AppColors.darkGreen),
-  ),
-),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _clearForm();
+                    context.read<ValidationCubit>().clearForm();
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.darkGreen),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      final newProduct = Product(
+                        name: _nameController.text,
+                        quantity: int.parse(_quantityController.text),
+                        productImage: context
+                                .read<ValidationCubit>()
+                                .state
+                                .imagePath
+                                .isNotEmpty
+                            ? context.read<ValidationCubit>().state.imagePath
+                            : "assets/images/default.png",
+                        unitPrice: double.parse(_unitPriceController.text),
+                        productDescription: _additionalInfoController.text,
+                        minimumQuantity: int.parse(_minController.text),
+                        deleted: false,
+                        supplierName: _supplierNameController.text,
+                        supplierPhoneNum: _supplierPhoneController.text,
+                        supplierAddress: _supplierAddressController.text,
+                      );
 
-TextButton(
-  onPressed: () {
-    if (formKey.currentState!.validate()) {
-      final newProduct = Product(
-        name: _nameController.text,
-        quantity: int.parse(_quantityController.text),
-        productImage: context
-                .read<ValidationCubit>()
-                .state
-                .imagePath
-                .isNotEmpty
-            ? context.read<ValidationCubit>().state.imagePath
-            : "assets/images/default.png",
-        unitPrice: double.parse(_unitPriceController.text),
-        productDescription: _additionalInfoController.text,
-        minimumQuantity: int.parse(_minController.text),
-        deleted: false,
-        supplierName: _supplierNameController.text,
-        supplierPhoneNum: _supplierPhoneController.text,
-        supplierAddress: _supplierAddressController.text,
-      );
+                      try {
+                        // Add the new product
+                        cubit.addProduct(newProduct);
 
-      // Print the instances of the product(the product object)
-      print('Product instance: ${newProduct.toMap()}');
-      
-      try {
-        // Add the new product
-        cubit.addProduct(newProduct);
-        print('Product added: ${newProduct.toString()}');
+                        // Create a new expense based on the product
+                        final newExpense = Expense(
+                          date: DateTime.now(),
+                          amount: newProduct.unitPrice * newProduct.quantity,
+                          product: newProduct,
+                        );
 
-        // Create a new expense based on the product
-        final newExpense = Expense(
-          date: DateTime.now(),
-          amount: newProduct.unitPrice * newProduct.quantity,
-          product: newProduct,
-        );
+                        // Add the new expense
+                        final expenseCubit = context.read<ExpenseCubit>();
+                        expenseCubit.addExpense(newExpense);
 
-        // Print the expense details being added
-        print('Adding expense: ${newExpense.toMap()}');
+                        // Navigate back to the previous screen
+                        Navigator.of(context).pop();
 
-        // Add the new expense
-        final expenseCubit = context.read<ExpenseCubit>();
-        expenseCubit.addExpense(newExpense);
-   
-        // Navigate back to the previous screen
-        Navigator.of(context).pop();
+                        // Clear the form and reset the validation state
+                        _clearForm();
+                        context.read<ValidationCubit>().clearForm();
+                      } catch (e) {
+                        print('Error: $e');
 
-        // Clear the form and reset the validation state
-        _clearForm();
-        context.read<ValidationCubit>().clearForm();
-
-        
-      } catch (e) {
-        print('Error: $e');
-
-        // Show an error Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error adding product or expense')),
-        );
-      }
-    }
-  },
-  child: const Text(
-    'Add',
-    style: TextStyle(color: AppColors.darkGreen),
-  ),
-),
-
-
+                        // Show an error Snackbar
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Error adding product or expense')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(color: AppColors.darkGreen),
+                  ),
+                ),
               ],
             );
           },

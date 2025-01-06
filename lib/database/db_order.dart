@@ -124,8 +124,6 @@ Future<int> addOrder({
       return -1;
     }
 
-    // Insert the order
-    print("Attempting to insert order: $order");
     final int orderId = await database.insert('Order', order);
 
     if (orderId <= 0) {
@@ -192,7 +190,8 @@ Future<double> _validateAndCalculateTotalPrice(
   return totalPrice;
 }
 
-Future<List<Map<String, dynamic>>> displayCustomerOrders(int? customerId) async {
+Future<List<Map<String, dynamic>>> displayCustomerOrders(
+    int? customerId) async {
   final db = await DBHelper.getDatabase();
 
   final List<Map<String, dynamic>> orders = await db.rawQuery('''
@@ -244,8 +243,7 @@ Future<List<Order>> displayOrder() async {
       where: 'deleted = ?',
       whereArgs: [0], // Fetch only non-deleted customers
     );
-    print("Fetched orders from DB: $orderData"); // Add this print statement
-
+    
     List<Order> orders = [];
     for (var map in orderData) {
       final int customerId = map['customer_id'];
