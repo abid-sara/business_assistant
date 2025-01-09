@@ -1,16 +1,17 @@
-import 'package:business_assistant/screens/landingPages/check_email.dart';
+import 'package:business_assistant/widget/back_arrow.dart';
+import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import '../../style/colors.dart';
-import '../../widget/button.dart';
 import '../../widget/form.dart';
-import '../../widget/back_arrow.dart';
 
 class ForgotPassword extends StatelessWidget {
   ForgotPassword({super.key});
   final TextEditingController _emailController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   static const String pageRoute = '/ForgotPassword';
-  final valid = FormFieldValidator;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -29,7 +30,7 @@ class ForgotPassword extends StatelessWidget {
                   child: Column(
                     children: [
                       Image.asset(
-                        'assets/images/logo.png', // Add your logo here
+                        'assets/images/logo.png',
                         height: 110,
                       ),
                       const SizedBox(height: 20),
@@ -64,27 +65,27 @@ class ForgotPassword extends StatelessWidget {
                           _emailController,
                           validateEmail,
                         ),
-
                         const SizedBox(height: 20),
-
-                        // Sign In Button
                         Center(
-                          child: ElevatedButton(
-                            style: button,
-                            onPressed: () {
-                              if (formKey.currentState!.validate()) {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => CheckEmail(
-                                        email: _emailController.text)));
-                              }
-                            },
-                            child: const Text(
-                              'Reset password',
-                              style:
-                                  TextStyle(fontSize: 19, color: Colors.white),
-                            ),
+                  child: ElevatedButton(
+                          style: button,
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              context.read<AuthCubit>().resetPassword(
+                                _emailController.text,
+                              ).then((_) {
+                                Navigator.pushReplacementNamed(context, '/check-email', arguments: _emailController.text);
+                              });
+                            }
+                          },
+                          child: const Text(
+                            'Reset password',
+                            style: TextStyle(fontSize: 19, color: Colors.white),
                           ),
                         ),
+
+                ),
+
                       ]),
                 ),
               ],

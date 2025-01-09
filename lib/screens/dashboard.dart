@@ -1,4 +1,5 @@
 import 'package:business_assistant/controllers/DrawerController.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import 'package:business_assistant/cubits/customer/customer_cubit.dart';
 import 'package:business_assistant/cubits/order/order_cubit.dart';
 import 'package:business_assistant/cubits/order/order_state.dart';
@@ -19,11 +20,24 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  String userName = '';
+
   @override
   void initState() {
     super.initState();
     context.read<ProductCubit>().fetchLowStockProducts();
     context.read<OrderCubit>().fetchOrdersDue();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    final authCubit = context.read<AuthCubit>();
+    final name = await authCubit.fetchUserName();
+    if (name != null && mounted) {
+      setState(() {
+        userName = name;
+      });
+    }
   }
 
   @override
@@ -69,9 +83,9 @@ class _DashboardState extends State<Dashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 25),
-                    const Text(
-                      'Welcome Sara!',
-                      style: TextStyle(
+                    Text(
+                      'Welcome $userName!',
+                      style: const TextStyle(
                         fontSize: 30,
                         color: AppColors.darkGreen,
                         fontWeight: FontWeight.bold,

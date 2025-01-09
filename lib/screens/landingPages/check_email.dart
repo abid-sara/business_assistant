@@ -1,5 +1,7 @@
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import '../../style/colors.dart';
 import '../../widget/back_arrow.dart';
 
@@ -69,10 +71,9 @@ class _CheckEmailState extends State<CheckEmail> {
                       ),
                     ],
                   ),
-                
                   textAlign: TextAlign.left,
                 ),
-                 SizedBox(height: screenHeight*0.01),
+                SizedBox(height: screenHeight * 0.01),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Form(
@@ -84,52 +85,50 @@ class _CheckEmailState extends State<CheckEmail> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 2.0),
-                            child: Expanded(
-                              child: SizedBox(
-                                width: screenWidth*0.16,
-                                child: TextFormField(
-                                  controller: widget.controllers[i],
-                                  validator: (value) {
-                                    if (widget.controllers[i].text.isEmpty) {
-                                      return "Please fill";
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 24),
-                                  decoration: InputDecoration(
-                                    contentPadding:
-                                        const EdgeInsets.symmetric(vertical: 20),
-                                    isDense: true,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(
-                                        color: widget.controllers[i].text.isEmpty
-                                            ? Colors.grey
-                                            : AppColors.darkGreen,
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: const BorderSide(
-                                        color: AppColors.darkGreen,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(
-                                        color: widget.controllers[i].text.isEmpty
-                                            ? Colors.grey
-                                            : AppColors.darkGreen,
-                                      ),
+                            child: SizedBox(
+                              width: screenWidth * 0.16,
+                              child: TextFormField(
+                                controller: widget.controllers[i],
+                                validator: (value) {
+                                  if (widget.controllers[i].text.isEmpty) {
+                                    return "Please fill";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 24),
+                                decoration: InputDecoration(
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 20),
+                                  isDense: true,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(
+                                      color: widget.controllers[i].text.isEmpty
+                                          ? Colors.grey
+                                          : AppColors.darkGreen,
                                     ),
                                   ),
-                                  onChanged: (value) {
-                                    setState(() {});
-                                  },
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(
+                                      color: widget.controllers[i].text.isEmpty
+                                          ? Colors.grey
+                                          : AppColors.darkGreen,
+                                    ),
+                                  ),
                                 ),
+                                onChanged: (value) {
+                                  setState(() {});
+                                },
                               ),
                             ),
                           ),
@@ -140,11 +139,25 @@ class _CheckEmailState extends State<CheckEmail> {
                 const SizedBox(height: 33),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        Navigator.pushNamed(context, '/ResetPassword');
-                      }
-                    },
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  // Combine the code from the text fields
+                  String code = widget.controllers.map((controller) => controller.text).join();
+                  context.read<AuthCubit>().verifyResetCode(
+                    widget.email,
+                    code,
+                  ).then((isVerified) {
+                    if (isVerified) {
+                      Navigator.pushReplacementNamed(context, '/reset-password', arguments: widget.email);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Invalid code. Please try again.')),
+                      );
+                    }
+                  });
+                }
+              },
+
                     style: button,
                     child: const Text(
                       "Verify Code",
@@ -169,6 +182,9 @@ class _CheckEmailState extends State<CheckEmail> {
                       TextButton(
                         onPressed: () {
                           // Resend password logic
+                          context.read<AuthCubit>().resetPassword(
+                                widget.email,
+                              );
                         },
                         child: const Text(
                           'Resend Password',

@@ -1,6 +1,7 @@
 import 'package:business_assistant/controllers/DrawerController.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-
 import '/constants/imagePaths.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/colors.dart';
@@ -146,14 +147,15 @@ class _SidebarState extends State<Sidebar> {
                 )),
             SizedBox(height: itemSpacing),
             ListTile(
-              leading:
-                  const Icon(Icons.exit_to_app, size: 25, color: Colors.red),
-              title: Text('Logout account',
-                  style: TextStyle(fontSize: screenWidth * 0.04)),
-              onTap: () {
-                Navigator.pushReplacementNamed(context, '/signIn');
-              },
+            leading: const Icon(Icons.exit_to_app, size: 25, color: Colors.red),
+            title: Text(
+              'Logout account',
+              style: TextStyle(fontSize: screenWidth * 0.04),
             ),
+            onTap: () {
+              context.read<AuthCubit>().signOut(context);
+            },
+          ),
           ],
         ),
       ),

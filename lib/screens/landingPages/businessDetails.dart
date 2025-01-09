@@ -1,6 +1,8 @@
 import '/widget/back_arrow.dart';
 import '/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import '../../style/colors.dart';
 import '../../widget/form.dart';
 
@@ -74,6 +76,8 @@ class _BusinessdetailsState extends State<Businessdetails> {
                             child: ElevatedButton(
                               onPressed: () {
                                 if (formKey.currentState!.validate()) {
+                                  // Save business details to local database
+                                  // Implement your logic here
                                   Navigator.pushNamed(context, '/dashboard');
                                 }
                               },

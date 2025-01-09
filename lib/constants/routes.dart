@@ -4,6 +4,7 @@ import 'package:business_assistant/screens/customers/customer_details.dart';
 import 'package:business_assistant/screens/dashboard.dart';
 import 'package:business_assistant/screens/inventory/products_center.dart';
 import 'package:business_assistant/screens/inventory/products_details.dart';
+import 'package:business_assistant/screens/landingPages/welcome_screen.dart';
 import 'package:business_assistant/screens/orders/order_details.dart';
 import 'package:business_assistant/screens/Settings/changepassword.dart';
 import 'package:business_assistant/screens/Settings/feedback.dart';
@@ -59,4 +60,5 @@ var routes = {
   '/analysismonth': (context) => const AnalysisMonth(),
   '/analysisyear': (context) => const AnalysisYear(),
   '/transaction': (context) => const Transaction(),
+   '/welcome': (context) => const WelcomeScreen(),
 };

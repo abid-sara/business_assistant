@@ -1,9 +1,18 @@
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,18 +65,31 @@ class WelcomeScreen extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.fromLTRB(screenWidth * 0.35, 0, 0, 0),
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signIn');
+                    onPressed: _isLoading ? null : () async {
+                      setState(() {
+                        _isLoading = true;
+                      });
+
+                      final authCubit = context.read<AuthCubit>();
+
+                      // Check if the user is already authenticated
+                      authCubit.checkAuthentication(context);
+
+                      setState(() {
+                        _isLoading = false;
+                      });
                     },
                     style: button,
-                    child: const Text(
-                      'Get Started',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: _isLoading 
+                        ? const CircularProgressIndicator() 
+                        : const Text(
+                            'Get Started',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],

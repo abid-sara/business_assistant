@@ -1,5 +1,9 @@
+import 'package:business_assistant/cubits/Authentification/auth_repository.dart';
+import 'package:business_assistant/cubits/Authentification/auth_state.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import '../../style/colors.dart';
 import '../../widget/form.dart';
 
@@ -165,20 +169,34 @@ class _CreateAccountState extends State<CreateAccount> {
 
                       const SizedBox(height: 20),
 
-                      Center(
-                        child: ElevatedButton(
-                          style: button,
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              Navigator.pushNamed(context, '/Businessdetails');
-                            }
-                          },
-                          child: const Text(
-                            'Sign in',
-                            style: TextStyle(fontSize: 19, color: Colors.white),
+                      BlocListener<AuthCubit, AuthState>(
+                        listener: (context, state) {
+                          if (state is SignUpSuccess) {
+                            // Redirect to the sign-in page
+                            Navigator.pushReplacementNamed(context, '/dashboard');
+                          }
+                        },
+                        child: Center(
+                          child: ElevatedButton(
+                            style: button,
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                context.read<AuthCubit>().signUp(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  _nameController.text,
+                                  context,
+                                );
+                              }
+                            },
+                            child: const Text(
+                              'Sign up', 
+                              style: TextStyle(fontSize: 19, color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 10),
                     ],
                   ),

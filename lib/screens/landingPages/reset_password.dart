@@ -1,5 +1,7 @@
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import '../../style/colors.dart';
 import '../../widget/back_arrow.dart';
 import '../../widget/form.dart';
@@ -142,22 +144,25 @@ class _ResetPasswordState extends State<ResetPassword> {
                 ),
                 SizedBox(height: screenHeight * 0.04),
                 Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        Navigator.pushNamed(context, '/dashboard');
-                      }
-                    },
-                    style: button,
-                    child: const Text(
-                      "Update Password",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                      ),
-                    ),
-                  ),
+                child: ElevatedButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  context.read<AuthCubit>().updatePassword(_password.text).then((_) {
+                    Navigator.pushReplacementNamed(context, '/signIn');
+                  });
+                }
+              },
+              style: button,
+              child: const Text(
+                "Update Password",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                ),
+              ),
+            ),
+
                 ),
               ],
             ),
