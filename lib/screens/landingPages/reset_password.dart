@@ -8,7 +8,7 @@ import '../../widget/form.dart';
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({super.key});
-  static const String pageRoute = '/ResetPassword';
+  static const String pageRoute = '/reset-password';
   @override
   State<ResetPassword> createState() => _ResetPasswordState();
 }
@@ -21,6 +21,19 @@ class _ResetPasswordState extends State<ResetPassword> {
 
   @override
   Widget build(BuildContext context) {
+    final String? email = ModalRoute.of(context)!.settings.arguments as String?;
+    if (email == null) {
+      // Handle the case where email is null
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Error'),
+        ),
+        body: const Center(
+          child: Text('No email provided.'),
+        ),
+      );
+    }
+
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
@@ -70,6 +83,9 @@ class _ResetPasswordState extends State<ResetPassword> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';
+                          }
+                          if (value.length < 8) {
+                            return 'Password must be at least 8 characters long';
                           }
                           return null;
                         },
@@ -144,25 +160,24 @@ class _ResetPasswordState extends State<ResetPassword> {
                 ),
                 SizedBox(height: screenHeight * 0.04),
                 Center(
-                child: ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  context.read<AuthCubit>().updatePassword(_password.text).then((_) {
-                    Navigator.pushReplacementNamed(context, '/signIn');
-                  });
-                }
-              },
-              style: button,
-              child: const Text(
-                "Update Password",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                ),
-              ),
-            ),
-
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        context.read<AuthCubit>().updatePassword(_password.text ,context).then((_) {
+                          Navigator.pushReplacementNamed(context, '/signIn');
+                        });
+                      }
+                    },
+                    style: button,
+                    child: const Text(
+                      "Update Password",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
