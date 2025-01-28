@@ -30,7 +30,6 @@ import 'database/db_helper.dart';
 import 'screens/inventory/products_center.dart';
 import 'screens/landingPages/welcome_screen.dart';
 import 'package:sqflite/sqflite.dart'; // For mobile platforms (Android/iOS)
-import 'package:permission_handler/permission_handler.dart';
 import 'cubits/expense/expense_cubit.dart';
 import 'cubits/expense/expense_repository.dart';
 import 'dart:io';
@@ -46,8 +45,8 @@ void main() async {
 
   // Initialize Supabase for local testing
   await Supabase.initialize(
-    url: 'https://ovjuafdbpmzxpwpocpzy.supabase.co', // Replace with your project URL
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92anVhZmRicG16eHB3cG9jcHp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyNDMzNDUsImV4cCI6MjA1MTgxOTM0NX0.RZk2Zf0vlQYHpoFdgxErHq_pdeaS4-VUd8RFkjmHhYQ', // Replace with your anon key
+    url: 'https://gywefksoajsnzqeawfbr.supabase.co', 
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5d2Vma3NvYWpzbnpxZWF3ZmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5ODI2OTUsImV4cCI6MjA1MzU1ODY5NX0.XIOjZNqHMok0etnJxNwQhTcozovkKGG1XWxBZzkkrCY', 
   );
 
   // Initialize SQLite based on platform
@@ -114,4 +113,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
