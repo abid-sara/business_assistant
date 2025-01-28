@@ -127,17 +127,16 @@ class _SignInState extends State<SignIn> {
                         // Sign In Button
                         BlocListener<AuthCubit, AuthState>(
                         listener: (context, state) {
-                          if (state is AuthAuthenticated) {
-                            // Redirect to the dashboard after successful sign-in
-                            Navigator.pushReplacementNamed(context, '/dashboard');
-                          }
+                          // if (state is AuthAuthenticated) {
+                            // Navigator.pushReplacementNamed(context, '/dashboard');
+                          // }
                         },
                         child: Center(
                           child: ElevatedButton(
                             style: button,
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
-                                context.read<AuthCubit>().signIn(
+                                context.read<AuthCubit>().signInWithPassword(
                                   _emailController.text,
                                   _passwordController.text,
                                   context,
@@ -154,11 +153,9 @@ class _SignInState extends State<SignIn> {
 
                       ]),
                 ),
-                // Email Address Field
 
                 const SizedBox(height: 20),
 
-                // Create Account
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
