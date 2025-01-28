@@ -42,7 +42,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     "My Business\nAssistant",
                     textAlign: TextAlign.start,
                     style: TextStyle(
-                      color: AppColors.darkGreen, // Your custom color
+                      color: AppColors.darkGreen, 
                       fontWeight: FontWeight.w900,
                       fontSize: 40,
                     ),
