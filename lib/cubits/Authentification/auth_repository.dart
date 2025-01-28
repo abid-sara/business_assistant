@@ -1,4 +1,8 @@
+import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class AuthRepository {
   final SupabaseClient _client;
@@ -6,12 +10,14 @@ class AuthRepository {
   AuthRepository(this._client);
 
   SupabaseClient get client => _client;
+  
+
 
   Future<AuthResponse> signIn(String email, String password) async {
     try {
       return await _client.auth.signInWithPassword(email: email, password: password);
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception('Sign-in failed: $e');
     }
   }
 
@@ -25,46 +31,58 @@ class AuthRepository {
 
   Future<void> addUserDetails({required String id, required String email, required String name}) async {
     try {
-      await _client.from('users').insert({'id': id, 'email': email, 'name': name});
+      await _client.from('user').insert({'id': id, 'email': email, 'name': name});
     } catch (e) {
       throw Exception('Error adding user details: $e');
     }
   }
 
-  Future<void> resetPassword(String email) async {
-    try {
-      await _client.auth.resetPasswordForEmail(email);
-    } catch (e) {
-      throw Exception(e.toString());
-    }
-  }
 
-  Future<bool> verifyResetCode(String email, String code) async {
-    try {
-      await _client.auth.verifyOTP(token: code, type: OtpType.recovery, email: email);
-      return true;
-    } catch (e) {
-      throw Exception('Error verifying reset code: $e');
-    }
-  }
 
-  Future<void> updatePassword(String newPassword) async {
-    try {
-      await _client.auth.updateUser(UserAttributes(password: newPassword));
-    } catch (e) {
-      throw Exception('Error updating password: $e');
+Future<void> updatePassword(String newPassword) async {
+  try {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
     }
-  }
 
-  User? getCurrentUser() {
-    return _client.auth.currentUser;
-  }
+    final response = await _client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
 
-  Future<void> signOut() async {
-    try {
-      await _client.auth.signOut();
-    } catch (e) {
-      throw Exception(e.toString());
-    }
+    print('Password updated successfully for ${user.email}');
+  } catch (e) {
+    print('Error updating password: $e');
+    throw Exception('Failed to update password');
   }
 }
+
+Future<String?> sendResetPasswordLink(String email) async {
+  try {
+    final response = await _client.auth.resetPasswordForEmail(email);
+    
+    return 'Password reset link sent';  // Return a success message or null
+  } catch (e) {
+    print("Error in sending reset password email: $e");
+    return null;  // Return null in case of an error
+  }
+}
+
+
+
+  Future<User?> getCurrentUser() async {
+    try {
+      final user = _client.auth.currentUser;
+      return user;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+  Future<void> signOut() async {
+
+    await client.auth.signOut();
+
+  }
+
+}
+
