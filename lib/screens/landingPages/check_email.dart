@@ -7,9 +7,8 @@ import '../../widget/back_arrow.dart';
 
 class CheckEmail extends StatefulWidget {
   late List<TextEditingController> controllers;
-  String email;
 
-  CheckEmail({super.key, required this.email}) {
+  CheckEmail({super.key}) {
     controllers = List.generate(5, (index) => TextEditingController());
   }
 
@@ -22,6 +21,19 @@ class _CheckEmailState extends State<CheckEmail> {
 
   @override
   Widget build(BuildContext context) {
+    final String? email = ModalRoute.of(context)!.settings.arguments as String?;
+    if (email == null) {
+      // Handle the case where email is null
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Error'),
+        ),
+        body: const Center(
+          child: Text('No email provided.'),
+        ),
+      );
+    }
+
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
@@ -48,14 +60,14 @@ class _CheckEmailState extends State<CheckEmail> {
                 const SizedBox(height: 19),
                 Text.rich(
                   TextSpan(
-                    text: 'We sent a reset link to ',
+                    text: 'We sent a reset code to ',
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 16,
                     ),
                     children: <TextSpan>[
                       TextSpan(
-                        text: widget.email,
+                        text: email,
                         style: const TextStyle(
                           color: Color.fromARGB(195, 0, 0, 0),
                           fontWeight: FontWeight.bold,
@@ -139,25 +151,24 @@ class _CheckEmailState extends State<CheckEmail> {
                 const SizedBox(height: 33),
                 Center(
                   child: ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  // Combine the code from the text fields
-                  String code = widget.controllers.map((controller) => controller.text).join();
-                  context.read<AuthCubit>().verifyResetCode(
-                    widget.email,
-                    code,
-                  ).then((isVerified) {
-                    if (isVerified) {
-                      Navigator.pushReplacementNamed(context, '/reset-password', arguments: widget.email);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Invalid code. Please try again.')),
-                      );
-                    }
-                  });
-                }
-              },
-
+                    onPressed: () {
+                      // if (formKey.currentState!.validate()) {
+                      //   // Combine the code from the text fields
+                      //   String code = widget.controllers.map((controller) => controller.text).join();
+                      //   context.read<AuthCubit>().verifyResetCode(
+                      //     email,
+                      //     code,
+                      //   ).then((isVerified) {
+                      //     if (isVerified) {
+                      //       Navigator.pushReplacementNamed(context, '/ResetPassword', arguments: email);
+                      //     } else {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         const SnackBar(content: Text('Invalid code. Please try again.')),
+                      //       );
+                      //     }
+                      //   });
+                      // }
+                    },
                     style: button,
                     child: const Text(
                       "Verify Code",
@@ -181,13 +192,15 @@ class _CheckEmailState extends State<CheckEmail> {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Resend password logic
-                          context.read<AuthCubit>().resetPassword(
-                                widget.email,
-                              );
+                          // // Resend password logic
+                          // String code = widget.controllers.map((controller) => controller.text).join();
+                          // context.read<AuthCubit>().verifyResetCode(
+                          //       email,
+                          //       code,
+                          //     );
                         },
                         child: const Text(
-                          'Resend Password',
+                          'Resend Code',
                           style: TextStyle(
                             color: AppColors.darkGreen,
                             fontWeight: FontWeight.bold,
