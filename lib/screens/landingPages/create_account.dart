@@ -170,32 +170,40 @@ class _CreateAccountState extends State<CreateAccount> {
                       const SizedBox(height: 20),
 
                       BlocListener<AuthCubit, AuthState>(
-                        listener: (context, state) {
-                          if (state is SignUpSuccess) {
-                            // Redirect to the sign-in page
-                            Navigator.pushReplacementNamed(context, '/dashboard');
-                          }
-                        },
-                        child: Center(
-                          child: ElevatedButton(
-                            style: button,
-                            onPressed: () {
-                              if (formKey.currentState!.validate()) {
-                                context.read<AuthCubit>().signUp(
-                                  _emailController.text,
-                                  _passwordController.text,
-                                  _nameController.text,
-                                  context,
-                                );
-                              }
-                            },
-                            child: const Text(
-                              'Sign up', 
-                              style: TextStyle(fontSize: 19, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
+  listener: (context, state) {
+    if (state is SignUpSuccess) {
+      // Ensure the context is still valid before navigating
+      if (context.mounted) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      }
+    } else if (state is AuthError) {
+      // Handle error if needed
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.message ?? 'An error occurred')),
+      );
+    }
+  },
+  child: Center(
+    child: ElevatedButton(
+      style: button,
+      onPressed: () {
+        if (formKey.currentState!.validate()) {
+          context.read<AuthCubit>().signUp(
+            _emailController.text,
+            _passwordController.text,
+            _nameController.text,
+            context,
+          );
+        }
+      },
+      child: const Text(
+        'Sign up', 
+        style: TextStyle(fontSize: 19, color: Colors.white),
+      ),
+    ),
+  ),
+),
+
 
                       const SizedBox(height: 10),
                     ],
