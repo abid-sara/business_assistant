@@ -11,6 +11,12 @@ class AuthError extends AuthState {
   AuthError(this.message);
 }
 
+class AuthLinkPressedState extends AuthState {
+  final bool isLinkPressed;
+
+  AuthLinkPressedState(this.isLinkPressed);
+}
+
 class AuthPasswordReset extends AuthState {}
 
 class AuthCodeVerified extends AuthState {}
