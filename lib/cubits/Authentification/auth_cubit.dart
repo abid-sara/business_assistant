@@ -26,7 +26,7 @@ class AuthCubit extends Cubit<AuthState> {
           .maybeSingle();
 
       if (response == null) {
-        return null; // No user name found
+        return null; 
       }
       return response['name'] as String?;
     } catch (e) {
@@ -34,20 +34,44 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  void checkAuthentication(BuildContext context) {
-    final user = _authRepository.getCurrentUser();
+
+ void checkAuthentication(BuildContext context) async {
+  try {
+    final session = _client.auth.currentSession;
+    final user = session?.user; 
+    print("Current user from session: $user");
+
     if (user != null) {
-      emit(AuthAuthenticated());
-      Future.microtask(() => Navigator.pushReplacementNamed(context, '/dashboard'));
+      final userDetails = await _client
+          .from('user')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (userDetails != null) {
+     
+        emit(AuthAuthenticated());
+        if (context.mounted) {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        }
+      } 
     } else {
+      
       emit(AuthInitial());
-      Future.microtask(() => Navigator.pushReplacementNamed(context, '/signIn'));
+      if (context.mounted) {
+        Navigator.pushReplacementNamed(context, '/signIn');
+      }
     }
+  } catch (e) {
+    print('Error during authentication check: $e');
+    emit(AuthError('An error occurred during authentication check'));
   }
+}
+
 
   supabase.User? getCurrentUser() {
-    return _client.auth.currentUser;
-  }
+  return _client.auth.currentUser;  
+}
 
   Future<void> signUp(String email, String password, String name, BuildContext context) async {
   print("Starting sign-up process...");  
@@ -60,7 +84,6 @@ class AuthCubit extends Cubit<AuthState> {
       if (response.user != null) {
       print("User signed up successfully. User ID: ${response.user!.id}");  
 
-      // Debugging before adding user details
       print("Adding user details: ID = ${response.user!.id}, Email = $email, Name = $name");
       await _authRepository.addUserDetails(
         id: response.user!.id,
@@ -70,11 +93,9 @@ class AuthCubit extends Cubit<AuthState> {
       
       print("User details added successfully.");  
         emit(SignUpSuccess());
-
-      // Ensure the context is still valid before navigating
       if (context.mounted) {
         print("Navigating to dashboard...");  
-        // Use `Future.microtask` to schedule the navigation after the current frame
+  
         Future.microtask(() => Navigator.pushReplacementNamed(context, '/dashboard'));
       } else {
         print("Context is no longer mounted, unable to navigate.");  
@@ -92,27 +113,29 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signInWithPassword(String email, String password, BuildContext context) async {
   emit(AuthLoading());
   try {
-    // Attempt to sign in with the provided email and password
     final authResponse = await _authRepository.signIn(email, password);
 
     if (authResponse.user != null) {
-      // Successful authentication
-      print("User signed in successfully: ${authResponse.user!.email}");  
+      print("User signed in successfully: ${authResponse.user!.email}");
+
       emit(AuthAuthenticated());
-      Navigator.pushReplacementNamed(context, '/dashboard'); // Navigate to the dashboard
+      Navigator.pushReplacementNamed(context, '/dashboard'); 
     } else {
-      emit(AuthError('Incorrect password.'));
+      emit(AuthError('Incorrect email or password.'));
+      print("Sign-in failed: Invalid credentials.");
     }
   } catch (e) {
-    // Add more detailed error handling
-    print("Error during sign-in: $e");  
+    print("Error during sign-in: $e");
+
+    
     if (e is AuthException) {
       emit(AuthError('Authentication failed: ${e.message}'));
     } else {
-      emit(AuthError('An error occurred: $e'));
+      emit(AuthError('An unexpected error occurred: $e'));
     }
   }
 }
+
 
 void setLinkPressed(bool isPressed) {
     emit(AuthLinkPressedState(isPressed));
@@ -121,16 +144,13 @@ void setLinkPressed(bool isPressed) {
 Future<void> sendPasswordResetEmail(String email, BuildContext context) async {
   emit(AuthLoading());
   try {
-    // Attempt to send the password reset link with the provided email
     final response = await _authRepository.sendResetPasswordLink(email);
 
     if (response != null) {
-      // If response contains success, navigate to a confirmation page or show a success message
       print("Password reset email sent successfully!");
-      emit(AuthLinkPressedState(true)); // Example of emitting success state
+      emit(AuthLinkPressedState(true)); 
       Navigator.pushReplacementNamed(context, '/ResetPassword');
     } else {
-      // Handle failure case (e.g., invalid email format)
       emit(AuthError('Failed to send password reset email.'));
     }
   } catch (e) {
@@ -145,7 +165,6 @@ Future<void> sendPasswordResetEmail(String email, BuildContext context) async {
 Future<void> updatePassword(String newPassword, BuildContext context) async {
   emit(AuthLoading());
   try {
-    // Directly attempt to update the password using the provided new password
     final response = await _client.auth.updateUser(supabase.UserAttributes(
       password: newPassword,
     ));
@@ -153,8 +172,8 @@ Future<void> updatePassword(String newPassword, BuildContext context) async {
     
 
     print('Password updated successfully!');
-    emit(AuthAuthenticated());  // Optionally, you can emit AuthAuthenticated if you want to refresh the state
-    Navigator.pushReplacementNamed(context, '/dashboard'); // Navigate to the dashboard after successful update
+    emit(AuthAuthenticated()); 
+    Navigator.pushReplacementNamed(context, '/dashboard'); 
   } catch (e) {
     emit(AuthError('Error updating password: $e'));
   }
@@ -163,13 +182,16 @@ Future<void> updatePassword(String newPassword, BuildContext context) async {
 
 
   Future<void> signOut(BuildContext context) async {
-    emit(AuthLoading());
-    try {
-      await _authRepository.signOut();
-      emit(AuthInitial());
-      Future.microtask(() => Navigator.pushReplacementNamed(context, '/welcome'));
-    } catch (e) {
-      emit(AuthError('An error occurred: $e'));
-    }
+  emit(AuthLoading());
+  try {
+    await _authRepository.signOut();
+    await _client.auth.signOut();
+    emit(AuthInitial());
+    Future.microtask(() => Navigator.pushReplacementNamed(context, '/welcome'));
+  } catch (e) {
+    emit(AuthError('An error occurred: $e'));
   }
 }
+
+}
+
