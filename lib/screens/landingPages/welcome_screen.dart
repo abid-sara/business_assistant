@@ -1,7 +1,6 @@
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
-import 'package:business_assistant/database/db_utility.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

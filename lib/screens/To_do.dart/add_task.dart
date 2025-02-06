@@ -11,23 +11,23 @@ class AddTaskPage extends StatefulWidget {
   const AddTaskPage({super.key, required this.onAddTask});
 
   @override
-  State<AddTaskPage> createState() => addTaskPageState();
+  State<AddTaskPage> createState() => AddTaskPageState();
 }
 
-class addTaskPageState extends State<AddTaskPage> {
+class AddTaskPageState extends State<AddTaskPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
-  String? _reminder = "15 Minutes";
-  String _repeatFrequency = "None";
+  String? _reminder = "15 Minutes";  // Default reminder value
+  String _repeatFrequency = "None"; // Default repeat frequency
 
   @override
-  void initState() {
-    super.initState();
-    
-    print(widget.onAddTask);
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   // Time picker for Start and End Times
@@ -48,32 +48,54 @@ class addTaskPageState extends State<AddTaskPage> {
   }
 
   void addTask() {
-  if (_titleController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Title cannot be empty!')),
-    );
-    return;
-  }
+    print("Title: ${_titleController.text}, Description: ${_descriptionController.text}");
+    print("Date: $_selectedDate, Start: $_startTime, End: $_endTime");
 
-  final newtask = Task(
-    title: _titleController.text,
-    date: DateTime(
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Title cannot be empty!')),
+      );
+      return;
+    }
+
+    final startDateTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,
       _selectedDate.day,
-    ),
-    status: "In progress",
-    description: _descriptionController.text,
-    reminder: _reminder,
-    repeatFrequency: _repeatFrequency,
-  );
+      _startTime.hour,
+      _startTime.minute,
+    );
 
-  print('Task Created: ${newtask.title}, ${newtask.description}'); 
-  widget.onAddTask(newtask);
-  print('onAddTask Invoked'); 
-  Navigator.pop(context);
-}
+    final endDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
 
+    if (endDateTime.isBefore(startDateTime)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('End time must be after start time!')),
+      );
+      return;
+    }
+
+    final newTask = Task(
+      title: _titleController.text,
+      date: _selectedDate,
+      startTime: startDateTime, // Ensure this matches your Task class
+      endTime: endDateTime,     // Ensure this matches your Task class
+      status: "In progress",    // Ensure you can modify status if it's not final
+      description: _descriptionController.text,
+      reminder: _reminder,      // Ensure this is valid for your Task class
+      repeatFrequency: _repeatFrequency,
+      deleted: false,               // Default value for deleted
+    );
+
+    widget.onAddTask(newTask);  // Pass the new task back to the parent widget
+    Navigator.pop(context);     // Go back to the previous screen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,8 +109,6 @@ class addTaskPageState extends State<AddTaskPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SafeArea(
-                
-                
                 child: TableCalendar(
                   focusedDay: _selectedDate,
                   firstDay: DateTime(2000),
@@ -121,7 +141,7 @@ class addTaskPageState extends State<AddTaskPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Grid Section
+              // Grid Section for Start Time, End Time, Repeat, and Reminder
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.2,
                 child: GridView(
@@ -146,21 +166,13 @@ class addTaskPageState extends State<AddTaskPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Start Time",
-                              style: TextStyle(
+                            const Text("Start Time", style: TextStyle(fontSize: 14)),
+                            const SizedBox(height: 1),
+                            Text(
+                              _startTime.format(context),
+                              style: const TextStyle(
                                 fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-
-                            Flexible(
-                              child: Text(
-                                _startTime.format(context),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -179,20 +191,13 @@ class addTaskPageState extends State<AddTaskPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "End Time",
-                              style: TextStyle(
+                            const Text("End Time", style: TextStyle(fontSize: 14)),
+                            const SizedBox(height: 1),
+                            Text(
+                              _endTime.format(context),
+                              style: const TextStyle(
                                 fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Flexible(
-                              child: Text(
-                                _endTime.format(context),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -263,7 +268,10 @@ class addTaskPageState extends State<AddTaskPage> {
                 child: ElevatedButton(
                   onPressed: addTask,
                   style: button,
-                  child: const Text('Done', style: TextStyle(color: Colors.white, fontSize: 20),) ,
+                  child: const Text(
+                    'Done',
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
                 ),
               ),
             ],

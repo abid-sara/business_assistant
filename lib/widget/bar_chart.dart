@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:business_assistant/database/db_helper.dart';
+//import 'package:business_assistant/database/db_helper.dart';
 import 'package:intl/intl.dart';
 
 import '../style/colors.dart';
@@ -23,9 +23,9 @@ class _CustomBarChartState extends State<CustomBarChart> {
   @override
   void initState() {
     super.initState();
-    fetchEntries();
+    //fetchEntries();
   }
-
+/*
   Future<void> fetchEntries() async {
     try {
       final database = await DBHelper.getDatabase();
@@ -43,7 +43,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
     } catch (e) {
       print('Error fetching entries: $e');
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       child: barChartData.isEmpty
-          ? Center(child: Text('No data available for the selected period.'))
+          ? const Center(child: Text('No data available for the selected period.'))
           : BarChart(
               BarChartData(
                 minY: minY,
@@ -69,19 +69,19 @@ class _CustomBarChartState extends State<CustomBarChart> {
                   drawHorizontalLine: true,
                   horizontalInterval: maxY / 5,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(color: Colors.grey, strokeWidth: 0.5);
+                    return const FlLine(color: Colors.grey, strokeWidth: 0.5);
                   },
                 ),
                 titlesData: FlTitlesData(
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 40,
                       interval: maxY / 5,
                       getTitlesWidget: (value, meta) {
-                        return Text(value.toInt().toString(), style: TextStyle(fontSize: 10));
+                        return Text(value.toInt().toString(), style: const TextStyle(fontSize: 10));
                       },
                     ),
                   ),
@@ -101,7 +101,7 @@ class _CustomBarChartState extends State<CustomBarChart> {
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         'Period: ${group.x}\nAmount: ${rod.toY.toStringAsFixed(2)}',
-                        TextStyle(color: Colors.white),
+                        const TextStyle(color: Colors.white),
                       );
                     },
                   ),
@@ -163,13 +163,13 @@ class _CustomBarChartState extends State<CustomBarChart> {
   Widget getBottomTitles(int value, String viewType) {
     if (viewType == 'weekly') {
       List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      return Text(days[value % 7], style: TextStyle(fontSize: 10));
+      return Text(days[value % 7], style: const TextStyle(fontSize: 10));
     } else if (viewType == 'monthly') {
-      return Text('Week $value', style: TextStyle(fontSize: 10));
+      return Text('Week $value', style: const TextStyle(fontSize: 10));
     } else if (viewType == 'yearly') {
-      return Text(DateFormat.MMM().format(DateTime(0, value)), style: TextStyle(fontSize: 10));
+      return Text(DateFormat.MMM().format(DateTime(0, value)), style: const TextStyle(fontSize: 10));
     } else {
-      return Text('', style: TextStyle(fontSize: 10));
+      return const Text('', style: TextStyle(fontSize: 10));
     }
   }
 }

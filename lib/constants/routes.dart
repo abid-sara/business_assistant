@@ -2,6 +2,7 @@ import 'package:business_assistant/screens/To_do.dart/add_task.dart';
 import 'package:business_assistant/screens/To_do.dart/all_tasks.dart';
 import 'package:business_assistant/screens/customers/customer_details.dart';
 import 'package:business_assistant/screens/dashboard.dart';
+import 'package:business_assistant/screens/goallist/update_goal.dart';
 import 'package:business_assistant/screens/inventory/products_center.dart';
 import 'package:business_assistant/screens/inventory/products_details.dart';
 import 'package:business_assistant/screens/orders/order_details.dart';
@@ -50,7 +51,7 @@ var routes = {
    '/Tasks' : (cntext) => const Tasks(),
    '/addtask' : (context) => AddTaskPage(onAddTask: (task) {},),
   '/goalList': (context) => const GoalList(),
-  '/description': (context) => const Description(),
+  '/description': (context) => const AddGoalPage(),
   '/analysisweek': (context) => const AnalysisWeek(),
   '/analysismonth': (context) => const AnalysisMonth(),
   '/analysisyear': (context) => const AnalysisYear(),

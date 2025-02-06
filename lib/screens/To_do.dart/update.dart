@@ -35,8 +35,8 @@ class _RescheduleTaskPageState extends State<RescheduleTaskPage> {
     _titleController = TextEditingController(text: widget.task.title);
     _descriptionController = TextEditingController(text: widget.task.description);
     _selectedDate = widget.task.date;
-    _startTime = TimeOfDay.fromDateTime(widget.task.date);
-    _endTime = TimeOfDay.fromDateTime(widget.task.date);
+    _startTime = TimeOfDay.fromDateTime(widget.task.startTime);
+    _endTime = TimeOfDay.fromDateTime(widget.task.endTime);
     _reminder = widget.task.reminder ?? "15 Minutes";
     _repeatFrequency = widget.task.repeatFrequency ?? "None";
   }
@@ -65,19 +65,49 @@ class _RescheduleTaskPageState extends State<RescheduleTaskPage> {
       return;
     }
 
+    final startDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+
+    final endDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
+
+    // Check if the date is in the past
+    if (startDateTime.isBefore(DateTime.now())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Start time cannot be in the past!')),
+      );
+      return;
+    }
+
+    if (endDateTime.isBefore(startDateTime)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('End time must be after start time!')),
+      );
+      return;
+    }
+
+    // Create the updated Task object
     final updatedTask = Task(
+      id: widget.task.id, // Retain the existing task ID
       title: _titleController.text,
       description: _descriptionController.text,
-      date: DateTime(
-        _selectedDate.year,
-        _selectedDate.month,
-        _selectedDate.day,
-        _startTime.hour,
-        _startTime.minute,
-      ),
+      date: _selectedDate,
+      startTime: startDateTime,  // Ensure it's DateTime
+      endTime: endDateTime,      // Ensure it's DateTime
       reminder: _reminder,
       repeatFrequency: _repeatFrequency,
-      status: "In progress",
+      status: widget.task.status, // Keep the existing status
+      deleted: widget.task.deleted, // Retain the deleted flag
     );
 
     widget.onUpdateTask(updatedTask); // Pass updated task back to parent
@@ -152,20 +182,13 @@ class _RescheduleTaskPageState extends State<RescheduleTaskPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Start Time",
-                            style: TextStyle(
+                          const Text("Start Time", style: TextStyle(fontSize: 14)),
+                          const SizedBox(height: 1),
+                          Text(
+                            _startTime.format(context),
+                            style: const TextStyle(
                               fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Flexible(
-                             child: Text(
-                              _startTime.format(context),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -184,20 +207,13 @@ class _RescheduleTaskPageState extends State<RescheduleTaskPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "End Time",
-                            style: TextStyle(
+                          const Text("End Time", style: TextStyle(fontSize: 14)),
+                          const SizedBox(height: 1),
+                          Text(
+                            _endTime.format(context),
+                            style: const TextStyle(
                               fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Flexible(
-                            child: Text(
-                              _endTime.format(context),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -267,7 +283,10 @@ class _RescheduleTaskPageState extends State<RescheduleTaskPage> {
                 child: ElevatedButton(
                   onPressed: rescheduleTask,
                   style: button,
-                  child: const Text('Done', style: TextStyle(color: Colors.white, fontSize: 20)),
+                  child: const Text(
+                    'Done',
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
                 ),
               ),
             ],

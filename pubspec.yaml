@@ -43,9 +43,9 @@ dependencies:
   date_picker_timeline:
   table_calendar:
   get: ^4.6.5
+  sqflite:
   path: ^1.9.0
-  sqflite: ^2.4.1
-  flutter_bcrypt: ^1.0.8
+  flutter_bloc: ^8.1.6
 
 dev_dependencies:
   flutter_test:
