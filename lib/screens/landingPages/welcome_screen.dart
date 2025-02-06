@@ -1,8 +1,7 @@
-import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -12,7 +11,46 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  bool _isLoading = false;
+  bool _isLoading = true; 
+  Session? _session;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSession();
+  }
+
+  Future<void> _initializeSession() async {
+    final session = Supabase.instance.client.auth.currentSession;
+    
+    if (session != null) {
+      // If session exists, navigate directly to the main screen (dashboard)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleGetStarted() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } else {
+      Navigator.pushReplacementNamed(context, '/signIn');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +80,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     "My Business\nAssistant",
                     textAlign: TextAlign.start,
                     style: TextStyle(
-                      color: AppColors.darkGreen, 
+                      color: AppColors.darkGreen,
                       fontWeight: FontWeight.w900,
                       fontSize: 40,
                     ),
@@ -65,23 +103,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Padding(
                   padding: EdgeInsets.fromLTRB(screenWidth * 0.35, 0, 0, 0),
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : () async {
-                      setState(() {
-                        _isLoading = true;
-                      });
-
-                      final authCubit = context.read<AuthCubit>();
-
-                      // Check if the user is already authenticated
-                      authCubit.checkAuthentication(context);
-
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    },
+                    onPressed: _isLoading ? null : _handleGetStarted,
                     style: button,
-                    child: _isLoading 
-                        ? const CircularProgressIndicator() 
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
                         : const Text(
                             'Get Started',
                             style: TextStyle(
@@ -93,7 +118,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
