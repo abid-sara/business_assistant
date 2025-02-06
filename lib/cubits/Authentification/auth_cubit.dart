@@ -8,70 +8,40 @@ import 'auth_repository.dart';
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 
+  String? _userName;
+
   AuthCubit(this._authRepository) : super(AuthInitial());
 
   supabase.SupabaseClient get _client => _authRepository.client;
 
-  Future<String?> fetchUserName() async {
-    try {
-      final user = _client.auth.currentUser;
-      if (user == null) {
-        throw Exception('No authenticated user found');
-      }
+  String? get userName => _userName;
 
-      final response = await _client
-          .from('user')
-          .select('name')
-          .eq('id', user.id)
-          .maybeSingle();
 
-      if (response == null) {
-        return null; 
-      }
-      return response['name'] as String?;
-    } catch (e) {
-      throw Exception('Error fetching user name: $e');
-    }
+  Future<String> _fetchUserName() async {
+  final currentUser = Supabase.instance.client.auth.currentUser;
+  
+  if (currentUser == null) {
+    return ' ';  
   }
 
-
- void checkAuthentication(BuildContext context) async {
   try {
-    final session = _client.auth.currentSession;
-    final user = session?.user; 
-    print("Current user from session: $user");
+    final response = await _client
+        .from('user')  
+        .select('name') 
+        .eq('id', currentUser.id)  
+        .maybeSingle();
 
-    if (user != null) {
-      final userDetails = await _client
-          .from('user')
-          .select('id')
-          .eq('id', user.id)
-          .maybeSingle();
-
-      if (userDetails != null) {
-     
-        emit(AuthAuthenticated());
-        if (context.mounted) {
-          Navigator.pushReplacementNamed(context, '/dashboard');
-        }
-      } 
+    if (response != null && response['name'] != null) {
+      return response['name'];
     } else {
-      
-      emit(AuthInitial());
-      if (context.mounted) {
-        Navigator.pushReplacementNamed(context, '/signIn');
-      }
+      return ' ';  
     }
-  } catch (e) {
-    print('Error during authentication check: $e');
-    emit(AuthError('An error occurred during authentication check'));
+  } catch (error) {
+    print("Error fetching user name: $error");
+    return ' ';  
   }
 }
 
-
-  supabase.User? getCurrentUser() {
-  return _client.auth.currentUser;  
-}
 
   Future<void> signUp(String email, String password, String name, BuildContext context) async {
   print("Starting sign-up process...");  
