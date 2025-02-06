@@ -24,21 +24,10 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
-    super.initState();
-    context.read<ProductCubit>().fetchLowStockProducts();
-    context.read<OrderCubit>().fetchOrdersDue();
-    _fetchUserName();
+    
   }
 
-  Future<void> _fetchUserName() async {
-    final authCubit = context.read<AuthCubit>();
-    final name = await authCubit.fetchUserName();
-    if (name != null && mounted) {
-      setState(() {
-        userName = name;
-      });
-    }
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +73,7 @@ class _DashboardState extends State<Dashboard> {
                   children: [
                     const SizedBox(height: 25),
                     Text(
-                      'Welcome $userName!',
+                      'Welcome !',
                       style: const TextStyle(
                         fontSize: 30,
                         color: AppColors.darkGreen,
