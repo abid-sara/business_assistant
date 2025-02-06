@@ -5,6 +5,7 @@ import 'package:business_assistant/screens/dashboard.dart';
 import 'package:business_assistant/screens/goallist/update_goal.dart';
 import 'package:business_assistant/screens/inventory/products_center.dart';
 import 'package:business_assistant/screens/inventory/products_details.dart';
+import 'package:business_assistant/screens/landingPages/welcome_screen.dart';
 import 'package:business_assistant/screens/orders/order_details.dart';
 import 'package:business_assistant/screens/Settings/changepassword.dart';
 import 'package:business_assistant/screens/Settings/feedback.dart';
@@ -27,33 +28,38 @@ import '../screens/Analysis/analysis_year.dart';
 import '../screens/goallist/goal_list.dart';
 import '../screens/goallist/description.dart';
 
-
 var routes = {
   '/signIn': (ctx) => const SignIn(),
   '/CreateAccount': (ctx) => const CreateAccount(),
   '/ForgotPassword': (ctx) => ForgotPassword(),
   '/ResetPassword': (ctx) => const ResetPassword(),
   '/Businessdetails': (ctx) => const Businessdetails(),
-  '/details': (context) => const orderDetails(),
+  '/details': (context) =>  const OrderDetails(),
   '/orders': (context) => const OrdersPage(),
-  '/customers': (context) =>  const customersPage(),
-  '/customerDetails': (context) => const customerDetails(),
-  '/inventory': (context) => const Inventory(),
-  '/itemDetails': (context) => const ItemDetails(),
+  '/customers': (context) => CustomersPage(),
+  '/customerDetails': (context) => CustomerDetails(),
+  '/inventory': (context) => Inventory(),
+  '/itemDetails': (context) => ItemDetails(),
   '/dashboard': (context) => const Dashboard(),
-   '/settings' : (context) => const Settings(),
-   '/editprofil' : (context) => const EditProfile(initialName: 'Sara', initialSurname: 'Abid',),
-   '/changepassword' : (context) => const ChangePassword(),
-   '/subscription' : (context) => const SubscriptionPage(),
-   '/reportproblem' : (context) => const ReportProblemPage(),
-   '/help&support' : (context) => const HelpSupportPage(),
-   '/feedback' : (context) => const Feedback(),
-   '/Tasks' : (cntext) => const Tasks(),
-   '/addtask' : (context) => AddTaskPage(onAddTask: (task) {},),
+  '/settings': (context) => const Settings(),
+  '/editprofil': (context) => const EditProfile(
+        initialName: 'Sara',
+        initialSurname: 'Abid',
+      ),
+  '/changepassword': (context) => const ChangePassword(),
+  '/subscription': (context) => const SubscriptionPage(),
+  '/reportproblem': (context) => const ReportProblemPage(),
+  '/help&support': (context) => const HelpSupportPage(),
+  '/feedback': (context) => const Feedback(),
+  '/Tasks': (cntext) => const Tasks(),
+  '/addtask': (context) => AddTaskPage(
+        onAddTask: (task) {},
+      ),
   '/goalList': (context) => const GoalList(),
   '/description': (context) => const AddGoalPage(),
   '/analysisweek': (context) => const AnalysisWeek(),
   '/analysismonth': (context) => const AnalysisMonth(),
   '/analysisyear': (context) => const AnalysisYear(),
   '/transaction': (context) => const Transaction(),
+   '/welcome': (context) => const WelcomeScreen(),
 };

@@ -1,18 +1,18 @@
-import 'package:business_assistant/style/containers.dart';
+import 'package:business_assistant/controllers/DrawerController.dart';
+import 'package:business_assistant/cubits/customer/customer_cubit.dart';
+import 'package:business_assistant/cubits/customer/customer_state.dart';
+import 'package:business_assistant/cubits/customer/validation_cubit.dart';
+import 'package:business_assistant/cubits/order/order_cubit.dart';
+import 'package:business_assistant/cubits/order/order_state.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:flutter/material.dart';
-import 'package:business_assistant/data/customers.dart'; // Import the customers.dart file
 import 'package:business_assistant/style/colors.dart';
+import 'package:business_assistant/models/customer.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class customersPage extends StatefulWidget {
-  const customersPage({super.key});
+class CustomersPage extends StatelessWidget {
+  CustomersPage({super.key});
 
-  @override
-  State<customersPage> createState() => _customersPageState();
-}
-
-class _customersPageState extends State<customersPage> {
-  //controllers for each input field
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _customerPhoneController =
       TextEditingController();
@@ -22,373 +22,309 @@ class _customersPageState extends State<customersPage> {
       TextEditingController();
   final TextEditingController _customerNoteController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  List<Customer> customersList =
-      customers; //take the customers from the data file
 
-  //we need to add the filter for the customers
-  String _searchQuery = '';
-  String _selectedSortOption = 'Orders count';
-  String phoneError = '';
-  String emailError = '';
-  String addressError = '';
-  String nameError = '';
-
-  void _sortCustomers() {
-    setState(() {
-      if (_selectedSortOption == 'Customer name') {
-        customersList.sort((a, b) => a.name.compareTo(b.name));
-      } else if (_selectedSortOption == 'Orders count') {
-        //sorting in an ascending order
-        customersList
-            .sort((a, b) => b.ordersCount().compareTo(a.ordersCount()));
-      }
-    });
+  void _clearCustomerInputFields() {
+    _customerNameController.clear();
+    _customerPhoneController.clear();
+    _customerEmailController.clear();
+    _customerAddressController.clear();
+    _customerNoteController.clear();
   }
 
-  List<Customer> _filterCustomers(String filter) {
-    List<Customer> filteredCustomers =
-        customersList; // first we have all the customers
-    if (_searchQuery.isNotEmpty) {
-      filteredCustomers = filteredCustomers.where((customer) {
-        return customer.name.toLowerCase().contains(_searchQuery
-            .toLowerCase()); // check if the name contains the one that was typed
-      }).toList();
-    }
-    return filteredCustomers;
+  void _showAddCustomerDialog(BuildContext context, CustomerCubit cubit) {
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return BlocProvider.value(
+          value: context.read<ValidationCustomerCubit>(),
+          child: BlocBuilder<ValidationCustomerCubit, ValidationState>(
+            builder: (context, validationState) {
+              return AlertDialog(
+                title: const Text('Add Customer'),
+                content: SingleChildScrollView(
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          controller: _customerNameController,
+                          decoration:
+                              const InputDecoration(labelText: 'Customer Name'),
+                          onChanged: (value) => context
+                              .read<ValidationCustomerCubit>()
+                              .validateCustomerName(value),
+                          validator: (_) =>
+                              validationState.customerNameError.isEmpty
+                                  ? null
+                                  : validationState.customerNameError,
+                        ),
+                        TextFormField(
+                          controller: _customerPhoneController,
+                          decoration:
+                              const InputDecoration(labelText: 'Phone Number'),
+                          onChanged: (value) => context
+                              .read<ValidationCustomerCubit>()
+                              .validateCustomerPhoneNumber(value),
+                          validator: (_) =>
+                              validationState.customerPhoneError.isEmpty
+                                  ? null
+                                  : validationState.customerPhoneError,
+                        ),
+                        TextFormField(
+                          controller: _customerEmailController,
+                          decoration: const InputDecoration(labelText: 'Email'),
+                          onChanged: (value) => context
+                              .read<ValidationCustomerCubit>()
+                              .validateCustomerEmail(value),
+                          validator: (_) =>
+                              validationState.customerEmailError.isEmpty
+                                  ? null
+                                  : validationState.customerEmailError,
+                        ),
+                        TextFormField(
+                          controller: _customerAddressController,
+                          decoration:
+                              const InputDecoration(labelText: 'Address'),
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'Please enter the address'
+                              : null,
+                        ),
+                        TextFormField(
+                          controller: _customerNoteController,
+                          decoration: const InputDecoration(
+                              labelText: 'Additional Notes'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      _clearCustomerInputFields();
+                      context.read<ValidationCustomerCubit>().clearForm();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        final newCustomer = Customer(
+                          name: _customerNameController.text,
+                          address: _customerAddressController.text,
+                          phoneNum: _customerPhoneController.text,
+                          email: _customerEmailController.text,
+                          note: _customerNoteController.text,
+                          deleted: 0,
+                        );
+                        cubit.addCustomer(newCustomer);
+                        _clearCustomerInputFields();
+                        context.read<ValidationCustomerCubit>().clearForm();
+                        Navigator.of(dialogContext).pop();
+                      }
+                    },
+                    child: const Text('Add Customer'),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
-  void _showAddCustomerDialog() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Add Customer'),
-        content: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Customer Name'),
-                  controller: _customerNameController,
-                  onChanged: (value) {
-                    setState(() {
-                      if (value.isEmpty) {
-                        nameError = 'Name of customer must be filled';
-                      } else {
-                        nameError = '';
-                      }
-                    });
-                  },
-                ),
-                Text(
-                  nameError,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                TextField(
-                  controller: _customerPhoneController,
-                  decoration:
-                      const InputDecoration(labelText: 'Customer phone number'),
-                  keyboardType: TextInputType.phone,
-                  onChanged: (value) {
-                    setState(() {
-                      if (value.isEmpty) {
-                        phoneError = 'Please enter a phone number';
-                      } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                        phoneError = 'Please enter a valid number';
-                      } else {
-                        phoneError = '';
-                      }
-                    });
-                  },
-                ),
-                Text(
-                  phoneError,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                TextField(
-                  controller: _customerEmailController,
-                  decoration: const InputDecoration(labelText: 'Customer Email'),
-                  onChanged: (value) {
-                    setState(() {
-                      if (value.isEmpty) {
-                        emailError = 'Please enter an email';
-                      } else if (!RegExp(
-                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                          .hasMatch(value)) {
-                        emailError = 'Please enter a valid email';
-                      } else {
-                        emailError = '';
-                      }
-                    });
-                  },
-                ),
-                Text(
-                  emailError,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                TextField(
-                  controller: _customerAddressController,
-                  decoration: const InputDecoration(labelText: 'Customer Address'),
-                ),
-                TextField(
-                  controller: _customerNoteController,
-                  decoration: const InputDecoration(labelText: 'Additional note'),
-                ),
-                const SizedBox(height: 10),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                if (_customerNameController.text.isEmpty) {
-                  nameError = 'Name of customer must be filled';
-                }
-                if (_customerPhoneController.text.isEmpty) {
-                  phoneError = 'Please enter a phone number';
-                } else if (!RegExp(r'^[0-9]*$')
-                    .hasMatch(_customerPhoneController.text)) {
-                  phoneError = 'Please enter a valid number';
-                }
-                if (_customerEmailController.text.isEmpty) {
-                  emailError = 'Please enter an email';
-                } else if (!RegExp(
-                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                    .hasMatch(_customerEmailController.text)) {
-                  emailError = 'Please enter a valid email';
-                }
-              });
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CustomerCubit, CustomerState>(
+      builder: (context, state) {
+        final cubit = context.read<CustomerCubit>();
 
-              if (nameError.isNotEmpty ||
-                  phoneError.isNotEmpty ||
-                  emailError.isNotEmpty) {
-                return;
-              }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<OrderCubit>().loadOrders(); // Ensure orders are loaded
+        });
 
-              setState(() {
-                customersList.add(Customer(
-                  customerID: customers.length + 1,
-                  name: _customerNameController.text,
-                  address: _customerAddressController.text,
-                  phone_num: _customerPhoneController.text,
-                  email: _customerEmailController.text,
-                  note: _customerNoteController.text,
-                  orders: [],
-                ));
-                _customerNameController.clear();
-                _customerPhoneController.clear();
-                _customerEmailController.clear();
-                _customerAddressController.clear();
-                _customerNoteController.clear();
-              });
-
-              Navigator.of(context).pop();
-            },
-            child: const Text('Add customer'),
+        return Scaffold(
+          drawer: const Sidebar(),
+          appBar: AppBar(
+            title: const Text("Customers center"),
+            backgroundColor: Colors.white,
           ),
-        ],
+          backgroundColor: Colors.transparent,
+          body: Stack(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/images/background.png"),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Column(
+                children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            width: 200,
+                            height: 50,
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                labelText: 'Customer...',
+                                prefixIcon: const Icon(Icons.search),
+                                fillColor: AppColors.purpule,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                              ),
+                              onChanged: (query) =>
+                                  cubit.filterCustomers(query),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SortByDropdown(
+                            currentValue: state.currentSortOption,
+                            onChanged: (String newValue) =>
+                                cubit.sortCustomers(newValue),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Customer",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 82, 81, 81))),
+                        Text("Orders",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 82, 81, 81))),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildCustomerList(state),
+                  ),
+                  SizedBox(
+                    width: 170,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkGreen,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
+                      ),
+                      onPressed: () => _showAddCustomerDialog(context, cubit),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.add, color: Colors.white),
+                          Text('Add Customer',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(height: 80)
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+Widget _buildCustomerList(CustomerState state) {
+  final List<Customer> customers;
+  if (state is CustomerLoaded) {
+    customers = state.customers;
+  } else if (state is CustomerFiltered) {
+    customers = state.filteredCustomers;
+  } else if (state is CustomerSorted) {
+    customers = state.sortedCustomers;
+  } else {
+    customers = [];
+  }
+
+  return ListView.builder(
+    itemCount: customers.length,
+    itemBuilder: (context, index) {
+      final item = customers[index];
+      return CustomerLine(
+        customer: item,
       );
     },
   );
 }
 
-
-  @override
-  Widget build(BuildContext context) {
-    List<Customer> filteredCustomers = _filterCustomers(_searchQuery);
-    return Scaffold(
-      drawer: const Sidebar(),
-      appBar: AppBar(
-        title: const Text("Customers center"),
-        backgroundColor: Colors.white,
-      ),
-      backgroundColor: Colors.transparent,
-      //ADDING THE BACKGROUND IMAGE
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                    "assets/images/background.png"), // Path to your image
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        width: 200,
-                        height: 50,
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            labelText: 'Customer...',
-                            prefixIcon: const Icon(Icons.search),
-                            fillColor: AppColors.purpule,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide.none, // Remove the border side
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide.none, // Remove the border side
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide.none, // Remove the border side
-                            ),
-                            filled: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 20.0),
-                          ),
-                          onChanged: (query) {
-                            setState(() {
-                              _searchQuery = query;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SortByDropdown(
-                            onChanged: (String newValue) {
-                              setState(() {
-                                _selectedSortOption = newValue;
-                                _sortCustomers();
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 10, right: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Customer", style: TextStyle(color: Colors.grey)),
-                    Text("Orders", style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: filteredCustomers.map((customer) {
-                    return CustomerLine(
-                        customerId: customer.customerID,
-                        customerName: customer.name,
-                        ordersCount: customer.orders.length,
-                        customeObj: customer);
-                  }).toList(),
-                ),
-              ),
-              SizedBox(
-                width: 170,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkGreen,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                  ),
-                  onPressed: () {
-                    _showAddCustomerDialog();
-                  },
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
-                      Text(
-                        'Add customer',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                height: 80,
-                //for the bottom bar
-              )
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class CustomerLine extends StatelessWidget {
-  final int customerId;
-  final String customerName;
-  final int ordersCount;
-  final Customer customeObj;
-  const CustomerLine(
-      {super.key,
-      required this.customerId,
-      required this.customerName,
-      required this.ordersCount,
-      required this.customeObj});
+  final Customer customer;
+
+  const CustomerLine({super.key, required this.customer});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      //takes us to the details, passing the needed arguments too through pages
       onTap: () {
         Navigator.pushNamed(
           context,
           '/customerDetails',
-          arguments:
-              customeObj, //pass the id of the customer to be able to get the details
+          arguments: customer,
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(3),
-        height: 50,
-        decoration: BoxDecoration(
-          color: AppColors.darkGreen,
-          borderRadius: roundedRadius,
+        margin: const EdgeInsets.all(10),
+        height: 70,
+        decoration: const BoxDecoration(
+          color: AppColors.lightGreen,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10),
+          padding: const EdgeInsets.only(left: 30, right: 30),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(customerName,
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
-              Text(ordersCount.toString(),
-                  style: const TextStyle(color: Colors.white)),
+              Text(
+                customer.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 58, 56, 56),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              BlocBuilder<OrderCubit, OrderState>(
+                builder: (context, state) {
+                  final count = context
+                      .read<OrderCubit>()
+                      .customerOrdersCount(customer.id);
+                  return Text(
+                    count.toString(),
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 58, 56, 56),
+                      fontSize: 16,
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -397,91 +333,76 @@ class CustomerLine extends StatelessWidget {
   }
 }
 
-class SortByDropdown extends StatefulWidget {
+class SortByDropdown extends StatelessWidget {
   final ValueChanged<String> onChanged;
+  final String currentValue;
+
   const SortByDropdown({
     super.key,
     required this.onChanged,
+    required this.currentValue,
   });
 
   @override
-  _SortByDropdownState createState() => _SortByDropdownState();
-}
-
-class _SortByDropdownState extends State<SortByDropdown> {
-  // Default selected value
-  String selectedValue = "Orders count";
-
-  // Options for the dropdown menu
-  final List<String> dropdownOptions = [
-    "Orders count",
-    "Customer name",
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 185,
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
+    return BlocBuilder<CustomerCubit, CustomerState>(
+      builder: (context, state) {
+        final cubit = context.read<CustomerCubit>();
+        final List<String> dropdownItems = ['Customer name', 'Order count'];
+        final String selectedValue = cubit.currentSortOption;
+
+        return Container(
+          width: 185,
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Sort by: ",
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
+          child: Row(
+            children: [
+              const Text(
+                "Sort by: ",
+                style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500),
               ),
-            ),
-            DropdownButton<String>(
-              value: selectedValue,
-              icon: const Icon(Icons.arrow_drop_down,
-                  color: Colors.deepPurple, size: 18),
-              iconSize: 18,
-              elevation: 16,
-              style: const TextStyle(
-                color: Colors.deepPurple,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+              DropdownButton<String>(
+                value: selectedValue,
+                icon:
+                    const Icon(Icons.arrow_drop_down, color: Colors.deepPurple),
+                iconSize: 18,
+                elevation: 16,
+                style: const TextStyle(
+                    color: Colors.deepPurple,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500),
+                underline: Container(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    cubit.sortCustomers(newValue);
+                    onChanged(newValue);
+                  }
+                },
+                items: dropdownItems.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
               ),
-              underline: Container(), // Remove default underline
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedValue = newValue!;
-                  widget.onChanged(newValue);
-                });
-              },
-              items:
-                  dropdownOptions.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
-
-
-
-//adding the customer is shown immediatly 

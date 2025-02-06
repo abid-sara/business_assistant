@@ -1,5 +1,9 @@
+import 'package:business_assistant/cubits/Authentification/auth_repository.dart';
+import 'package:business_assistant/cubits/Authentification/auth_state.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import '../../style/colors.dart';
 import '../../widget/form.dart';
 
@@ -121,28 +125,37 @@ class _SignInState extends State<SignIn> {
                         const SizedBox(height: 20),
 
                         // Sign In Button
-                        Center(
+                        BlocListener<AuthCubit, AuthState>(
+                        listener: (context, state) {
+                          // if (state is AuthAuthenticated) {
+                            // Navigator.pushReplacementNamed(context, '/dashboard');
+                          // }
+                        },
+                        child: Center(
                           child: ElevatedButton(
                             style: button,
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
-                                Navigator.pushNamed(context, '/dashboard');
+                                context.read<AuthCubit>().signInWithPassword(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  context,
+                                );
                               }
                             },
                             child: const Text(
-                              'Sign in',
-                              style:
-                                  TextStyle(fontSize: 19, color: Colors.white),
+                              'Sign in',  
+                              style: TextStyle(fontSize: 19, color: Colors.white),
                             ),
                           ),
                         ),
+                      ),
+
                       ]),
                 ),
-                // Email Address Field
 
                 const SizedBox(height: 20),
 
-                // Create Account
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(

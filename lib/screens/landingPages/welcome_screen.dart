@@ -2,8 +2,56 @@ import 'package:business_assistant/style/colors.dart';
 import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
 
-class WelcomeScreen extends StatelessWidget {
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  bool _isLoading = true; 
+  Session? _session;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSession();
+  }
+
+  Future<void> _initializeSession() async {
+    final session = Supabase.instance.client.auth.currentSession;
+    
+    if (session != null) {
+      // If session exists, navigate directly to the main screen (dashboard)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleGetStarted() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } else {
+      Navigator.pushReplacementNamed(context, '/signIn');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +81,7 @@ class WelcomeScreen extends StatelessWidget {
                     "My Business\nAssistant",
                     textAlign: TextAlign.start,
                     style: TextStyle(
-                      color: AppColors.darkGreen, // Your custom color
+                      color: AppColors.darkGreen,
                       fontWeight: FontWeight.w900,
                       fontSize: 40,
                     ),
@@ -56,22 +104,22 @@ class WelcomeScreen extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.fromLTRB(screenWidth * 0.35, 0, 0, 0),
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signIn');
-                    },
+                    onPressed: _isLoading ? null : _handleGetStarted,
                     style: button,
-                    child: const Text(
-                      'Get Started',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text(
+                            'Get Started',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

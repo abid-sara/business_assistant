@@ -1,9 +1,12 @@
 import 'package:business_assistant/controllers/DrawerController.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
+import 'package:business_assistant/cubits/Authentification/auth_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-
 import '/constants/imagePaths.dart';
 import 'package:flutter/material.dart';
 import 'package:business_assistant/style/colors.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -18,7 +21,26 @@ late double screenWidth;
 late double screenHeight;
 
 class _SidebarState extends State<Sidebar> {
+  final _supabaseClient = Supabase.instance.client;
+  String userName = 'Profile'; 
+
   final controller = Get.put(DrawerControl());
+
+  @override
+  
+  void initState() {
+  super.initState();
+ 
+
+  // Subscribe to AuthCubit for username updates
+  context.read<AuthCubit>().stream.listen((state) {
+    if (state is AuthUserNameFetched) {
+      setState(() {
+        userName = state.userName;  // Update username
+      });
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +79,7 @@ class _SidebarState extends State<Sidebar> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Sara ABID',
+                      userName,
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: screenWidth * 0.056,
@@ -146,12 +168,13 @@ class _SidebarState extends State<Sidebar> {
                 )),
             SizedBox(height: itemSpacing),
             ListTile(
-              leading:
-                  const Icon(Icons.exit_to_app, size: 25, color: Colors.red),
-              title: Text('Logout account',
-                  style: TextStyle(fontSize: screenWidth * 0.04)),
+              leading: const Icon(Icons.exit_to_app, size: 25, color: Colors.red),
+              title: Text(
+                'Logout account',
+                style: TextStyle(fontSize: screenWidth * 0.04),
+              ),
               onTap: () {
-                Navigator.pushReplacementNamed(context, '/signIn');
+                context.read<AuthCubit>().signOut(context);
               },
             ),
           ],

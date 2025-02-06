@@ -1,18 +1,27 @@
-import 'package:business_assistant/screens/landingPages/check_email.dart';
+import 'package:business_assistant/widget/button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/cubits/Authentification/auth_cubit.dart';
 import '../../style/colors.dart';
-import '../../widget/button.dart';
-import '../../widget/form.dart';
 import '../../widget/back_arrow.dart';
+import '../../widget/form.dart';
 
-class ForgotPassword extends StatelessWidget {
-  ForgotPassword({super.key});
+class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({super.key});
+  static const String pageRoute = '/forgot-password';
+  @override
+  State<ForgotPassword> createState() => _ForgotPasswordState();
+}
+
+class _ForgotPasswordState extends State<ForgotPassword> {
   final TextEditingController _emailController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  static const String pageRoute = '/ForgotPassword';
-  final valid = FormFieldValidator;
+
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return SafeArea(
       child: Scaffold(
         appBar: BackArrow(
@@ -20,72 +29,84 @@ class ForgotPassword extends StatelessWidget {
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(height: 12),
-                Center(
+                SizedBox(height: screenHeight * 0.01),
+                const Text(
+                  'Forgot Password',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkGreen,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                const Text(
+                  "Enter your email address to request a password reset link.",
+                  style: TextStyle(color: Colors.grey, fontSize: 17),
+                ),
+                SizedBox(height: screenHeight * 0.03),
+                Form(
+                  key: formKey,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset(
-                        'assets/images/logo.png', // Add your logo here
-                        height: 110,
-                      ),
-                      const SizedBox(height: 20),
                       const Text(
-                        'Forgot password',
+                        "Email",
                         style: TextStyle(
-                          fontSize: 27,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkGreen,
-                        ),
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkGreen),
                       ),
-                      const SizedBox(height: 30),
-                      const Text(
-                        'Please enter your email to reset the password',
-                        style: TextStyle(
+                      SizedBox(height: screenHeight * 0.01),
+                      TextFormField(
+                        controller: _emailController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                        style: const TextStyle(
                           fontSize: 17,
-                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Enter your email',
+                          border: normalBorder,
+                          focusedBorder: focused,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 45),
-                Form(
-                  key: formKey,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        structure(
-                          "Email",
-                          "Enter your email",
-                          _emailController,
-                          validateEmail,
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Sign In Button
-                        Center(
-                          child: ElevatedButton(
-                            style: button,
-                            onPressed: () {
-                              if (formKey.currentState!.validate()) {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => CheckEmail(
-                                        email: _emailController.text)));
-                              }
-                            },
-                            child: const Text(
-                              'Reset password',
-                              style:
-                                  TextStyle(fontSize: 19, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ]),
+                SizedBox(height: screenHeight * 0.04),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        context.read<AuthCubit>().sendPasswordResetEmail(_emailController.text ,context).then((_) {
+                          Navigator.pushReplacementNamed(context, '/ResetPassword', arguments: _emailController.text);
+                        });
+                      }
+                    },
+                    style: button,
+                    child: const Text(
+                      "Request Reset Link",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

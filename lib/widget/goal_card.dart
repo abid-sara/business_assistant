@@ -99,6 +99,7 @@ class GoalCard extends StatelessWidget {
                   color: statusColor,
                 ),
                 child: PopupMenuButton<String>(
+
                   child: Text(
                     status,
                     style: const TextStyle(fontSize: 16, color: Colors.black),
@@ -111,14 +112,14 @@ class GoalCard extends StatelessWidget {
                   },
                   itemBuilder: (BuildContext context) {
                     return [
-                      PopupMenuItem<String>(
+                      const PopupMenuItem<String>(
                         value: 'Completed',
                         child: Text(
                           'Completed',
                           style: TextStyle(color: AppColors.green),
                         ),
                       ),
-                      PopupMenuItem<String>(
+                      const PopupMenuItem<String>(
                         value: 'In progress',
                         child: Text(
                           'In Progress',
@@ -127,12 +128,14 @@ class GoalCard extends StatelessWidget {
                       ),
                     ];
                   },
+),
+
+
                 ),
-              ),
+        ]
+        ),
             ],
           ),
-        ],
-      ),
     );
   }
 }
