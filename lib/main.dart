@@ -102,7 +102,7 @@ class MyApp extends StatelessWidget {
            
         ),
         BlocProvider(create:  (context) => IncomeCubit(repository:  IncomeRepository())),
-        BlocProvider(create: (context) => TaskCubit(TaskRepository())), // Added TaskCubit
+        BlocProvider(create: (context) => TaskCubit(TaskRepository())),
         BlocProvider(create: (context) => GoalCubit(GoalRepository())),
       ],
       child: GetMaterialApp(

@@ -21,12 +21,15 @@ class _AnalysisWeekState extends State<AnalysisWeek> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final int? index = ModalRoute.of(context)!.settings.arguments as int?;
-    if (index != null && selectedIndex != index) {
+  final arguments = ModalRoute.of(context)!.settings.arguments;
+  if (arguments is int) {
+    final int index = arguments;
+    if (selectedIndex != index) {
       setState(() {
         selectedIndex = index; // Ensure selectedIndex is updated from arguments
       });
     }
+  } 
   }
 
   void handleButtonPress(int index, String routeName) {

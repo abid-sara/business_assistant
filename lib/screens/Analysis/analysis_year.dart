@@ -4,9 +4,6 @@ import 'package:business_assistant/cubits/Income/income_cubit.dart';
 import 'package:business_assistant/cubits/Income/income_repository.dart';
 import 'package:business_assistant/widget/bar_chart.dart' as widget;
 import 'package:flutter/material.dart';
-import 'analysis_week.dart';
-import 'package:business_assistant/data/transactiondata.dart';
-import 'package:business_assistant/widget/bar_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:business_assistant/style/colors.dart';
@@ -24,12 +21,15 @@ class _AnalysisYearState extends State<AnalysisYear> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final int? index = ModalRoute.of(context)!.settings.arguments as int?;
-    if (index != null && selectedIndex != index) {
+  final arguments = ModalRoute.of(context)!.settings.arguments;
+  if (arguments is int) {
+    final int index = arguments;
+    if (selectedIndex != index) {
       setState(() {
         selectedIndex = index; 
       });
     }
+  } 
   }
 
   void handleButtonPress(int index, String routeName) {

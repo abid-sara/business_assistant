@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'analysis_week.dart';
-import 'package:business_assistant/data/transactiondata.dart';
-import 'package:business_assistant/widget/bar_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/cubits/Expense/expense_cubit.dart';
 import 'package:business_assistant/cubits/Expense/expense_repository.dart';
@@ -24,12 +21,15 @@ class _AnalysisMonthState extends State<AnalysisMonth> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final int? index = ModalRoute.of(context)!.settings.arguments as int?;
-    if (index != null && selectedIndex != index) {
+  final arguments = ModalRoute.of(context)!.settings.arguments;
+  if (arguments is int) {
+    final int index = arguments;
+    if (selectedIndex != index) {
       setState(() {
-        selectedIndex = index; // Ensure selectedIndex is updated from arguments
+        selectedIndex = index; 
       });
     }
+  } 
   }
 
   void handleButtonPress(int index, String routeName) {
