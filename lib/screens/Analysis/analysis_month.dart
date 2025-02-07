@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'analysis_week.dart';
 import 'package:business_assistant/data/transactiondata.dart';
 import 'package:business_assistant/widget/bar_chart.dart';
-=======
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/cubits/Expense/expense_cubit.dart';
 import 'package:business_assistant/cubits/Expense/expense_repository.dart';
 import 'package:business_assistant/cubits/Income/income_cubit.dart';
 import 'package:business_assistant/cubits/Income/income_repository.dart';
 import 'package:business_assistant/widget/bar_chart.dart' as widget;
->>>>>>> bbcb0d9a5f723a488d00b1745e395e4b7b97491e
 import 'package:business_assistant/widget/sidebar.dart';
 import 'package:business_assistant/style/colors.dart';
 
